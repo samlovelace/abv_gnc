@@ -1,15 +1,15 @@
-#ifndef NAVIGATIONMANAGER_H
-#define NAVIGATIONMANAGER_H
+#ifndef ROSNAVIGATIONLISTENER_H
+#define ROSNAVIGATIONLISTENER_H
 
 #include "robot_idl/msg/abv_state.hpp"
 #include <eigen3/Eigen/Dense>
 #include <mutex> 
 
-class NavigationManager
+class RosNavigationListener
 {
 public:
-    NavigationManager();
-    ~NavigationManager();
+    RosNavigationListener();
+    ~RosNavigationListener();
 
     Eigen::Vector3d getCurrentPose(); 
     Eigen::Vector3d getCurrentVel(); 

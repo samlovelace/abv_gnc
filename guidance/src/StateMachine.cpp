@@ -23,7 +23,13 @@ StateMachine::~StateMachine()
 void StateMachine::onCommand(const Command& aCommand)
 {
     mCommand = aCommand;
-    LOGV << "Recvd command to execute " << mCommand.mType << " path for " << mCommand.mDuration << " seconds!";  
+    LOGV << "Recvd command to execute " << mCommand.mType << " path for " << mCommand.mDuration << " seconds!";
+    if(States::STARTUP == getActiveState())
+    {
+        LOGW << "Cannot execute trajectory, navigation data not yet acquired..."; 
+        return; 
+    }  
+    
     setActiveState(States::GENERATE_PATH); 
 }
 
@@ -71,15 +77,17 @@ void StateMachine::run()
 void StateMachine::startup()
 {
     // wait for nav data, once received transition to IDLE.
-    // also setup the listener class for controller status   
-    setActiveState(States::IDLE); 
+    if(mNavSource.hasAcquiredStateData())
+    {
+        setActiveState(States::IDLE);
+    }
 }
 
 void StateMachine::generatePath()
 {
     // get the latest command, instantiate the proper IPathGenerator based on the command
     // and do any startup/init stuff for that IPathGenerator 
-    if("Line" == mCommand.mType)
+    if("line" == mCommand.mType)
     {
         auto pathGen = std::make_unique<StraightLineGenerator>(); 
         mPathGenerator = std::move(pathGen);         

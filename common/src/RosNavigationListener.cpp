@@ -1,23 +1,21 @@
 
-#include "abv_controller/NavigationManager.h"
+#include "common/RosNavigationListener.h"
 #include "common/RosTopicManager.h"
 
-NavigationManager::NavigationManager(/* args */) : mAcquiredState(false)
+RosNavigationListener::RosNavigationListener(/* args */) : mAcquiredState(false)
 {
     RosTopicManager::getInstance()->createSubscriber<robot_idl::msg::AbvState>("abv/state", 
-                                                                               std::bind(&NavigationManager::stateCallback,
+                                                                               std::bind(&RosNavigationListener::stateCallback,
                                                                                          this, 
-                                                                                         std::placeholders::_1)); 
-
-                                                                                
+                                                                                         std::placeholders::_1));                                                                                
 }
 
-NavigationManager::~NavigationManager()
+RosNavigationListener::~RosNavigationListener()
 {
 
 }
 
-void NavigationManager::stateCallback(const robot_idl::msg::AbvState::SharedPtr aMsg)
+void RosNavigationListener::stateCallback(const robot_idl::msg::AbvState::SharedPtr aMsg)
 {
     Eigen::Matrix<double, 12, 1> state; 
     
@@ -49,18 +47,18 @@ void NavigationManager::stateCallback(const robot_idl::msg::AbvState::SharedPtr 
     }
 }
 
-void NavigationManager::setState(const Eigen::Matrix<double, 12, 1>& aState)
+void RosNavigationListener::setState(const Eigen::Matrix<double, 12, 1>& aState)
 {
     std::lock_guard<std::mutex> lock(mCurrentStateMutex); 
     mCurrentState = aState; 
 }
 
-bool NavigationManager::hasAcquiredStateData()
+bool RosNavigationListener::hasAcquiredStateData()
 {
     return mAcquiredState; 
 }
 
-Eigen::Vector3d NavigationManager::getCurrentPose()
+Eigen::Vector3d RosNavigationListener::getCurrentPose()
 {
     std::lock_guard<std::mutex> lock(mCurrentStateMutex); 
 
@@ -70,7 +68,7 @@ Eigen::Vector3d NavigationManager::getCurrentPose()
     return pose; 
 }
 
-Eigen::Vector3d NavigationManager::getCurrentVel()
+Eigen::Vector3d RosNavigationListener::getCurrentVel()
 {
     std::lock_guard<std::mutex> lock(mCurrentStateMutex); 
 
@@ -80,7 +78,7 @@ Eigen::Vector3d NavigationManager::getCurrentVel()
     return vel; 
 }
 
-Eigen::Matrix<double, 12, 1> NavigationManager::getCurrentState()
+Eigen::Matrix<double, 12, 1> RosNavigationListener::getCurrentState()
 {
     std::lock_guard<std::mutex> lock(mCurrentStateMutex); 
     return mCurrentState; 

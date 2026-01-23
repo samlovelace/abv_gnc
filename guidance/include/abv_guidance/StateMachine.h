@@ -5,6 +5,8 @@
 #include <thread>
 #include <mutex>
 
+#include "common/RosNavigationListener.h"
+
 #include "abv_guidance/IPathGenerator.hpp"
 #include "abv_guidance/InternalTypes.hpp"
 #include "abv_guidance/ICommandSink.hpp"
@@ -44,6 +46,7 @@ private:
     Command mCommand;
 
     std::unique_ptr<IPathGenerator> mPathGenerator; 
+    RosNavigationListener mNavSource; 
 
 private: 
     void startup(); 

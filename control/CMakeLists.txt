@@ -30,7 +30,6 @@ set(ABV_CONTROLLER_SOURCES
   src/CommandHandler.cpp
   src/Controller.cpp
   src/main.cpp 
-  src/NavigationManager.cpp
   src/StateMachine.cpp
   src/ThrusterCommander.cpp
   src/UdpThrusterDriver.cpp

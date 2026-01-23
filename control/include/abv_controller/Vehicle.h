@@ -4,8 +4,10 @@
 #include <eigen3/Eigen/Dense>
 #include <mutex> 
 #include <memory>
+
+#include "common/RosNavigationListener.h"
+
 #include "abv_controller/ThrusterCommander.h"
-#include "abv_controller/NavigationManager.h"
 #include "abv_controller/Controller.h"
 
 class Vehicle
@@ -47,7 +49,7 @@ private:
     std::mutex mGoalVelocityMutex;
 
     std::unique_ptr<ThrusterCommander> mThrusterCommander;
-    std::shared_ptr<NavigationManager> mNavManager;
+    std::shared_ptr<RosNavigationListener> mNavManager;
     std::unique_ptr<Controller> mController; 
 
 private: 

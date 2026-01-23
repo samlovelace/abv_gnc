@@ -6,8 +6,8 @@
 #include "common/RateController.hpp"
 
 
-Vehicle::Vehicle(/* args */) : 
-    mNavManager(std::make_shared<NavigationManager>()), mController(std::make_unique<Controller>()),
+Vehicle::Vehicle() : 
+    mNavManager(std::make_shared<RosNavigationListener>()), mController(std::make_unique<Controller>()),
     mLastInputRecvdAt(std::chrono::steady_clock::now()), mStaleInputThreshold(std::chrono::duration<double>(std::chrono::milliseconds(500)))
 {
 }
@@ -126,6 +126,8 @@ Eigen::Vector3d Vehicle::getControlStatus()
 {
     // TODO: expand this to include more controller status related stuff
     // For now, just getting the theoretical thruster vector 
+    // TODO: logic to determine some sort of Arrival notion, send that on controller status 
+    // Status: IDLE, RUNNING, ARRIVED
 
     return mThrusterCommander->getAppliedThrustVector(); 
 }
