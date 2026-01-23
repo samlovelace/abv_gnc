@@ -79,6 +79,7 @@ void StateMachine::startup()
     // wait for nav data, once received transition to IDLE.
     if(mNavSource.hasAcquiredStateData())
     {
+        LOGV << "Acquired navigation data!"; 
         setActiveState(States::IDLE);
     }
 }

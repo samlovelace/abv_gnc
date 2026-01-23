@@ -132,7 +132,6 @@ void StateMachine::controlStatusPublishLoop()
         // TODO: maybe add state machine state to this msg being published
         Eigen::Vector3d status = mVehicle->getControlStatus(); 
 
-
         robot_idl::msg::AbvControllerStatus statusToSend; 
         statusToSend.set__fx(status.x()); 
         statusToSend.set__fy(status.y()); 
