@@ -126,30 +126,22 @@ void StateMachine::generatePath()
 void StateMachine::sendWaypoint()
 {
     // get next waypoint from current IPathGenerator and send via ROS2 
-    if(mPathGenerator->hasNext())
-    {
-        Waypoint wp = mPathGenerator->getNext(); 
+    Waypoint wp = mPathGenerator->getNext(); 
 
-        // convert to idl type and publish 
-        robot_idl::msg::AbvCommand cmd; 
-        cmd.set__type(wp.mType); 
-        
-        robot_idl::msg::AbvVec3 vec; 
-        vec.set__x(wp.mPose.x()); 
-        vec.set__y(wp.mPose.y()); 
-        vec.set__yaw(wp.mPose.z()); 
+    // convert to idl type and publish 
+    robot_idl::msg::AbvCommand cmd; 
+    cmd.set__type(wp.mType); 
+    
+    robot_idl::msg::AbvVec3 vec; 
+    vec.set__x(wp.mPose.x()); 
+    vec.set__y(wp.mPose.y()); 
+    vec.set__yaw(wp.mPose.z()); 
 
-        cmd.set__data(vec); 
+    cmd.set__data(vec); 
 
-        LOGV << "Sending next waypoint..."; 
-        RosTopicManager::getInstance()->publishMessage<robot_idl::msg::AbvCommand>("abv/command", cmd); 
-        setActiveState(States::WAITING_FOR_EXECUTION); 
-    }
-    else
-    {
-        LOGV << "Full path executed. Returning to IDLE state"; 
-        setActiveState(States::IDLE); 
-    }
+    LOGV << "Sending next waypoint..."; 
+    RosTopicManager::getInstance()->publishMessage<robot_idl::msg::AbvCommand>("abv/command", cmd); 
+    setActiveState(States::WAITING_FOR_EXECUTION); 
 }
 
 void StateMachine::waitForExecution()
@@ -168,7 +160,15 @@ void StateMachine::waitForArrival()
     {
         // controller arrived on current waypoint, send next
         LOGV << "Controller arrived..."; 
-        setActiveState(States::SEND_WAYPOINT); 
+        if(mPathGenerator->hasNext())
+        {
+            setActiveState(States::SEND_WAYPOINT);
+        }
+        else
+        {
+            // arrived at final waypoint, go back to IDLE
+            setActiveState(States::IDLE); 
+        }
     }
 }
 

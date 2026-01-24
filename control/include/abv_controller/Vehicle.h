@@ -60,6 +60,7 @@ private:
 
     ThreadSafe<Eigen::Vector3d> mPoseError; 
     ThreadSafe<Eigen::Vector3d> mVelError; 
+    ThreadSafe<bool> mJustRecvdNewGoal; 
 
     Eigen::Vector3d mPoseThresh; 
     Eigen::Vector3d mVelThresh; 
