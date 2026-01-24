@@ -7,6 +7,7 @@ find_package(robot_idl REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 set(ABV_GUIDANCE_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/src/FromFileGenerator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/RosCommandSource.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/StateMachine.cpp

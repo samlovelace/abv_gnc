@@ -2,17 +2,22 @@
 #include <iostream> 
 #include "plog/Log.h"
 
+#include "robot_idl/msg/abv_command.hpp"
+
 #include "common/RateController.hpp"
 #include "common/ConfigurationManager.h"
 #include "common/RosTopicManager.h"
 
 #include "abv_guidance/StateMachine.h"
 #include "abv_guidance/StraightLineGenerator.h"
+#include "abv_guidance/FromFileGenerator.h"
 
 StateMachine::StateMachine() : 
     mDone(false), mActiveState(States::STARTUP)
 {
-
+    RosTopicManager::getInstance()->createPublisher<robot_idl::msg::AbvCommand>("abv/command"); 
+    RosTopicManager::getInstance()->createSubscriber<robot_idl::msg::AbvControllerStatus>("abv/controller_status", 
+            std::bind(&StateMachine::controllerStatusCallback, this, std::placeholders::_1)); 
 }
 
 StateMachine::~StateMachine()
@@ -61,9 +66,13 @@ void StateMachine::run()
         case States::SEND_WAYPOINT:
             sendWaypoint(); 
             break;
+        
+        case States::WAITING_FOR_EXECUTION: 
+            waitForExecution(); 
+            break; 
 
-        case States::WAITING:
-            wait(); 
+        case States::WAITING_FOR_ARRIVAL:
+            waitForArrival(); 
             break; 
 
         default:
@@ -93,12 +102,20 @@ void StateMachine::generatePath()
         auto pathGen = std::make_unique<StraightLineGenerator>(); 
         mPathGenerator = std::move(pathGen);         
     }
+    else if("file" == mCommand.mType)
+    {
+        auto pathGen = std::make_unique<FromFileGenerator>(); 
+        mPathGenerator = std::move(pathGen); 
+    }
     else
     {
         LOGW << "Unknown path generator of type: " << mCommand.mType; 
         setActiveState(States::IDLE); 
         return; 
     }
+
+    // init the path generator 
+    mPathGenerator->init(); 
 
     // reset watchdog 
     //mWatchdog.setDuration(mCommand.mDuration); 
@@ -114,15 +131,50 @@ void StateMachine::sendWaypoint()
         Waypoint wp = mPathGenerator->getNext(); 
 
         // convert to idl type and publish 
+        robot_idl::msg::AbvCommand cmd; 
+        cmd.set__type(wp.mType); 
+        
+        robot_idl::msg::AbvVec3 vec; 
+        vec.set__x(wp.mPose.x()); 
+        vec.set__y(wp.mPose.y()); 
+        vec.set__yaw(wp.mPose.z()); 
 
-        // transition to wait state 
-        setActiveState(States::WAITING); 
+        cmd.set__data(vec); 
+
+        LOGV << "Sending next waypoint..."; 
+        RosTopicManager::getInstance()->publishMessage<robot_idl::msg::AbvCommand>("abv/command", cmd); 
+        setActiveState(States::WAITING_FOR_EXECUTION); 
+    }
+    else
+    {
+        LOGV << "Full path executed. Returning to IDLE state"; 
+        setActiveState(States::IDLE); 
     }
 }
 
-void StateMachine::wait()
+void StateMachine::waitForExecution()
+{
+    if(mArrivalStatus.get() == Arrival::Status::RUNNING)
+    {
+        LOGV << "Controller heard waypoint..."; 
+        setActiveState(States::WAITING_FOR_ARRIVAL); 
+    }
+}
+
+void StateMachine::waitForArrival()
 {
     // query controller status for arrival state, once arrived, send next waypoint 
+    if(mArrivalStatus.get() == Arrival::Status::ARRIVED)
+    {
+        // controller arrived on current waypoint, send next
+        LOGV << "Controller arrived..."; 
+        setActiveState(States::SEND_WAYPOINT); 
+    }
+}
+
+void StateMachine::controllerStatusCallback(robot_idl::msg::AbvControllerStatus::SharedPtr aStatus)
+{
+    mArrivalStatus.set((Arrival::Status)aStatus->arrival); 
 }
 
 void StateMachine::setActiveState(StateMachine::States aState)
@@ -151,8 +203,11 @@ std::string StateMachine::toString(StateMachine::States aState)
     case StateMachine::States::SEND_WAYPOINT: 
         stringToReturn = "SEND_WAYPOINT"; 
         break;
-    case StateMachine::States::WAITING: 
-        stringToReturn = "WAITING"; 
+    case StateMachine::States::WAITING_FOR_EXECUTION: 
+        stringToReturn = "WAITING_FOR_EXECUTION"; 
+        break; 
+    case StateMachine::States::WAITING_FOR_ARRIVAL: 
+        stringToReturn = "WAITING_FOR_ARRIVAL"; 
         break; 
     default:
         stringToReturn = "UNKNOWN"; 

@@ -5,6 +5,8 @@
 #include <mutex> 
 #include <memory>
 
+#include "common/ArrivalStatus.hpp"
+#include "common/ThreadSafe.hpp"
 #include "common/RosNavigationListener.h"
 
 #include "abv_controller/ThrusterCommander.h"
@@ -35,14 +37,40 @@ public:
     bool isControlInputStale(); 
     bool hasAcquiredStateData(); 
 
-    Eigen::Vector3d getControlStatus(); 
+    enum class GoalType
+    {
+        THRUSTER, 
+        POSE, 
+        VELOCITY,
+        NUM_TYPES
+    };
+    
+    struct ControlStatus
+    {
+        Eigen::Vector3d mAppliedThrust; 
+        Arrival::Status mStatus; 
+    };
+
+    ControlStatus getControlStatus(); 
 
 private:
     Eigen::Vector3d mGoalPose; 
     Eigen::Vector3d mGoalVelocity; 
-    Eigen::Vector3d mControlInput; 
+    Eigen::Vector3d mControlInput;
+
+    ThreadSafe<Eigen::Vector3d> mPoseError; 
+    ThreadSafe<Eigen::Vector3d> mVelError; 
+
+    Eigen::Vector3d mPoseThresh; 
+    Eigen::Vector3d mVelThresh; 
+    std::chrono::steady_clock::time_point mArrivalStart;
+    bool mArrivalTimerActive;
+
+
     std::chrono::steady_clock::time_point mLastInputRecvdAt; 
     std::chrono::duration<double> mStaleInputThreshold;  
+
+    GoalType mGoalType; 
 
     std::mutex mGoalPoseMutex; 
     std::mutex mControlInputMutex; 
@@ -54,8 +82,7 @@ private:
 
 private: 
     Eigen::Vector3d convertToBodyFrame(Eigen::Vector3d aControlInputGlobal); 
-
-
+    Arrival::Status determineArrivalStatus(); 
 
 };
 #endif // VEHICLE_H

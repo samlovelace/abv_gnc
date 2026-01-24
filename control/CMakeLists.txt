@@ -81,6 +81,7 @@ endif()
 # Install
 install(TARGETS ${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY ../configuration/ DESTINATION share/${PROJECT_NAME}/configuration)
+install(DIRECTORY ../tools/launch/ DESTINATION share/${PROJECT_NAME})
 
 install(
   PROGRAMS ../run.sh

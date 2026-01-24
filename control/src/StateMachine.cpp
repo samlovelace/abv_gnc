@@ -130,12 +130,14 @@ void StateMachine::controlStatusPublishLoop()
 
         // get needed data from wherever 
         // TODO: maybe add state machine state to this msg being published
-        Eigen::Vector3d status = mVehicle->getControlStatus(); 
+        Vehicle::ControlStatus status = mVehicle->getControlStatus(); 
 
         robot_idl::msg::AbvControllerStatus statusToSend; 
-        statusToSend.set__fx(status.x()); 
-        statusToSend.set__fy(status.y()); 
-        statusToSend.set__tz(status.z()); 
+        statusToSend.set__fx(status.mAppliedThrust.x()); 
+        statusToSend.set__fy(status.mAppliedThrust.y()); 
+        statusToSend.set__tz(status.mAppliedThrust.z());
+        
+        statusToSend.set__arrival((uint8_t)status.mStatus); 
 
         RosTopicManager::getInstance()->publishMessage<robot_idl::msg::AbvControllerStatus>("abv/controller_status", statusToSend); 
 

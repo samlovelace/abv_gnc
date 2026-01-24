@@ -8,8 +8,10 @@
 
 Vehicle::Vehicle() : 
     mNavManager(std::make_shared<RosNavigationListener>()), mController(std::make_unique<Controller>()),
-    mLastInputRecvdAt(std::chrono::steady_clock::now()), mStaleInputThreshold(std::chrono::duration<double>(std::chrono::milliseconds(500)))
-{
+    mLastInputRecvdAt(std::chrono::steady_clock::now()), mStaleInputThreshold(std::chrono::duration<double>(std::chrono::milliseconds(500))), 
+    mPoseError(), mVelError(), mPoseThresh(0.05, 0.05, 0.25), mVelThresh(0.1, 0.1, 0.1), 
+    mArrivalTimerActive(false)
+{ 
 }
 
 Vehicle::~Vehicle()
@@ -33,8 +35,8 @@ void Vehicle::doPoseControl()
 { 
     Eigen::Vector3d currentPose = mNavManager->getCurrentPose();
 
-    Eigen::Vector3d poseError = getGoalPose() - currentPose; 
-    Eigen::Vector3d controlInput = mController->computeControlInput(poseError); 
+    mPoseError.set(getGoalPose() - currentPose); 
+    Eigen::Vector3d controlInput = mController->computeControlInput(mPoseError.get()); 
 
     setControlInput(controlInput);
     doThrusterControl(); 
@@ -44,8 +46,8 @@ void Vehicle::doVelocityControl()
 {
     Eigen::Vector3d currentVel = mNavManager->getCurrentVel();
 
-    Eigen::Vector3d velError = getGoalVelocity() - currentVel; 
-    Eigen::Vector3d controlInput = mController->computeControlInput(velError); 
+    mVelError.set(getGoalVelocity() - currentVel); 
+    Eigen::Vector3d controlInput = mController->computeControlInput(mVelError.get()); 
 
     setControlInput(controlInput); 
     doThrusterControl(); 
@@ -61,13 +63,18 @@ void Vehicle::setControlInput(Eigen::Vector3d aControlInput)
 
 void Vehicle::setGoalPose(Eigen::Vector3d aGoalPose) 
 {
+    LOGV << "Recvd goal pose: " << aGoalPose; 
     std::lock_guard<std::mutex> lock(mGoalPoseMutex); 
     mGoalPose = aGoalPose;
+    mGoalType = GoalType::POSE;
+
 }
 void Vehicle::setGoalVelocity(Eigen::Vector3d aGoalVel)
 {
+    LOGV << "Recd goal vel: " << aGoalVel; 
     std::lock_guard<std::mutex> lock(mGoalVelocityMutex); 
     mGoalVelocity = aGoalVel; 
+    mGoalType = GoalType::VELOCITY; 
 }
 
 Eigen::Vector3d Vehicle::getGoalPose() 
@@ -122,12 +129,81 @@ void Vehicle::stop()
     doThrusterControl(); 
 }
 
-Eigen::Vector3d Vehicle::getControlStatus()
+Vehicle::ControlStatus Vehicle::getControlStatus()
 {
     // TODO: expand this to include more controller status related stuff
-    // For now, just getting the theoretical thruster vector 
-    // TODO: logic to determine some sort of Arrival notion, send that on controller status 
-    // Status: IDLE, RUNNING, ARRIVED
 
-    return mThrusterCommander->getAppliedThrustVector(); 
+    ControlStatus cs; 
+    cs.mStatus = determineArrivalStatus(); 
+    cs.mAppliedThrust = mThrusterCommander->getAppliedThrustVector();     
+    
+    return cs;  
+}
+
+Arrival::Status Vehicle::determineArrivalStatus()
+{
+    using clock = std::chrono::steady_clock;
+
+    Arrival::Status status;
+    status = Arrival::Status::ARRIVED;
+
+    bool within_threshold = false;
+
+    switch (mGoalType)
+    {
+    case GoalType::POSE:
+        {
+            auto error = mPoseError.get();
+            within_threshold = (abs(error.array() < mPoseThresh.array())).all();
+            break;
+        }
+    case GoalType::VELOCITY:
+        {
+            auto error = mVelError.get();
+            within_threshold = (abs(error.array() < mVelThresh.array())).all();
+            break;
+        }
+    case GoalType::THRUSTER:
+        {
+            status = Arrival::Status::RUNNING;
+            return status;
+        }
+    default:
+        status = Arrival::Status::IDLE;
+        return status;
+    }
+
+    // --- Arrival timing logic ---
+    const auto now = clock::now();
+    const auto required_duration = std::chrono::milliseconds(3000); // TODO: make config 
+
+    if (!within_threshold)
+    {
+        // Reset timer
+        mArrivalTimerActive = false;
+        status = Arrival::Status::RUNNING;
+        return status;
+    }
+
+    // We are within threshold
+    if (!mArrivalTimerActive)
+    {
+        // Start the timer
+        mArrivalTimerActive = true;
+        mArrivalStart = now;
+        status = Arrival::Status::RUNNING;
+        return status;
+    }
+
+    // Timer is active — check if enough time has passed
+    if (now - mArrivalStart >= required_duration)
+    {
+        status = Arrival::Status::ARRIVED;
+    }
+    else
+    {
+        status = Arrival::Status::RUNNING;
+    }
+
+    return status;
 }

@@ -5,7 +5,11 @@
 #include <thread>
 #include <mutex>
 
+#include "robot_idl/msg/abv_controller_status.hpp"
+
+#include "common/ArrivalStatus.hpp"
 #include "common/RosNavigationListener.h"
+#include "common/ThreadSafe.hpp"
 
 #include "abv_guidance/IPathGenerator.hpp"
 #include "abv_guidance/InternalTypes.hpp"
@@ -23,7 +27,8 @@ public:
         IDLE, 
         GENERATE_PATH, 
         SEND_WAYPOINT, 
-        WAITING, 
+        WAITING_FOR_EXECUTION,
+        WAITING_FOR_ARRIVAL, 
         NUM_TYPES
     };
 
@@ -48,13 +53,17 @@ private:
     std::unique_ptr<IPathGenerator> mPathGenerator; 
     RosNavigationListener mNavSource; 
 
+    ThreadSafe<Arrival::Status> mArrivalStatus; 
+
 private: 
     void startup(); 
     void generatePath(); 
     void sendWaypoint(); 
-    void wait(); 
+    void waitForExecution();
+    void waitForArrival();  
 
     void onCommand(const Command& aCommand) override; 
+    void controllerStatusCallback(robot_idl::msg::AbvControllerStatus::SharedPtr aStatus); 
 
 };
 #endif // STATEMACHINE_H
