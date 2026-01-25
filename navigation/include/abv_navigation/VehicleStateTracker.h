@@ -15,7 +15,7 @@
 class VehicleStateTracker
 {
 public:
-    VehicleStateTracker(const std::string& aRigidBodyName);
+    VehicleStateTracker();
     ~VehicleStateTracker();
 
     enum class FetcherType
@@ -35,7 +35,7 @@ private:
     // polymorphic state fetcher interface so we arent tied to optiTrack
     std::shared_ptr<IStateFetcher> mStateFetcher; // state fetcher interface class 
     RosStatePublisher mStatePublisher; 
-    StateTrackerConfig mConfig; 
+    NavigationConfig mConfig; 
 
     // TODO: add subscription to ControllerStatus, pass latest input to EKF
     ExtendedKalmanFilter mEKF; 

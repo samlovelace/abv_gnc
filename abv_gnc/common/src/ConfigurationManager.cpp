@@ -27,49 +27,101 @@ bool ConfigurationManager::loadConfiguration(const std::string& aFilePath)
    
     YAML::Node config = YAML::LoadFile(aFilePath); 
     std::stringstream s; 
-    s << "Configuration: ";
+    s << "Configuration: \n";
     s << YAML::Dump(config);
     LOGD << s.str();  
 
-    // Parse StateMachine
-    mConfigurations.stateMachineConfig.mRate = config["StateMachine"]["Rate"].as<int>(); 
+    // Parse configs 
+    YAML::Node guidanceNode = config["Guidance"]; 
+    parseGuidanceConfig(guidanceNode); 
 
-    // Parse Vehicle
-    YAML::Node vehicleNode = config["Vehicle"];
-    mConfigurations.vehicleConfig.Name = vehicleNode["Name"].as<std::string>();
-    mConfigurations.vehicleConfig.Mass = vehicleNode["Mass"].as<double>();
-    mConfigurations.vehicleConfig.Inertia = vehicleNode["Inertia"].as<double>();
+    YAML::Node navigationNode = config["Navigation"]; 
+    parseNavigationConfig(navigationNode); 
 
-    // Parse Controller Gains
-    YAML::Node controllerNode = config["Controller"];
-    mConfigurations.vehicleConfig.controllerConfig.Kp = ConfigUtils::parseVector3d(controllerNode["Kp"]);
-    mConfigurations.vehicleConfig.controllerConfig.Ki = ConfigUtils::parseVector3d(controllerNode["Ki"]);
-    mConfigurations.vehicleConfig.controllerConfig.Kd = ConfigUtils::parseVector3d(controllerNode["Kd"]);
+    YAML::Node controlNode = config["Control"]; 
+    parseControlConfig(controlNode); 
 
-    // Parse Thrusters
-    mConfigurations.vehicleConfig.controllerConfig.thrusterConfig.mForce = config["Thrusters"]["Force"].as<double>(); 
-    mConfigurations.vehicleConfig.controllerConfig.thrusterConfig.mMomentArm = config["Thrusters"]["MomentArm"].as<double>();
+    // // Parse StateMachine
+    // mConfigurations.stateMachineConfig.mRate = config["StateMachine"]["Rate"].as<int>(); 
 
-    YAML::Node thrusterNode = config["Thrusters"]["InputDiscretization"];
-    mConfigurations.vehicleConfig.controllerConfig.thrusterConfig.uOn = thrusterNode["On"].as<double>();
-    mConfigurations.vehicleConfig.controllerConfig.thrusterConfig.uOff = thrusterNode["Off"].as<double>();
+    // // Parse Vehicle
+    // YAML::Node vehicleNode = config["Vehicle"];
+    // mConfigurations.vehicleConfig.Name = vehicleNode["Name"].as<std::string>();
+    // mConfigurations.vehicleConfig.Mass = vehicleNode["Mass"].as<double>();
+    // mConfigurations.vehicleConfig.Inertia = vehicleNode["Inertia"].as<double>();
 
-    YAML::Node thrusterDriverNode = config["Thrusters"]["ThrusterDriver"]; 
-    mConfigurations.vehicleConfig.controllerConfig.thrusterConfig.mType = thrusterDriverNode["Type"].as<std::string>(); 
-    mConfigurations.vehicleConfig.controllerConfig.thrusterConfig.mGpioPins = ConfigUtils::parseIntVector(thrusterDriverNode["GPIO"]["pins"]);
+    // // Parse Controller Gains
+    // YAML::Node controllerNode = config["Controller"];
+    // mConfigurations.vehicleConfig.controllerConfig.Kp = ConfigUtils::parseVector3d(controllerNode["Kp"]);
+    // mConfigurations.vehicleConfig.controllerConfig.Ki = ConfigUtils::parseVector3d(controllerNode["Ki"]);
+    // mConfigurations.vehicleConfig.controllerConfig.Kd = ConfigUtils::parseVector3d(controllerNode["Kd"]);
 
-    YAML::Node networkNode = config["Network"];
-    mConfigurations.vehicleConfig.stateTrackerConfig.mServerIp = networkNode["Server"]["Ip"].as<std::string>();
-    mConfigurations.vehicleConfig.stateTrackerConfig.mLocalIp = networkNode["Local"]["Ip"].as<std::string>();
+    // // Parse Thrusters
+    // mConfigurations.vehicleConfig.controllerConfig.thrusterConfig.mForce = config["Thrusters"]["Force"].as<double>(); 
+    // mConfigurations.vehicleConfig.controllerConfig.thrusterConfig.mMomentArm = config["Thrusters"]["MomentArm"].as<double>();
 
-    YAML::Node stateTrackerNode = config["StateTracker"]; 
-    mConfigurations.vehicleConfig.stateTrackerConfig.mInterface = stateTrackerNode["Interface"].as<std::string>(); 
-    mConfigurations.vehicleConfig.stateTrackerConfig.mRate = stateTrackerNode["Rate"].as<int>(); 
-    mConfigurations.vehicleConfig.stateTrackerConfig.mRigidBodyId = stateTrackerNode["RigidBodyId"].as<int>(); 
+    // YAML::Node thrusterNode = config["Thrusters"]["InputDiscretization"];
+    // mConfigurations.vehicleConfig.controllerConfig.thrusterConfig.uOn = thrusterNode["On"].as<double>();
+    // mConfigurations.vehicleConfig.controllerConfig.thrusterConfig.uOff = thrusterNode["Off"].as<double>();
 
-    YAML::Node statePubNode = config["StatePublisher"]; 
-    mConfigurations.vehicleConfig.statePublisherConfig.mInterface = statePubNode["Interface"].as<std::string>(); 
-    mConfigurations.vehicleConfig.statePublisherConfig.mRate = statePubNode["Rate"].as<int>(); 
+    // YAML::Node thrusterDriverNode = config["Thrusters"]["ThrusterDriver"]; 
+    // mConfigurations.vehicleConfig.controllerConfig.thrusterConfig.mType = thrusterDriverNode["Type"].as<std::string>(); 
+    // mConfigurations.vehicleConfig.controllerConfig.thrusterConfig.mGpioPins = ConfigUtils::parseIntVector(thrusterDriverNode["GPIO"]["pins"]);
+
+    // YAML::Node networkNode = config["Network"];
+    // mConfigurations.vehicleConfig.stateTrackerConfig.mServerIp = networkNode["Server"]["Ip"].as<std::string>();
+    // mConfigurations.vehicleConfig.stateTrackerConfig.mLocalIp = networkNode["Local"]["Ip"].as<std::string>();
+
+    // YAML::Node stateTrackerNode = config["StateTracker"]; 
+    // mConfigurations.vehicleConfig.stateTrackerConfig.mInterface = stateTrackerNode["Interface"].as<std::string>(); 
+    // mConfigurations.vehicleConfig.stateTrackerConfig.mRate = stateTrackerNode["Rate"].as<int>(); 
+    // mConfigurations.vehicleConfig.stateTrackerConfig.mRigidBodyId = stateTrackerNode["RigidBodyId"].as<int>(); 
+
+    // YAML::Node statePubNode = config["StatePublisher"]; 
+    // mConfigurations.vehicleConfig.statePublisherConfig.mInterface = statePubNode["Interface"].as<std::string>(); 
+    // mConfigurations.vehicleConfig.statePublisherConfig.mRate = statePubNode["Rate"].as<int>(); 
 
     return true; 
 }
+
+void ConfigurationManager::parseGuidanceConfig(const YAML::Node& aNode)
+{
+    mGuidanceConfig.mStateMachineRate = aNode["StateMachine"]["Rate"].as<int>(); 
+}
+
+void ConfigurationManager::parseNavigationConfig(const YAML::Node& aNode)
+{
+    mNavigationConfig.mInterface = aNode["Interface"].as<std::string>(); 
+    mNavigationConfig.mRate = aNode["Rate"].as<int>(); 
+    mNavigationConfig.mRigidBodyName = aNode["RigidBodyName"].as<std::string>(); 
+
+    mNavigationConfig.mLocalIp = aNode["Network"]["Local"]["Ip"].as<std::string>();
+    mNavigationConfig.mServerIp = aNode["Network"]["Server"]["Ip"].as<std::string>(); 
+}
+
+void ConfigurationManager::parseControlConfig(const YAML::Node& aNode)
+{
+    mControlConfig.mStateMachineRate = aNode["StateMachine"]["Rate"].as<int>(); 
+    mControlConfig.mPoseArrivalTol = ConfigUtils::parseVector3d(aNode["Arrival"]["Tolerance"]);
+    mControlConfig.mArrivalDuration = aNode["Arrival"]["Duration"].as<double>(); 
+
+    mControlConfig.mKp = ConfigUtils::parseVector3d(aNode["Gains"]["Kp"]);
+    mControlConfig.mKi = ConfigUtils::parseVector3d(aNode["Gains"]["Ki"]);
+    mControlConfig.mKd = ConfigUtils::parseVector3d(aNode["Gains"]["Kd"]);
+
+    mControlConfig.mSchmittTriggerOn = aNode["Thrusters"]["InputDiscretization"]["On"].as<double>(); 
+    mControlConfig.mSchmittTriggerOff = aNode["Thrusters"]["InputDiscretization"]["Off"].as<double>();
+
+    mControlConfig.mThrusterDriverType = aNode["Thrusters"]["ThrusterDriver"]["Type"].as<std::string>(); 
+    if("JETGPIO" == mControlConfig.mThrusterDriverType)
+    {
+        // parse GPIO pins 
+        mControlConfig.mGpioPins = ConfigUtils::parseIntVector(aNode["Thrusters"]["ThrusterDriver"]["GPIO"]["pins"]); 
+    }
+
+    mControlConfig.mForce = aNode["Dynamics"]["ThrusterForce"].as<double>(); 
+    mControlConfig.mMomentArm = aNode["Dynamics"]["MomentArm"].as<double>(); 
+}
+
+
+

@@ -27,7 +27,6 @@ public:
      * @brief loadConfiguration loads the config file and parsing its contents. 
      * 
      * @param aFilePath the path ot the config file to load and parse. 
-     * 
      * @return true if the config file was parsed successfully, false otherwise. 
      */
     bool loadConfiguration(const std::string& aFilePath);
@@ -35,12 +34,9 @@ public:
     /**
      * @brief Getters for various sub-configs
      */
-    ThrusterConfig getThrusterConfig() { return mConfigurations.vehicleConfig.controllerConfig.thrusterConfig; }
-    StateTrackerConfig getStateTrackerConfig() {return mConfigurations.vehicleConfig.stateTrackerConfig;}
-    StatePublisherConfig getStatePublisherConfig() {return mConfigurations.vehicleConfig.statePublisherConfig;}
-    ControllerConfig getControllerConfig() {return mConfigurations.vehicleConfig.controllerConfig;}
-    VehicleConfig getVehicleConfig() {return mConfigurations.vehicleConfig; }
-    StateMachineConfig getStateMachineConfig() {return mConfigurations.stateMachineConfig;}
+    GuidanceConfig& getGuidanceConfig() { return mGuidanceConfig; }
+    NavigationConfig& getNavigationConfig() { return mNavigationConfig; }
+    ControlConfig& getControlConfig() { return mControlConfig; }
 
 private: 
     /**
@@ -52,8 +48,15 @@ private:
      */
     ~ConfigurationManager();
 
+    void parseGuidanceConfig(const YAML::Node& aNode); 
+    void parseNavigationConfig(const YAML::Node& aNode); 
+    void parseControlConfig(const YAML::Node& aNode); 
+
 private: 
-    Configurations mConfigurations;
+
+    GuidanceConfig mGuidanceConfig; 
+    NavigationConfig mNavigationConfig; 
+    ControlConfig mControlConfig; 
 };
 
 #endif

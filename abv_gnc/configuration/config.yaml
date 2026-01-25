@@ -1,41 +1,49 @@
-StateMachine:
-  Rate: 10 # hz
+##################################################
+# Configuration file for the guidance, navigation
+# and control modules running on the abv.
+#################################################
 
-Vehicle:
-  Name: ABV1
-  Mass: 12.6 # kg
-  Inertia: 0.3 # kg-m^2m
+Guidance:
+  StateMachine:
+    Rate: 10 # Hz
 
-StateTracker:
+Navigation:
   Interface: simulated
   Rate: 10 # Hz
-  RigidBodyId: 1
+  RigidBodyName: ABV1
 
-StatePublisher:
-  Interface: ROS2
-  Rate: 10 # Hz
+  Network:
+    Local:
+      Ip: 192.168.1.15
 
-Network:
-  Local:
-    Ip: 192.168.1.15
+    Server:
+      Ip: 192.168.1.64
 
-  Server:
-    Ip: 192.168.1.64
+Control:
+  StateMachine:
+    Rate: 10 # hz
 
-Controller:
-  Kp: [5.0, 5.0, 5.0]
-  Ki: [0, 0, 0]
-  Kd: [15.0, 15.0, 15.0]
+  Arrival:
+    Tolerance: [0.05, 0.05, 1] # [m, m, deg]
+    Duration: 3 # seconds
 
-Thrusters:
-  Force: 0.08 # N
-  MomentArm: 0.15 #
+  Gains:
+    Kp: [5.0, 5.0, 5.0]
+    Ki: [0, 0, 0]
+    Kd: [15.0, 15.0, 15.0]
 
-  InputDiscretization:
-    On: 0.2
-    Off: 0.09
+  Thrusters:
+    InputDiscretization:
+      On: 0.2
+      Off: 0.09
 
-  ThrusterDriver:
-    Type: JETGPIO
-    GPIO:
-      pins: [12, 7, 8, 24, 19, 22, 15, 13]
+    ThrusterDriver:
+      Type: JETGPIO
+      GPIO:
+        pins: [12, 7, 8, 24, 19, 22, 15, 13]
+
+  Dynamics:
+    Mass: 12.6 # kg
+    Inertia: 0.3 # kg-m^2
+    ThrusterForce: 0.08 # N
+    MomentArm: 0.125 # m

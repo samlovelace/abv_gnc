@@ -26,8 +26,8 @@ int main()
     RosTopicManager::getInstance("abv_navigation"); 
     RosTopicManager::getInstance()->spinNode(); 
 
-    VehicleStateTracker stateTracker("abv");
-
+    VehicleStateTracker stateTracker;
+    
     while(true)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000)); 

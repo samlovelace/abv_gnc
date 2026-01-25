@@ -23,7 +23,7 @@ protected:
     Eigen::Vector3i convertToThrustVector(Eigen::Vector3d aControlInput); 
     void determineThrusterCommand(Eigen::Vector3i aThrustDirVec);
 
-    ThrusterConfig mConfig; 
+    ControlConfig mConfig;  
     std::string mThrusterCommand; 
     std::mutex mThrusterCommandMutex;
     Eigen::Matrix<int, 3, 27> mMatrixOfThrustDirCombinations; 

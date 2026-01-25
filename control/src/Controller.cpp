@@ -2,7 +2,7 @@
 #include "abv_controller/Controller.h"
 #include "common/ConfigurationManager.h"
 
-Controller::Controller() : mConfig(ConfigurationManager::getInstance()->getControllerConfig())
+Controller::Controller() : mConfig(ConfigurationManager::getInstance()->getControlConfig())
 {
     mPrevTime = std::chrono::steady_clock::now(); 
     mPrevPoseError = Eigen::Vector3d::Zero(); 
@@ -11,7 +11,7 @@ Controller::Controller() : mConfig(ConfigurationManager::getInstance()->getContr
 
 Controller::~Controller()
 {
-
+    
 }
 
 Eigen::Vector3d Controller::computeControlInput(Eigen::Vector3d aPoseError)
@@ -35,9 +35,9 @@ Eigen::Vector3d Controller::PID(Eigen::Vector3d aPoseError)
         double deriv = (error - mPrevPoseError[i]) / dt;
         mPoseErrorIntegral[i] += error * dt;
 
-        controlInput[i] = mConfig.Kp[i] * error +
-                          mConfig.Ki[i] * mPoseErrorIntegral[i] +
-                          mConfig.Kd[i] * deriv;
+        controlInput[i] = mConfig.mKp[i] * error +
+                          mConfig.mKi[i] * mPoseErrorIntegral[i] +
+                          mConfig.mKd[i] * deriv;
     }
 
     mPrevPoseError = aPoseError; 

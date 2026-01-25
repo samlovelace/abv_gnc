@@ -15,13 +15,14 @@
 
 
 ThrusterCommander::ThrusterCommander() : 
-    mConfig(ConfigurationManager::getInstance()->getThrusterConfig()), mThrusterCommand("00000000"), 
+    mThrusterCommand("00000000"),
+    mConfig(ConfigurationManager::getInstance()->getControlConfig()),
     mThrusterDriver(std::make_unique<ThrusterDriverImpl>(mConfig.mGpioPins))
 {
     mThrusterDriver->init(); 
 
     mThrusterForce = mConfig.mForce; 
-    mMomentArm = mConfig.mMomentArm;  
+    mMomentArm = mConfig.mMomentArm; 
 
     mMatrixOfThrustDirCombinations << 1, -1, 0, 0, 0, 0, 1, 1, -1, -1, 1, 1, -1, -1, 0, 0, 0, 0, 1, 1, 1, -1, 1, -1, -1, -1, 0,
 			                          0, 0, 1, -1, 0, 0, 1, -1, 1, -1, 0, 0, 0, 0, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, -1, 0,
@@ -47,8 +48,8 @@ void ThrusterCommander::commandThrusters(Eigen::Vector3d aControlInput)
 Eigen::Vector3i ThrusterCommander::convertToThrustVector(Eigen::Vector3d aControlInput)
 {
     Eigen::Vector3i thrustDir;
-    double uOn = mConfig.uOn;
-    double uOff = mConfig.uOff;
+    double uOn = mConfig.mSchmittTriggerOn;
+    double uOff = mConfig.mSchmittTriggerOff;
         
     for(int i = 0; i < 3; i++)
     {

@@ -10,7 +10,7 @@ Vehicle::Vehicle() :
     mNavManager(std::make_shared<RosNavigationListener>()), mController(std::make_unique<Controller>()),
     mLastInputRecvdAt(std::chrono::steady_clock::now()), mStaleInputThreshold(std::chrono::duration<double>(std::chrono::milliseconds(500))), 
     mPoseError(), mVelError(), mPoseThresh(0.01, 0.01, 0.05), mVelThresh(0.1, 0.1, 0.1), 
-    mArrivalTimerActive(false)
+    mArrivalTimerActive(false), mConfig(ConfigurationManager::getInstance()->getControlConfig())
 { 
 
 }
@@ -156,7 +156,7 @@ Arrival::Status Vehicle::determineArrivalStatus()
     case GoalType::POSE:
         {
             auto error = mPoseError.get();
-            within_threshold = (abs(error.array()) < mPoseThresh.array()).all();
+            within_threshold = (abs(error.array()) < mConfig.mPoseArrivalTol.array()).all();
             break;
         }
     case GoalType::VELOCITY:
@@ -177,7 +177,6 @@ Arrival::Status Vehicle::determineArrivalStatus()
 
     // --- Arrival timing logic ---
     const auto now = clock::now();
-    const auto required_duration = std::chrono::milliseconds(5000); // TODO: make config 
 
     if (!within_threshold || mJustRecvdNewGoal.get())
     {
@@ -199,7 +198,7 @@ Arrival::Status Vehicle::determineArrivalStatus()
     }
 
     // Timer is active — check if enough time has passed
-    if (now - mArrivalStart >= required_duration)
+    if (now - mArrivalStart >= std::chrono::seconds((int)mConfig.mArrivalDuration))
     {
         status = Arrival::Status::ARRIVED;
     }

@@ -6,54 +6,50 @@
 #include <eigen3/Eigen/Dense>
 #include <yaml-cpp/yaml.h>
 #include <plog/Log.h>
-struct StateMachineConfig 
-{
-    int mRate;
-};
-struct StateTrackerConfig 
-{
-    std::string mInterface;
-    int mRate;
-    std::string mServerIp; 
-    std::string mLocalIp; 
-    int mRigidBodyId; 
-};
-struct StatePublisherConfig 
-{
-    std::string mInterface; 
-    int mRate; 
-};
-struct ThrusterConfig 
-{
-    double uOn;
-    double uOff;
-    std::string mType; 
-    std::vector<int> mGpioPins;
-    double mForce; 
-    double mMomentArm; 
-};
-struct ControllerConfig 
-{
-    Eigen::Vector3d Kp;
-    Eigen::Vector3d Ki;
-    Eigen::Vector3d Kd;
-    ThrusterConfig thrusterConfig;
-};
+
 struct VehicleConfig 
 {
     std::string Name;
     double Mass;
     double Inertia;
+};
 
-    StateTrackerConfig stateTrackerConfig;
-    StatePublisherConfig statePublisherConfig; 
-    ControllerConfig controllerConfig;
-};
-struct Configurations 
+struct GuidanceConfig
 {
-    StateMachineConfig stateMachineConfig;
-    VehicleConfig vehicleConfig;
+    int mStateMachineRate;  
 };
+
+struct NavigationConfig
+{
+    std::string mInterface;
+    int mRate;
+    std::string mServerIp; 
+    std::string mLocalIp; 
+    std::string mRigidBodyName;
+};
+
+struct ControlConfig
+{
+    int mStateMachineRate; 
+
+    // PID controller gains 
+    Eigen::Vector3d mKp;
+    Eigen::Vector3d mKi;
+    Eigen::Vector3d mKd;
+
+    // Controller arrival
+    Eigen::Vector3d mPoseArrivalTol;
+    double mArrivalDuration; 
+
+    // ThrusterCommander & ThrusterDriver configs
+    std::string mThrusterDriverType; 
+    std::vector<int> mGpioPins;
+    double mSchmittTriggerOn;
+    double mSchmittTriggerOff;
+    double mForce; 
+    double mMomentArm; 
+};
+
 namespace ConfigUtils
 {
     static Eigen::Vector3d parseVector3d(const YAML::Node& node) 

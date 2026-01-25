@@ -58,6 +58,8 @@ private:
     Eigen::Vector3d mGoalVelocity; 
     Eigen::Vector3d mControlInput;
 
+    ControlConfig mConfig; 
+
     ThreadSafe<Eigen::Vector3d> mPoseError; 
     ThreadSafe<Eigen::Vector3d> mVelError; 
     ThreadSafe<bool> mJustRecvdNewGoal; 

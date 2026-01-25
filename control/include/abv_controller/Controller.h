@@ -15,7 +15,7 @@ public:
     Eigen::Vector3d computeControlInput(Eigen::Vector3d aPoseError); 
 
 private:
-    ControllerConfig mConfig; 
+    ControlConfig mConfig; 
     std::chrono::steady_clock::time_point mPrevTime; 
     Eigen::Vector3d mPrevPoseError; 
     Eigen::Vector3d mPoseErrorIntegral; 

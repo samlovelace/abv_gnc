@@ -24,8 +24,8 @@ StateMachine::~StateMachine()
 
 void StateMachine::run()
 {
-    auto config = ConfigurationManager::getInstance()->getStateMachineConfig(); 
-    RateController rate(config.mRate); 
+    int rateConfig = ConfigurationManager::getInstance()->getControlConfig().mStateMachineRate; 
+    RateController rate(rateConfig); 
 
     LOGD << "State Machine starting in " << toString(mActiveState);
 
@@ -119,8 +119,8 @@ std::string StateMachine::toString(StateMachine::States aState)
 void StateMachine::controlStatusPublishLoop()
 {
     // publish control status at same rate as StateMachine loop 
-    auto config = ConfigurationManager::getInstance()->getStateMachineConfig(); 
-    RateController rate(config.mRate); 
+    int rateConfig = ConfigurationManager::getInstance()->getControlConfig().mStateMachineRate; 
+    RateController rate(rateConfig); 
 
     LOGV << "Starting control status publish loop"; 
 

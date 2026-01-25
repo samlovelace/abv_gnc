@@ -79,9 +79,4 @@ endif()
 # Install
 install(TARGETS ${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
 
-install(
-  PROGRAMS ../run.sh
-  DESTINATION bin
-)
-
 ament_package()

@@ -10,8 +10,8 @@
 
 using OptitrackStateFetcher = OptitrackStateFetcher_LibMocap; 
 
-VehicleStateTracker::VehicleStateTracker(const std::string& aRigidBodyName) : 
-            mConfig(ConfigurationManager::getInstance()->getStateTrackerConfig())
+VehicleStateTracker::VehicleStateTracker() : 
+    mConfig(ConfigurationManager::getInstance()->getNavigationConfig())
 {
     FetcherType typeToMake = toEnum(mConfig.mInterface); 
 
@@ -25,7 +25,7 @@ VehicleStateTracker::VehicleStateTracker(const std::string& aRigidBodyName) :
             break;
         case FetcherType::OPTITRACK: 
             
-            mStateFetcher = std::make_shared<OptitrackStateFetcher>(mConfig.mServerIp, mConfig.mLocalIp, mConfig.mRigidBodyId, aRigidBodyName); 
+            mStateFetcher = std::make_shared<OptitrackStateFetcher>(mConfig.mServerIp, mConfig.mLocalIp, mConfig.mRigidBodyName); 
             LOGD << "Configuring ABV to use OptiTrack for state data"; 
             
             break;

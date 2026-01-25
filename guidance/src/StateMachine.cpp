@@ -40,8 +40,8 @@ void StateMachine::onCommand(const Command& aCommand)
 
 void StateMachine::run()
 {
-    //auto config = ConfigurationManager::getInstance()->getStateMachineConfig(); 
-    RateController rate(10); 
+    int rateConfig = ConfigurationManager::getInstance()->getGuidanceConfig().mStateMachineRate; 
+    RateController rate(rateConfig); 
 
     LOGD << "State Machine starting in " << toString(mActiveState);
 
