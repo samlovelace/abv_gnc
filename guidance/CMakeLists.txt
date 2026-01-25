@@ -15,7 +15,7 @@ set(ABV_GUIDANCE_SOURCES
 )
 
 # include the common dir cmake file
-include(${CMAKE_CURRENT_LIST_DIR}/../common/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/../abv_gnc/common/CMakeLists.txt)
 
 # Create executable
 add_executable(${PROJECT_NAME} ${ABV_GUIDANCE_SOURCES} ${COMMON_SOURCES})
@@ -24,7 +24,7 @@ add_executable(${PROJECT_NAME} ${ABV_GUIDANCE_SOURCES} ${COMMON_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE
 	${CMAKE_CURRENT_LIST_DIR}/include
     ${COMMON_INCLUDE_DIR}
-	${CMAKE_CURRENT_LIST_DIR}/../dependencies/plog/plog-master/include
+	${CMAKE_CURRENT_LIST_DIR}/../abv_gnc/dependencies/plog/plog-master/include
     ${EIGEN3_INCLUDE_DIRS}
 )
 

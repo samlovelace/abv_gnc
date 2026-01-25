@@ -1,0 +1,43 @@
+# Configurations for the Guidance Module
+Guidance:
+  StateMachine:
+    Rate: 10 # Hz
+
+# Configurations for the Navigation Module
+Navigation:
+  Interface: simulated
+  Rate: 10 # Hz
+
+  Network:
+    Local:
+      Ip: 192.168.1.15
+
+    Server:
+      Ip: 192.168.1.64
+
+# Configurations for the Control Module
+Control:
+  StateMachine:
+    Rate: 10 # hz
+
+  Vehicle:
+    Name: ABV1
+    Mass: 12.6 # kg
+    Inertia: 0.3 # kg-m^2
+    Force1: 0.15 # N
+    Force2: 0.08 # N
+
+  Gains:
+    Kp: [5.0, 5.0, 5.0]
+    Ki: [0, 0, 0]
+    Kd: [15.0, 15.0, 15.0]
+
+  Thrusters:
+    InputDiscretization:
+      On: 0.2
+      Off: 0.09
+
+    ThrusterDriver:
+      Type: JETGPIO
+      GPIO:
+        pins: [12, 7, 8, 24, 19, 22, 15, 13]

@@ -115,7 +115,12 @@ void StateMachine::generatePath()
     }
 
     // init the path generator 
-    mPathGenerator->init(); 
+    if(!mPathGenerator->init())
+    {
+        LOGW << "Failed to initialize path generator..."; 
+        setActiveState(States::IDLE); 
+        return; 
+    }
 
     // reset watchdog 
     //mWatchdog.setDuration(mCommand.mDuration); 

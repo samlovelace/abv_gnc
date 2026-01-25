@@ -16,7 +16,7 @@ find_package(yaml-cpp REQUIRED)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libmotioncapture")
 set(LIBMOTIONCAPTURE_ENABLE_OPTITRACK_CLOSED_SOURCE OFF CACHE BOOL "Dont Use NatNetSDK at all")
 add_subdirectory(
-  ${CMAKE_CURRENT_LIST_DIR}/../dependencies/libmotioncapture libmotioncapture
+  ${CMAKE_CURRENT_LIST_DIR}/../abv_gnc/dependencies/libmotioncapture libmotioncapture
 )
 
 set(SOURCES
@@ -28,14 +28,14 @@ set(SOURCES
 	src/main.cpp
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/../common/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/../abv_gnc/common/CMakeLists.txt)
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${COMMON_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE 
     include
     ${COMMON_INCLUDE_DIR}
-    ${CMAKE_CURRENT_LIST_DIR}/../dependencies/plog/plog-master/include
-	${CMAKE_CURRENT_LIST_DIR}/../dependencies/libmotioncapture/include
+    ${CMAKE_CURRENT_LIST_DIR}/../abv_gnc/dependencies/plog/plog-master/include
+	${CMAKE_CURRENT_LIST_DIR}/../abv_gnc/dependencies/libmotioncapture/include
 	${EIGEN3_INCLUDE_DIRS}
 )
 
