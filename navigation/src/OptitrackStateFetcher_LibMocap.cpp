@@ -5,9 +5,8 @@
 
 OptitrackStateFetcher_LibMocap::OptitrackStateFetcher_LibMocap(const std::string& aServerIp, 
                                                                const std::string& aLocalIp, 
-                                                               int aRigidBodyId, 
                                                                const std::string& aRigidBodyName) : 
-    mID(aRigidBodyId), mRigidBodyName(aRigidBodyName), mServerIp(aServerIp), mLocalIp(aLocalIp)
+    mRigidBodyName(aRigidBodyName), mServerIp(aServerIp), mLocalIp(aLocalIp)
 {
     mAcquired.store(false); 
 
@@ -85,8 +84,7 @@ void OptitrackStateFetcher_LibMocap::listen()
                     // take the xy location 
                     AbvState state; 
                     state.x = pos(0); 
-                    state.y = pos(1); 
-                    //state[2] = pos(2); 
+                    state.y = pos(1);  
 
                     // compute linear velocity 
                     for(int i=0; i<3; i++)

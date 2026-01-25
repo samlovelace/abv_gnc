@@ -14,7 +14,6 @@ class OptitrackStateFetcher_LibMocap : public IStateFetcher
 public:
     OptitrackStateFetcher_LibMocap(const std::string& aServerIp, 
                                    const std::string& aLocalIp, 
-                                   int aRigidBodyId, 
                                    const std::string& aRigidBodyName);
 
     ~OptitrackStateFetcher_LibMocap() override; 
@@ -34,7 +33,6 @@ private:
     
     std::string mServerIp; 
     std::string mLocalIp; 
-    int mID; 
     std::string mRigidBodyName; 
     std::mutex mStateMutex; 
     std::chrono::steady_clock::time_point mPrevRecvdTime; 

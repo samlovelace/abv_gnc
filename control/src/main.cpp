@@ -12,10 +12,9 @@ int main()
 {
     std::signal(SIGINT, signalHandler); 
 
-    // instantiate singletons 
-    DataLogger::get().createMainLog("controller");
+    DataLogger::get().createMainLog("abv_controller");
 
-    std::string configFilePath = ament_index_cpp::get_package_share_directory("abv_controller") + "/configuration/config.yaml"; 
+    std::string configFilePath = ament_index_cpp::get_package_share_directory("abv_gnc") + "/configuration/config.yaml"; 
     if(!ConfigurationManager::getInstance()->loadConfiguration(configFilePath))
     {
         printf("Could not load config file at %s\n", configFilePath.c_str()); 

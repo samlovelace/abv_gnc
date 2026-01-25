@@ -1,0 +1,49 @@
+##################################################
+# Configuration file for the guidance, navigation
+# and control modules running on the abv.
+#################################################
+
+Guidance:
+  StateMachine:
+    Rate: 10 # Hz
+
+Navigation:
+  Interface: simulated
+  Rate: 10 # Hz
+  RigidBodyName: ABV1
+
+  Network:
+    Local:
+      Ip: 192.168.1.15
+
+    Server:
+      Ip: 192.168.1.64
+
+Control:
+  StateMachine:
+    Rate: 10 # hz
+
+  Arrival:
+    Tolerance: [0.05, 0.05, 1] # [m, m, deg]
+    Duration: 3 # seconds
+
+  Gains:
+    Kp: [5.0, 5.0, 5.0]
+    Ki: [0, 0, 0]
+    Kd: [15.0, 15.0, 15.0]
+
+  Thrusters:
+    InputDiscretization:
+      On: 0.2
+      Off: 0.09
+
+    ThrusterDriver:
+      Type: JETGPIO
+      GPIO:
+        pins: [12, 7, 8, 24, 19, 22, 15, 13]
+
+  Dynamics:
+    Mass: 12.6 # kg
+    Inertia: 0.3 # kg-m^2
+    ThrusterForce: 0.08 # N
+    MomentArm: 0.125 # m

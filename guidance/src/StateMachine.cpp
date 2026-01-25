@@ -40,8 +40,8 @@ void StateMachine::onCommand(const Command& aCommand)
 
 void StateMachine::run()
 {
-    //auto config = ConfigurationManager::getInstance()->getStateMachineConfig(); 
-    RateController rate(10); 
+    int rateConfig = ConfigurationManager::getInstance()->getGuidanceConfig().mStateMachineRate; 
+    RateController rate(rateConfig); 
 
     LOGD << "State Machine starting in " << toString(mActiveState);
 
@@ -115,7 +115,12 @@ void StateMachine::generatePath()
     }
 
     // init the path generator 
-    mPathGenerator->init(); 
+    if(!mPathGenerator->init())
+    {
+        LOGW << "Failed to initialize path generator..."; 
+        setActiveState(States::IDLE); 
+        return; 
+    }
 
     // reset watchdog 
     //mWatchdog.setDuration(mCommand.mDuration); 

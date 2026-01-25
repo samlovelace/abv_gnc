@@ -17,7 +17,7 @@ FromFileGenerator::~FromFileGenerator()
 bool FromFileGenerator::init()
 {
     std::string filePath =
-        ament_index_cpp::get_package_share_directory("abv_controller") +
+        ament_index_cpp::get_package_share_directory("abv_gnc") +
         "/configuration/path.csv";
 
     std::ifstream file(filePath);
