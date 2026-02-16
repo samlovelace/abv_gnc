@@ -1,2 +1,12 @@
 # sphinx build output 
 docs/build/
+docs/make.bat
+docs/Makefile
+
+# colcon build results 
+build/
+install/
+log/
+
+# vscode 
+.vscode

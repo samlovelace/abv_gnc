@@ -1,7 +1,7 @@
 #ifndef ROSNAVIGATIONLISTENER_H
 #define ROSNAVIGATIONLISTENER_H
 
-#include "robot_idl/msg/abv_state.hpp"
+#include "abv_msgs/msg/abv_state.hpp"
 #include <eigen3/Eigen/Dense>
 #include <mutex> 
 
@@ -20,7 +20,7 @@ public:
 
 private: 
 
-    void stateCallback(const robot_idl::msg::AbvState::SharedPtr aMsg); 
+    void stateCallback(const abv_msgs::msg::AbvState::SharedPtr aMsg); 
 
     Eigen::Matrix<double, 12, 1> mCurrentState; 
     std::mutex mCurrentStateMutex; 

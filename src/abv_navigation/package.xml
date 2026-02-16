@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>abv_gnc</name>
+  <name>abv_navigation</name>
   <version>1.1.0</version>
-  <description>common code, tools and more for abv</description>
+  <description>navigation software running on-board the abv</description>
   <maintainer email="samlovelace12@gmail.com">sam</maintainer>
   <license>MIT</license>
 

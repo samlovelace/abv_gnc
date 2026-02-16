@@ -4,7 +4,7 @@
 
 RosNavigationListener::RosNavigationListener(/* args */) : mAcquiredState(false)
 {
-    RosTopicManager::getInstance()->createSubscriber<robot_idl::msg::AbvState>("abv/state", 
+    RosTopicManager::getInstance()->createSubscriber<abv_msgs::msg::AbvState>("abv/state", 
                                                                                std::bind(&RosNavigationListener::stateCallback,
                                                                                          this, 
                                                                                          std::placeholders::_1));                                                                                
@@ -15,7 +15,7 @@ RosNavigationListener::~RosNavigationListener()
 
 }
 
-void RosNavigationListener::stateCallback(const robot_idl::msg::AbvState::SharedPtr aMsg)
+void RosNavigationListener::stateCallback(const abv_msgs::msg::AbvState::SharedPtr aMsg)
 {
     Eigen::Matrix<double, 12, 1> state; 
     

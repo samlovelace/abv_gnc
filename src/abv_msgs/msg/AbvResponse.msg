@@ -1,0 +1,2 @@
+bool ack
+bool complete
