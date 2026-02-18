@@ -12,6 +12,7 @@ find_package(rclcpp REQUIRED)
 find_package(abv_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(plog REQUIRED)
 
 # Architecture detection
 set(ARCH_X86 FALSE)
@@ -50,7 +51,7 @@ add_executable(${PROJECT_NAME} ${ABV_CONTROLLER_SOURCES} ${COMMON_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE
 	${CMAKE_CURRENT_LIST_DIR}/include
   ${COMMON_INCLUDE_DIR}
-	${CMAKE_CURRENT_LIST_DIR}/../../abv_gnc/dependencies/plog/plog-master/include
+	#${CMAKE_CURRENT_LIST_DIR}/../../abv_gnc/dependencies/plog/plog-master/include
 	${EIGEN3_INCLUDE_DIRS}
 )
 
@@ -67,7 +68,7 @@ ament_target_dependencies(${PROJECT_NAME}
 )
 
 # Link libraries
-target_link_libraries(${PROJECT_NAME} yaml-cpp)
+target_link_libraries(${PROJECT_NAME} yaml-cpp plog::plog)
 
 if(ARCH_ARM)
 	# manually set because it doesnt use cmake 

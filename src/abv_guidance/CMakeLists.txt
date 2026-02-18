@@ -5,6 +5,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(abv_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(plog REQUIRED)
 
 set(ABV_GUIDANCE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/FromFileGenerator.cpp
@@ -24,7 +25,6 @@ add_executable(${PROJECT_NAME} ${ABV_GUIDANCE_SOURCES} ${COMMON_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE
 	${CMAKE_CURRENT_LIST_DIR}/include
     ${COMMON_INCLUDE_DIR}
-	${CMAKE_CURRENT_LIST_DIR}/../../abv_gnc/dependencies/plog/plog-master/include
     ${EIGEN3_INCLUDE_DIRS}
 )
 
@@ -34,6 +34,6 @@ ament_target_dependencies(${PROJECT_NAME}
     Eigen3
 )
 
-target_link_libraries(${PROJECT_NAME} yaml-cpp)
+target_link_libraries(${PROJECT_NAME} yaml-cpp plog::plog)
 install(TARGETS ${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
 ament_package()
