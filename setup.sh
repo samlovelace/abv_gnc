@@ -75,7 +75,7 @@ install_from_source() {
 
     cmake -DCMAKE_BUILD_TYPE=Release "${CMAKE_ARGS[@]}" ..
     make -j"$(nproc)"
-    make install
+    sudo make install
 }
 
 install_ros() {
