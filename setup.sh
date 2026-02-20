@@ -34,7 +34,7 @@ check_and_install() {
             "$CUSTOM_INSTALL_FUNC"
         else
             echo "[↪] Installing $PKG via apt..."
-            apt update && apt install -y "$PKG"
+            sudo apt update && sudo apt install -y "$PKG"
         fi
     fi
 }
@@ -84,7 +84,7 @@ install_ros() {
     # --- Configure UTF-8 Locale ---
     if ! locale | grep -q "UTF-8"; then
         echo "[ROS] Configuring UTF-8 locale..."
-        apt install -y locales
+        sudo apt install -y locales
         locale-gen en_US en_US.UTF-8
         update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
         export LANG=en_US.UTF-8
@@ -93,11 +93,11 @@ install_ros() {
     # --- Set Timezone Non-Interactively ---
     echo "[ROS] Setting timezone to America/New_York..."
     ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
-    DEBIAN_FRONTEND=noninteractive apt install -y tzdata
+    DEBIAN_FRONTEND=noninteractive sudo apt install -y tzdata
     dpkg-reconfigure -f noninteractive tzdata
 
     # --- Add Required Tools ---
-    DEBIAN_FRONTEND=noninteractive apt install -y software-properties-common curl gnupg lsb-release
+    DEBIAN_FRONTEND=noninteractive sudo apt install -y software-properties-common curl gnupg lsb-release
 
     # --- Add Universe Repo (auto-confirm) ---
     echo "[ROS] Adding universe repository..."
@@ -116,8 +116,8 @@ install_ros() {
 
     # --- Install ROS 2 Humble and Tools ---
     echo "[ROS] Installing ROS 2 Humble and tools..."
-    apt update
-    DEBIAN_FRONTEND=noninteractive apt install -y ros-humble-desktop \
+    sudo apt update
+    DEBIAN_FRONTEND=noninteractive sudo apt install -y ros-humble-desktop \
         python3-colcon-common-extensions \
         python3-rosdep \
         python3-vcstool
@@ -136,7 +136,7 @@ install_ros() {
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # make sure things are updated 
-apt update
+sudo apt update
 
 # treat ros2 install special 
 check_and_install "ros-humble-desktop" "install_ros"
@@ -153,7 +153,7 @@ install_from_source libmotioncapture samlovelace/libmotioncapture main "$LIBS_DI
 # custom steps for JETGPIO 
 clone_and_checkout JETGPIO Rubberazer/JETGPIO v1.2 "$LIBS_DIR"
 echo "orinagx" > hardware
-make && make install
+make && sudo make install
 # end JETGPIO custom  
 
 # build the packages 
