@@ -51,13 +51,14 @@ add_executable(${PROJECT_NAME} ${ABV_CONTROLLER_SOURCES} ${COMMON_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE
 	${CMAKE_CURRENT_LIST_DIR}/include
   ${COMMON_INCLUDE_DIR}
-	#${CMAKE_CURRENT_LIST_DIR}/../../abv_gnc/dependencies/plog/plog-master/include
 	${EIGEN3_INCLUDE_DIRS}
 )
 
 if(ARCH_ARM)
-	target_include_directories(${PROJECT_NAME} PRIVATE
-		${CMAKE_CURRENT_LIST_DIR}/../../abv_gnc/dependencies/JETGPIO-1.2)
+	target_include_directories(${PROJECT_NAME} 
+    PRIVATE
+      /usr/include/
+  )
 endif()
 
 # Dependencies
@@ -71,10 +72,8 @@ ament_target_dependencies(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} yaml-cpp plog::plog)
 
 if(ARCH_ARM)
-	# manually set because it doesnt use cmake 
-	set(jetgpio_LIB ${CMAKE_CURRENT_LIST_DIR}/../../abv_gnc/dependencies/JETGPIO-1.2/libjetgpio.so)
-    target_link_libraries(${PROJECT_NAME} ${jetgpio_LIB})
-	install(FILES ${CMAKE_CURRENT_LIST_DIR}/../../abv_gnc/dependencies/JETGPIO-1.2/libjetgpio.so DESTINATION lib/${PROJECT_NAME})
+	set(jetgpio_LIB /usr/lib/libjetgpio.so) # manually set because it doesnt use cmake 
+  target_link_libraries(${PROJECT_NAME} ${jetgpio_LIB})
 endif()
 
 # Install

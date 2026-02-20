@@ -1,5 +1,0 @@
-CD into ~/Desktop/JETGPIO-1.2/EXAMPLES_C++
-
-compile the code with: g++ -o gpio_solenoid gpio_solenoid.cpp -ljetgpio
-
-run with: ./gpio_solenoid

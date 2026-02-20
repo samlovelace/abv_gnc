@@ -8,7 +8,7 @@ Guidance:
     Rate: 10 # Hz
 
 Navigation:
-  Interface: simulated
+  Interface: optitrack
   Rate: 10 # Hz
   RigidBodyName: ABV1
 

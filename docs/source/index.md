@@ -10,6 +10,7 @@ visualization, and experimentation.
 :maxdepth: 1
 
 overview/index
+getting_started/index
 operation/index
 packages/index
 development/index
