@@ -32,7 +32,8 @@ bool GpioThrusterDriver::init()
             return false; 
         } 
 
-        LOGD << "set Pin: " << pin << " Mode: " << JET_OUTPUT;  
+        LOGD << "Set pin: " << pin << " Mode: " << JET_OUTPUT;
+        writePin(pin, 0);   
     }
 
     LOGD << "Initialized all output pins successfully"; 
@@ -43,13 +44,15 @@ bool GpioThrusterDriver::init()
 
 bool GpioThrusterDriver::fini()
 {
-    gpioTerminate(); 
+    gpioTerminate();
+    return true;  
 }
 
 bool GpioThrusterDriver::send(const std::string& aThrusterCommand)
 {
     std::bitset<8> command(aThrusterCommand);
     writePins(command); 
+    return true; 
 }
 
 bool GpioThrusterDriver::areAllPinsOff()
