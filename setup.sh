@@ -158,4 +158,4 @@ make && sudo make install
 
 # build the packages 
 cd $SCRIPT_DIR
-exec bash && colcon build
+source /opt/ros/humble/setup.bash && colcon build
