@@ -120,9 +120,6 @@ void InputHandler::handle(const std::string& anInput)
         -----------------------------
         Interact with the air-bearing vehicle by sending pose or velocity waypoints. 
         
-        Usage:
-        <tool_name> [command]
-        
         Available Commands:
         
         pose:       command the abv to a desired x, y, yaw pose 

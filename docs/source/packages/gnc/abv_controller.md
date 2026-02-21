@@ -79,7 +79,7 @@ Core components include:
   Estimated vehicle state from `abv_navigation`.
 
 - `/abv/command`  
-  Commands from `abv_guidance` or `abv_teleop`.
+  Commands from `abv_guidance` or `abv_teleop` or `abv_commander`
 
 ### Published
 

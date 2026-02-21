@@ -7,5 +7,5 @@ Core guidance, navigation, and control modules.
 
 abv_guidance
 abv_navigation
-abv_control
+abv_controller
 ```
