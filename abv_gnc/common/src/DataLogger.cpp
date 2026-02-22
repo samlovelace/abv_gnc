@@ -74,7 +74,7 @@ LogId DataLogger::createLog(const std::string& aFileNameKey)
 
     auto log = std::make_unique<Log>();
     
-    std::string fileName = "ABV_" + aFileNameKey + "_Log_" + mMainLogTimestamp + ".csv"; 
+    std::string fileName = aFileNameKey + "_" + mMainLogTimestamp + ".csv"; 
     std::string fullFilePath = mMainLogDir + "/" + fileName; 
     log->mFile.open(fullFilePath, std::ios::out | std::ios::app); 
 

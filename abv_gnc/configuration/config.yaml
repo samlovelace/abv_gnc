@@ -8,7 +8,7 @@ Guidance:
     Rate: 10 # Hz
 
 Navigation:
-  Interface: optitrack
+  Interface: simulated
   Rate: 10 # Hz
   RigidBodyName: ABV1
 
@@ -17,7 +17,7 @@ Navigation:
       Ip: 192.168.1.15
 
     Server:
-      Ip: 192.168.1.64
+      Ip: 192.168.1.152
 
 Control:
   StateMachine:

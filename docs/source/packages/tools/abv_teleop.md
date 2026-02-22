@@ -10,18 +10,21 @@ The `abv_teleop` package is responsible for taking user inputs from the configur
 
 Run the `abv_teleop` package from the `abv_gnc` folder
 
-```bash 
+```bash
 sudo ./run.sh abv_teleop
 ```
-After running the program, using the computer keyboard is enabled by default. The mapping of the keys to command is shown below. Note, all commands are in the ABV body frame. 
 
-- `arrow up` - +x
-- `arrow down` - -x
-- `arrow right` - +y
-- `arrow left` - -y
-- `e` - +yaw
-- `q` - -yaw
+After running the program, using the computer keyboard is enabled by default. The mapping of the keys to command is shown below. Note, all commands are in the ABV body frame.
 
-## Topics 
-### Published 
+- `arrow up` +x
+- `arrow down` -x
+- `arrow right` +y
+- `arrow left` -y
+- `e` +yaw
+- `q` -yaw
+
+## Topics
+
+### Published
+
 - `/abv/command` - publishes the desired thrust vector to the ABV

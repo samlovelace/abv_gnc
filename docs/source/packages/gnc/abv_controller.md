@@ -28,7 +28,7 @@ This package does not perform state estimation or trajectory generation.
 
 ## Control Modes
 
-The control stack typically supports two operating modes:
+This packages supports two operating modes:
 
 ### 1. Waypoint (Pose Control) Mode
 
@@ -49,25 +49,15 @@ Mode selection is handled in the command topic. ''TODO: add link to abv_msgs/Abv
 
 ## Architecture
 
-Core components include:
+Core classes within this package include:
 
-- `Controller`  
-  Computes control effort from state error.
-
-- `StateMachine`  
-  Manages operating modes and control flow.
-
-- `ThrusterCommander`  
-  Converts control efforts into discrete thruster activation sequences.
-
-- `Vehicle`  
-  Encapsulates control logic.
-
-- `GpioThrusterDriver`  
-  Sends commands directly to hardware via GPIO.
-
-- `UdpThrusterDriver`  
-  Sends thruster commands via UDP (only used for simulation).
+- `CommandHandler`: Receives commands over ROS 2 topic and delegates to the `StateMachine`
+- `StateMachine`: Contains the main run loop, invokes commanded functionality from the `Vehicle`
+- `Vehicle`: Uses `Controller` to perform pose, velocity or manual thruster control.
+- `Controller`: Computes control effort from state error. Uses `'ThrusterCommander` to send thruster commands.
+- `ThrusterCommander`: Converts control efforts into discrete thruster activation sequences. Uses `GpioThrusterDriver` or `UdpThrusterDriver` to send commands to hardware.
+- `GpioThrusterDriver`: Sends commands directly to hardware via GPIO
+- `UdpThrusterDriver`: Sends thruster commands via UDP (only used for simulation).
 
 ---
 

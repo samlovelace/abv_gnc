@@ -14,8 +14,7 @@ public:
     ExtendedKalmanFilter();
     ~ExtendedKalmanFilter();
 
-    void update(const AbvState& aStateMeasurement, AbvState& aStateEstimateOut); 
-
+    void step(const AbvState& aStateMeasurement, const double& aDt, AbvState& aStateEstimateOut);  
     void setLatestInput(const Eigen::Vector3d& anInput);
 
 private:
@@ -27,6 +26,7 @@ private:
     void predictionLoop(); 
 
     void predict(const double aDt);
+    void update(const AbvState& aStateMeasurement, AbvState& aStateEstimateOut);
 
     Eigen::Vector3d mLatestInput; 
     std::mutex mLatestInputMutex; 

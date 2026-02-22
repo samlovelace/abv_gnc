@@ -3,21 +3,21 @@
 #include "common/RateController.hpp"
 
 ExtendedKalmanFilter::ExtendedKalmanFilter()
-{
-    // TODO: init other variables 
+{   
+    // process noise covariance matrix 
     Eigen::VectorXd cov(6); 
-    cov << 0, 0, 0, 0.01, 0.01, 0.01; 
+    cov << 1e-5, 1e-5, 1e-6,
+           1e-2, 1e-2, 1e-3; 
     mProcessNoiseCovariance = cov.asDiagonal(); 
 
+    // measurement noise covariance matrix 
     Eigen::VectorXd mcov(3); 
-    mcov << 0.01, 0.01, 0.01;
+    mcov << 0.05, 0.05, 0.05;
     mMeasurementNoiseCovariance = mcov.asDiagonal(); 
 
     // TODO: get these from config 
     mMass = 12.7; 
     mIz = 0.3; 
-
-    mPredictionThread = std::thread(&ExtendedKalmanFilter::predictionLoop, this); 
 }
 
 ExtendedKalmanFilter::~ExtendedKalmanFilter()
@@ -27,6 +27,12 @@ ExtendedKalmanFilter::~ExtendedKalmanFilter()
     {
         mPredictionThread.join(); 
     }
+}
+
+void ExtendedKalmanFilter::step(const AbvState& aStateMeasurement, const double& aDt, AbvState& aStateEstimateOut)
+{
+    predict(aDt); 
+    update(aStateMeasurement, aStateEstimateOut); 
 }
 
 void ExtendedKalmanFilter::predict(const double aDt)
@@ -84,7 +90,7 @@ void ExtendedKalmanFilter::updateStateTransitionMatrix(const double aDt,
     double Fx = aControlInput[0]; 
     double Fy = aControlInput[1]; 
 
-    AbvState state = getLatestStateEstimate(); 
+    AbvState state = getLatestStatePrediction(); 
     double th = state.theta; 
 
     double a = aDt / mMass * (-Fx * sin(th) - Fy * cos(th)); 
@@ -147,30 +153,9 @@ void ExtendedKalmanFilter::update(const AbvState& aStateMeasurement, AbvState& a
     aStateEstimateOut = fromEigen(stateEst);  
     setLatestStateEstimate(aStateEstimateOut); 
 
-    // covariance update 
+    // covariance update  
+    mCovarianceEst = (I6x6 - K * H) * mCovarianceEst;
     mPrevCovariance = mCovarianceEst; 
-    mCovarianceEst = (I6x6 - K * H) * mCovarianceEst; 
-}
-
-void ExtendedKalmanFilter::predictionLoop()
-{
-    // TODO: get from config 
-    RateController rate(50); 
-
-    mRunning.store(true);
-    rate.start(); 
-    rate.block(); // warmup to get actual dt in loop
-
-    while(mRunning.load())
-    {
-        rate.start(); 
-
-        // EKF prediction step 
-        predict(rate.getDeltaTime());  
-        
-        rate.block(); 
-    }
-
 }
 
 void ExtendedKalmanFilter::setLatestStatePrediction(const AbvState& aState)
@@ -184,7 +169,6 @@ AbvState ExtendedKalmanFilter::getLatestStatePrediction()
     std::lock_guard<std::mutex> lock(mStatePredMutex); 
     return mStatePred;
 }
-
 
 void ExtendedKalmanFilter::setLatestStateEstimate(const AbvState& aState)
 {

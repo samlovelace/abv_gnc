@@ -92,11 +92,10 @@ void VehicleStateTracker::stateTrackerLoop()
         sleep(1); 
     }
 
-    auto logId = DataLogger::get().createLog("state"); 
-
+    // init stuff
+    auto logId = DataLogger::get().createLog("abv_state_data"); 
     LOGD << "Starting state tracking thread";
     setStateTracking(true); 
-
     AbvState stateEstimate; 
 
     while(doStateTracking())
@@ -104,7 +103,7 @@ void VehicleStateTracker::stateTrackerLoop()
         rate.start(); 
 
         AbvState state = mStateFetcher->fetchState();
-        mEKF.update(state, stateEstimate); 
+        mEKF.step(state, rate.getDeltaTime(), stateEstimate); 
 
         mStatePublisher.publish(stateEstimate);  
         DataLogger::get().write(logId, toVector(stateEstimate)); 

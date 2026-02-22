@@ -10,7 +10,7 @@
 class RosTopicManager : public rclcpp::Node
 {
 public:
-    RosTopicManager() : rclcpp::Node("simulator") {}
+    RosTopicManager() : rclcpp::Node("abv_simulator") {}
     ~RosTopicManager() {}
 
     template<typename T>
