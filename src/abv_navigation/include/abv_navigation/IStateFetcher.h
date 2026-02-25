@@ -4,20 +4,23 @@
 #include <mutex> 
 #include <atomic>
 
+#include "common/ConsumableBuffer.hpp"
 #include "common/AbvState.hpp"
-
 class IStateFetcher
 {
 public:
-    virtual ~IStateFetcher() = default; 
-    virtual AbvState fetchState() = 0; 
-    virtual bool init() = 0; 
-    virtual bool isStateAcquired() {return mAcquired.load(); }
-    virtual std::string type() {return "unknown"; }
+    explicit IStateFetcher(ConsumableBuffer<AbvState>& buffer)
+        : mBuffer(buffer), mAcquired(false)
+    {}
 
-protected: 
-    AbvState mState; 
-    std::atomic<bool> mAcquired; 
+    virtual ~IStateFetcher() = default;
 
+    virtual bool init() = 0;
+    virtual bool isStateAcquired() { return mAcquired.load(); }
+    virtual std::string type() { return "unknown"; }
+
+protected:
+    ConsumableBuffer<AbvState>& mBuffer;
+    std::atomic<bool> mAcquired;
 };
 #endif // ISTATEFETCHER_H

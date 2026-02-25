@@ -7,6 +7,7 @@
 #include "abv_navigation/IStateFetcher.h"
 #include "common/Configurations.h"
 #include "common/ConfigurationManager.h"
+#include "common/ConsumableBuffer.hpp"
 #include "RosStatePublisher.h"
 #include "ExtendedKalmanFilter.h"
 
@@ -32,6 +33,10 @@ public:
     void setStateTracking(bool aFlag) {std::lock_guard<std::mutex> lock(mStateTrackingMutex); mDoStateTracking = aFlag; }
 
 private:
+
+    // construct buffer first 
+    ConsumableBuffer<AbvState> mStateBuffer; 
+
     // polymorphic state fetcher interface so we arent tied to optiTrack
     std::shared_ptr<IStateFetcher> mStateFetcher; // state fetcher interface class 
     RosStatePublisher mStatePublisher; 

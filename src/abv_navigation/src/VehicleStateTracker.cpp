@@ -19,13 +19,16 @@ VehicleStateTracker::VehicleStateTracker() :
     {
         case FetcherType::SIMULATED:
             
-            mStateFetcher = std::make_shared<SimulatedStateFetcher>(); 
+            mStateFetcher = std::make_shared<SimulatedStateFetcher>(mStateBuffer); 
             LOGD << "Configuring ABV to use Simulated state data"; 
             
             break;
         case FetcherType::OPTITRACK: 
             
-            mStateFetcher = std::make_shared<OptitrackStateFetcher>(mConfig.mServerIp, mConfig.mLocalIp, mConfig.mRigidBodyName); 
+            mStateFetcher = std::make_shared<OptitrackStateFetcher>(mStateBuffer, 
+                                                                    mConfig.mServerIp, 
+                                                                    mConfig.mLocalIp, 
+                                                                    mConfig.mRigidBodyName); 
             LOGD << "Configuring ABV to use OptiTrack for state data"; 
             
             break;
@@ -96,19 +99,31 @@ void VehicleStateTracker::stateTrackerLoop()
     auto logId = DataLogger::get().createLog("abv_state_data"); 
     LOGD << "Starting state tracking thread";
     setStateTracking(true); 
-    AbvState stateEstimate; 
+    AbvState stateEstimate;
 
-    while(doStateTracking())
+    while (doStateTracking())
     {
-        rate.start(); 
+        rate.start();
 
-        AbvState state = mStateFetcher->fetchState();
-        mEKF.step(state, rate.getDeltaTime(), stateEstimate); 
+        double dt = rate.getDeltaTime(); 
+        auto stateMeasurement = mStateBuffer.consume();
 
-        mStatePublisher.publish(stateEstimate);  
-        DataLogger::get().write(logId, toVector(stateEstimate)); 
+        if (stateMeasurement.has_value())
+        {
+            // Predict exactly to this measurement time
+            mEKF.predict(dt, stateEstimate);
+            mEKF.update(stateMeasurement.value(), stateEstimate);
+        }
+        else
+        {
+            // Just propagate forward
+            mEKF.predict(dt, stateEstimate);
+        }
 
-        rate.block(); 
+        mStatePublisher.publish(stateEstimate);
+        DataLogger::get().write(logId, toVector(stateEstimate));
+
+        rate.block();
     }
 }
 

@@ -1,6 +1,7 @@
 #ifndef ABVSTATE_HPP
 #define ABVSTATE_HPP
 
+#include <ostream>
 #include <vector> 
 #include <eigen3/Eigen/Dense>
 
@@ -48,5 +49,18 @@ inline AbvState fromEigen(const Eigen::Matrix<double, 6, 1>& aState)
     return state; 
 }
 
+inline std::ostream& operator<<(std::ostream& os, const AbvState& s)
+{
+    os << "AbvState {\n"
+       << "  x:      " << s.x      << "\n"
+       << "  y:      " << s.y      << "\n"
+       << "  theta:  " << s.theta  << "\n"
+       << "  vx:     " << s.vx     << "\n"
+       << "  vy:     " << s.vy     << "\n"
+       << "  omega:  " << s.omega  << "\n"
+       << "}";
+
+    return os;
+}
 
 #endif 

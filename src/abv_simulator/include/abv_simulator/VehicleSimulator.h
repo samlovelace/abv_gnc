@@ -47,7 +47,19 @@ private:
 
     VehicleState mVehicleState; 
 
-    std::default_random_engine mRng;
+    // Dropout configuration
+    double mDropoutStartProbability{0.02};  // 2% chance per tick to START a burst
+    int mMinDropoutSteps{10};               // minimum burst length
+    int mMaxDropoutSteps{50};               // maximum burst length
+    double mSimTime{0.0};
+
+    // Dropout state
+    bool mDropoutActive{false};
+    int mDropoutRemainingSteps{0};
+
+    // Random generators
+    std::mt19937 mRng{std::random_device{}()};
+    std::uniform_real_distribution<double> mUniformDist{0.0, 1.0};
 
     void convertThrusterCommandToForce(const std::string& aCommand);
     abv_msgs::msg::AbvState convertToIdl(VehicleState aState);

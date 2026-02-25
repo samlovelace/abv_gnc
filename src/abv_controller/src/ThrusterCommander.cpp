@@ -23,6 +23,7 @@ ThrusterCommander::ThrusterCommander() :
 
     mThrusterForce = mConfig.mForce; 
     mMomentArm = mConfig.mMomentArm; 
+    mAppliedThrustVector = Eigen::Vector3d::Zero(); 
 
     mMatrixOfThrustDirCombinations << 1, -1, 0, 0, 0, 0, 1, 1, -1, -1, 1, 1, -1, -1, 0, 0, 0, 0, 1, 1, 1, -1, 1, -1, -1, -1, 0,
 			                          0, 0, 1, -1, 0, 0, 1, -1, 1, -1, 0, 0, 0, 0, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, -1, 0,

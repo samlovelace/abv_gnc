@@ -3,7 +3,7 @@
 #include "common/RosTopicManager.h"
 
 
-SimulatedStateFetcher::SimulatedStateFetcher()
+SimulatedStateFetcher::SimulatedStateFetcher(ConsumableBuffer<AbvState>& aBuffer) : IStateFetcher(aBuffer)
 {
     mAcquired.store(false);  
 }
@@ -32,19 +32,7 @@ void SimulatedStateFetcher::stateCallback(abv_msgs::msg::AbvState::SharedPtr aSi
     state.omega = aSimState->ang_vel.z; 
     
     // thread safe setting of state
-    setState(state); 
+    mBuffer.put(state);  
     if(!mAcquired.load())
         mAcquired.store(true); 
-}
-
-void SimulatedStateFetcher::setState(const AbvState& aState)
-{
-    std::lock_guard<std::mutex> lock(mStateMutex); 
-    mState = aState; 
-}
-
-AbvState SimulatedStateFetcher::fetchState()
-{
-    std::lock_guard<std::mutex> lock(mStateMutex); 
-    return mState; 
 }

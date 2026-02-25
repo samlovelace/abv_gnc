@@ -7,11 +7,10 @@
 class SimulatedStateFetcher : public IStateFetcher
 {
 public:
-    SimulatedStateFetcher(/* args */);
+    SimulatedStateFetcher(ConsumableBuffer<AbvState>& aBuffer);
     ~SimulatedStateFetcher() override; 
 
     bool init() override; 
-    AbvState fetchState() override; 
     std::string type() {return "Simulated"; }
 
 private:

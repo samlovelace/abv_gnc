@@ -63,25 +63,65 @@ void VehicleSimulator::update(const double dt)
     //addProcessNoise();
     
     VehicleState mNoisyState = mVehicleState;
-
+    mSimTime += dt;
     bool addNoise = true; 
     if(addNoise)
     {
         makeMeasurement(mNoisyState);
     } 
 
-    mTopicManager->publishMessage<abv_msgs::msg::AbvState>(
-        "abv/sim/state", convertToIdl(mNoisyState));
+    // -------------------------
+    // Burst Dropout Logic
+    // -------------------------
+
+    // If currently in dropout, decrement counter
+    if (mDropoutActive)
+    {
+        mDropoutRemainingSteps--;
+
+        if (mDropoutRemainingSteps <= 0)
+        {
+            mDropoutActive = false;
+        }
+    }
+    else
+    {
+        // Possibly START a new dropout burst
+        if (mUniformDist(mRng) < mDropoutStartProbability)
+        {
+            std::uniform_int_distribution<int> burstDist(mMinDropoutSteps,
+                                                        mMaxDropoutSteps);
+
+            mDropoutRemainingSteps = burstDist(mRng);
+            mDropoutActive = true;
+        }
+    }
+
+    // override
+    mDropoutActive = false; 
+
+    // Publish only if not in dropout
+    if (!mDropoutActive)
+    {
+        mTopicManager->publishMessage<abv_msgs::msg::AbvState>(
+            "abv/sim/state",
+            convertToIdl(mNoisyState));
+    }
 }
 
-void VehicleSimulator::makeMeasurement(VehicleState& aStateToAlter)
+void VehicleSimulator::makeMeasurement(VehicleState& s)
 {
-    std::normal_distribution<double> mPosNoise{0.0, 0.01};    // 1 mm
-    std::normal_distribution<double> mYawNoise{0.0, 0.002};   // ~0.1 deg
+    std::normal_distribution<double> posNoise(0.0, 0.02);
+    std::normal_distribution<double> yawNoise(0.0, 0.003);
 
-    aStateToAlter.x += mPosNoise(mRng); 
-    aStateToAlter.y += mPosNoise(mRng); 
-    aStateToAlter.yaw += mYawNoise(mRng); 
+    s.x += posNoise(mRng);
+    s.y += posNoise(mRng);
+    s.yaw += yawNoise(mRng);
+
+    // Add small high frequency vibration
+    double freq = 60.0; // Hz
+    s.x += 0.005 * sin(2.0 * M_PI * freq * mSimTime);
+    s.y += 0.005 * cos(2.0 * M_PI * freq * mSimTime);
 }
 
 void VehicleSimulator::addSensorNoise()

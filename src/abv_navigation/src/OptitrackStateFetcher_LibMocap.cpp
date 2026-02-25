@@ -3,13 +3,16 @@
 #include "plog/Log.h"
 #include <iostream> 
 
-OptitrackStateFetcher_LibMocap::OptitrackStateFetcher_LibMocap(const std::string& aServerIp, 
+OptitrackStateFetcher_LibMocap::OptitrackStateFetcher_LibMocap(ConsumableBuffer<AbvState>& aBuffer,
+                                                               const std::string& aServerIp, 
                                                                const std::string& aLocalIp, 
                                                                const std::string& aRigidBodyName) : 
-    mRigidBodyName(aRigidBodyName), mServerIp(aServerIp), mLocalIp(aLocalIp)
+    IStateFetcher(aBuffer), 
+    mRigidBodyName(aRigidBodyName), 
+    mServerIp(aServerIp), 
+    mLocalIp(aLocalIp)
 {
     mAcquired.store(false); 
-
 }
 
 OptitrackStateFetcher_LibMocap::~OptitrackStateFetcher_LibMocap()
@@ -40,13 +43,6 @@ bool OptitrackStateFetcher_LibMocap::init()
     mListenThread = std::thread(&OptitrackStateFetcher_LibMocap::listen, this); 
     return true; 
 }
-
-
-AbvState OptitrackStateFetcher_LibMocap::fetchState()
-{
-    std::lock_guard<std::mutex> lock(mStateMutex); 
-    return mLatestState; 
-} 
 
 void OptitrackStateFetcher_LibMocap::setLatestState(const AbvState& aLatestState)
 {
@@ -114,7 +110,7 @@ void OptitrackStateFetcher_LibMocap::listen()
                     state.omega = angularVelocity.z(); 
 
                     // set latest state and update previous values
-                    setLatestState(state); 
+                    mBuffer.put(state); 
                     mPrevState = state; 
                     mPrevQuat = q; 
                     mPrevRecvdTime = std::chrono::steady_clock::now();  

@@ -1,9 +1,10 @@
 
 #include "abv_navigation/ExtendedKalmanFilter.h"
 #include "common/RateController.hpp"
+#include "plog/Log.h"
 
 ExtendedKalmanFilter::ExtendedKalmanFilter()
-{   
+{
     // process noise covariance matrix 
     Eigen::VectorXd cov(6); 
     cov << 1e-5, 1e-5, 1e-6,
@@ -13,11 +14,22 @@ ExtendedKalmanFilter::ExtendedKalmanFilter()
     // measurement noise covariance matrix 
     Eigen::VectorXd mcov(3); 
     mcov << 0.05, 0.05, 0.05;
-    mMeasurementNoiseCovariance = mcov.asDiagonal(); 
+    mMeasurementNoiseCovariance = mcov.asDiagonal();
+
+    mMeasurementMatrix = Eigen::Matrix<double,3,6>::Zero();
+    mMeasurementMatrix(0,0) = 1;
+    mMeasurementMatrix(1,1) = 1;
+    mMeasurementMatrix(2,2) = 1;
+
+    mI6 = Eigen::Matrix<double,6,6>::Identity();
 
     // TODO: get these from config 
     mMass = 12.7; 
     mIz = 0.3; 
+
+    mStateEst = {0,0,0,0,0,0};
+    mStatePred = mStateEst;
+    mCovarianceEst = Eigen::Matrix<double,6,6>::Identity() * 1e-3;
 }
 
 ExtendedKalmanFilter::~ExtendedKalmanFilter()
@@ -29,23 +41,22 @@ ExtendedKalmanFilter::~ExtendedKalmanFilter()
     }
 }
 
-void ExtendedKalmanFilter::step(const AbvState& aStateMeasurement, const double& aDt, AbvState& aStateEstimateOut)
+void ExtendedKalmanFilter::predict(const double dt, AbvState& out)
 {
-    predict(aDt); 
-    update(aStateMeasurement, aStateEstimateOut); 
-}
+    Eigen::Vector3d u = getLatestInput();
+    setLatestInput(Eigen::Vector3d::Zero());
 
-void ExtendedKalmanFilter::predict(const double aDt)
-{   
-    Eigen::Vector3d latestInput = getLatestInput(); 
-    
-    propagate(aDt, latestInput); 
-    linearize(aDt, latestInput);  
-    
-    mCovarianceEst = mStateTransitionMatrix * 
-                     mPrevCovariance * 
-                     mStateTransitionMatrix.transpose() + 
-                     mProcessNoiseCovariance; 
+    propagate(dt, u);
+    linearize(dt, u);
+
+    mCovarianceEst =
+        mStateTransitionMatrix *
+        mCovarianceEst *
+        mStateTransitionMatrix.transpose()
+        + mProcessNoiseCovariance;
+
+    out = getLatestStatePrediction();
+    setLatestStateEstimate(out);
 }
 
 void ExtendedKalmanFilter::propagate(const double aDt, const Eigen::Vector3d& aControlInput)
@@ -120,42 +131,35 @@ void ExtendedKalmanFilter::updateControlMappingMatrix(const double aDt,
 }
 
 
-void ExtendedKalmanFilter::update(const AbvState& aStateMeasurement, AbvState& aStateEstimateOut)
+void ExtendedKalmanFilter::update(const AbvState& meas, AbvState& out)
 {
-    auto I6x6 = Eigen::Matrix<double, 6, 6>::Identity(); 
-    Eigen::Matrix<double,3,6> H;
-    H.setZero();
-    H(0,0) = 1;
-    H(1,1) = 1;
-    H(2,2) = 1;
+    Eigen::Vector3d z;
+    z << meas.x, meas.y, meas.theta;
 
-    AbvState statePred = getLatestStatePrediction(); 
+    AbvState pred = getLatestStatePrediction();
+    Eigen::Vector3d h;
+    h << pred.x, pred.y, pred.theta;
 
-    Eigen::Vector3d measurement; 
-    measurement << aStateMeasurement.x, aStateMeasurement.y, aStateMeasurement.theta; 
+    Eigen::Vector3d innovation = z - h;
 
-    Eigen::Vector3d prediction; 
-    prediction << statePred.x, statePred.y, statePred.theta; 
- 
-    // Measurement matrix is just identity on x,y so innovation is difference of state
-    Eigen::Vector3d innovation = measurement - prediction;  
+    Eigen::Matrix<double,3,3> S =
+        mMeasurementMatrix * mCovarianceEst * mMeasurementMatrix.transpose()
+        + mMeasurementNoiseCovariance;
 
-    // Innovation covariance 
-    auto S = H * mCovarianceEst * H.transpose() + mMeasurementNoiseCovariance; 
-    
-    // Kalman Gain
-    auto K = mCovarianceEst * H.transpose() * S.inverse(); 
+    Eigen::Matrix<double,6,3> K =
+        mCovarianceEst * mMeasurementMatrix.transpose() * S.inverse();
 
-    // state update 
-    auto stateEst = toEigen(statePred) + K * innovation;
-    
-    // convert to internal state representation 
-    aStateEstimateOut = fromEigen(stateEst);  
-    setLatestStateEstimate(aStateEstimateOut); 
+    Eigen::Matrix<double,6,1> x =
+        toEigen(pred) + K * innovation;
 
-    // covariance update  
-    mCovarianceEst = (I6x6 - K * H) * mCovarianceEst;
-    mPrevCovariance = mCovarianceEst; 
+    out = fromEigen(x);
+    setLatestStateEstimate(out);
+
+    // Joseph form covariance update (numerically safer)
+    mCovarianceEst =
+        (mI6 - K * mMeasurementMatrix) * mCovarianceEst *
+        (mI6 - K * mMeasurementMatrix).transpose()
+        + K * mMeasurementNoiseCovariance * K.transpose();
 }
 
 void ExtendedKalmanFilter::setLatestStatePrediction(const AbvState& aState)

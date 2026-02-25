@@ -12,14 +12,14 @@
 class OptitrackStateFetcher_LibMocap : public IStateFetcher
 { 
 public:
-    OptitrackStateFetcher_LibMocap(const std::string& aServerIp, 
+    OptitrackStateFetcher_LibMocap(ConsumableBuffer<AbvState>& aBuffer,
+                                   const std::string& aServerIp, 
                                    const std::string& aLocalIp, 
                                    const std::string& aRigidBodyName);
 
     ~OptitrackStateFetcher_LibMocap() override; 
 
-    bool init() override;
-    AbvState fetchState() override;  
+    bool init() override;  
     std::string type() {return "OptiTrack"; }
 
 private:

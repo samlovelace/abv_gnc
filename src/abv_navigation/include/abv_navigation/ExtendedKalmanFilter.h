@@ -14,7 +14,9 @@ public:
     ExtendedKalmanFilter();
     ~ExtendedKalmanFilter();
 
-    void step(const AbvState& aStateMeasurement, const double& aDt, AbvState& aStateEstimateOut);  
+    void predict(const double aDt, AbvState& aStatePredictionOut);
+    void update(const AbvState& aStateMeasurement, AbvState& aStateEstimateOut);
+  
     void setLatestInput(const Eigen::Vector3d& anInput);
 
 private:
@@ -22,11 +24,6 @@ private:
     std::mutex mStateMutex; 
     std::thread mPredictionThread; 
     std::atomic<bool> mRunning; 
-
-    void predictionLoop(); 
-
-    void predict(const double aDt);
-    void update(const AbvState& aStateMeasurement, AbvState& aStateEstimateOut);
 
     Eigen::Vector3d mLatestInput; 
     std::mutex mLatestInputMutex; 
@@ -41,8 +38,12 @@ private:
     Eigen::Matrix<double, 6, 6> mProcessNoiseCovariance; 
     Eigen::Matrix<double, 3, 3> mMeasurementNoiseCovariance;
 
+    Eigen::Matrix<double,3,6> mMeasurementMatrix;
+
     Eigen::Matrix<double, 6, 6> mStateTransitionMatrix; 
     Eigen::Matrix<double, 6, 3> mControlMappingMatrix; 
+
+    Eigen::Matrix<double,6,6> mI6;
 
     AbvState mStatePred; 
     AbvState mStateEst; 

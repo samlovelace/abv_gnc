@@ -9,7 +9,7 @@ Guidance:
 
 Navigation:
   Interface: simulated
-  Rate: 10 # Hz
+  Rate: 25 # Hz
   RigidBodyName: ABV1
 
   Network:
@@ -43,7 +43,7 @@ Control:
         pins: [12, 7, 8, 24, 19, 22, 15, 13]
 
   Dynamics:
-    Mass: 12.6 # kg
+    Mass: 12.7 # kg
     Inertia: 0.3 # kg-m^2
     ThrusterForce: 0.08 # N
     MomentArm: 0.125 # m
