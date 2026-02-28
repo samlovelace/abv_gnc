@@ -7,7 +7,7 @@ CommandHandler::CommandHandler(std::shared_ptr<StateMachine> msm, std::shared_pt
     mStateMachine(msm), mVehicle(abv)
 {
     auto topicManager = RosTopicManager::getInstance(); 
-    topicManager->createSubscriber<abv_msgs::msg::AbvCommand>("abv/command", 
+    topicManager->createSubscriber<abv_msgs::msg::AbvControllerCommand>("abv/controller/command", 
                                     std::bind(&CommandHandler::commandCallback, this, std::placeholders::_1)); 
 
     topicManager->spinNode(); 
@@ -24,7 +24,7 @@ CommandHandler::~CommandHandler()
     
 }
 
-void CommandHandler::commandCallback(abv_msgs::msg::AbvCommand::SharedPtr aCmdMsg)
+void CommandHandler::commandCallback(abv_msgs::msg::AbvControllerCommand::SharedPtr aCmdMsg)
 {   
     if(CommandType::STOP == toEnum(aCmdMsg->type))
     {

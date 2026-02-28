@@ -45,11 +45,11 @@ void InputHandler::handle(const std::string& anInput)
         data.set__y(vehPose[1]); 
         data.set__yaw(vehPose[2]); 
 
-        abv_msgs::msg::AbvCommand cmd; 
+        abv_msgs::msg::AbvControllerCommand cmd; 
         cmd.set__data(data); 
         cmd.set__type("pose");
         
-        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvCommand>("abv/command", cmd); 
+        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvControllerCommand>("abv/controller/command", cmd); 
         std::cout << "Published goal waypoint (x y yaw): " << vehPose[0] << ", " << vehPose[1] << ", " << vehPose[2] << std::endl; 
     }
     else if ("vel" == anInput)
@@ -75,11 +75,11 @@ void InputHandler::handle(const std::string& anInput)
         data.set__y(vehPose[1]); 
         data.set__yaw(vehPose[2]); 
 
-        abv_msgs::msg::AbvCommand cmd; 
+        abv_msgs::msg::AbvControllerCommand cmd; 
         cmd.set__data(data); 
         cmd.set__type("velocity");
         
-        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvCommand>("abv/command", cmd); 
+        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvControllerCommand>("abv/controller/command", cmd); 
         std::cout << "Published goal velocity waypoint (xd yd yawd): " << vehPose[0] << ", " << vehPose[1] << ", " << vehPose[2] << std::endl;
     }
     else if ("stop" == anInput)
@@ -89,11 +89,11 @@ void InputHandler::handle(const std::string& anInput)
         data.set__y(0); 
         data.set__yaw(0); 
 
-        abv_msgs::msg::AbvCommand cmd; 
+        abv_msgs::msg::AbvControllerCommand cmd; 
         cmd.set__data(data); 
         cmd.set__type("STOP");
         
-        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvCommand>("abv/command", cmd); 
+        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvControllerCommand>("abv/controller/command", cmd); 
     }
     else if ("path" == anInput)
     {

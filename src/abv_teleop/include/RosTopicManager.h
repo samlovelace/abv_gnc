@@ -2,7 +2,7 @@
 #define ROSTOPICMANAGER_H
 
 #include <rclcpp/rclcpp.hpp>
-#include "abv_msgs/msg/abv_command.hpp"
+#include "abv_msgs/msg/abv_controller_command.hpp"
 #include "CommsUtils.h"
 
 class RosTopicManager : public rclcpp::Node

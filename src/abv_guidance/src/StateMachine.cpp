@@ -2,7 +2,7 @@
 #include <iostream> 
 #include "plog/Log.h"
 
-#include "abv_msgs/msg/abv_command.hpp"
+#include "abv_msgs/msg/abv_controller_command.hpp"
 
 #include "common/RateController.hpp"
 #include "common/ConfigurationManager.h"
@@ -15,8 +15,8 @@
 StateMachine::StateMachine() : 
     mDone(false), mActiveState(States::STARTUP)
 {
-    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvCommand>("abv/command"); 
-    RosTopicManager::getInstance()->createSubscriber<abv_msgs::msg::AbvControllerStatus>("abv/controller_status", 
+    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvControllerCommand>("abv/controller/command"); 
+    RosTopicManager::getInstance()->createSubscriber<abv_msgs::msg::AbvControllerStatus>("abv/controller/status", 
             std::bind(&StateMachine::controllerStatusCallback, this, std::placeholders::_1)); 
 }
 
@@ -134,7 +134,7 @@ void StateMachine::sendWaypoint()
     Waypoint wp = mPathGenerator->getNext(); 
 
     // convert to idl type and publish 
-    abv_msgs::msg::AbvCommand cmd; 
+    abv_msgs::msg::AbvControllerCommand cmd; 
     cmd.set__type(wp.mType); 
     
     abv_msgs::msg::AbvVec3 vec; 
@@ -145,7 +145,7 @@ void StateMachine::sendWaypoint()
     cmd.set__data(vec); 
 
     LOGV << "Sending next waypoint..."; 
-    RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvCommand>("abv/command", cmd); 
+    RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvControllerCommand>("abv/controller/command", cmd); 
     setActiveState(States::WAITING_FOR_EXECUTION); 
 }
 

@@ -40,7 +40,7 @@ VehicleStateTracker::VehicleStateTracker() :
     mStateTrackingThread = std::thread(&VehicleStateTracker::stateTrackerLoop, this); 
 
     // setup subscriber to get control status 
-    RosTopicManager::getInstance()->createSubscriber<abv_msgs::msg::AbvControllerStatus>("abv/controller_status", 
+    RosTopicManager::getInstance()->createSubscriber<abv_msgs::msg::AbvControllerStatus>("abv/controller/status", 
                                                                                           std::bind(&VehicleStateTracker::controllerStatusCallback, 
                                                                                           this, 
                                                                                           std::placeholders::_1)); 

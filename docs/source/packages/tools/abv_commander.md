@@ -19,5 +19,5 @@ After running the package, a list of available commands can be displayed by ente
 
 ### Published
 
-- `/abv/command`  
+- `/abv/controller/command`  
   Sends commands to `abv_controller` or `abv_guidance`.
