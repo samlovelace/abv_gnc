@@ -2,7 +2,7 @@
 #include "TeleopController.h"
 #include "ControlDeviceFactory.h"
 #include "RosTopicManager.h"
-#include <abv_msgs/msg/abv_command.hpp>
+#include <abv_msgs/msg/abv_controller_command.hpp>
 
 // Signal handler function
 void signalHandler(int signal) {
@@ -26,7 +26,7 @@ int main()
 
     rclcpp::init(0, nullptr); 
     auto topicManager = RosTopicManager::getInstance(); 
-    topicManager->createPublisher<abv_msgs::msg::AbvCommand>("abv/command"); 
+    topicManager->createPublisher<abv_msgs::msg::AbvControllerCommand>("abv/controller/command"); 
     topicManager->spinNode(); 
     
     auto controlDevice = ControlDeviceFactory::create("sfml"); 

@@ -2,7 +2,7 @@
 #define ROS_TOPIC_MANAGER_H
 
 #include <rclcpp/rclcpp.hpp>
-#include "abv_msgs/msg/abv_command.hpp"
+#include "abv_msgs/msg/abv_controller_command.hpp"
 #include "abv_msgs/msg/abv_response.hpp"
 #include "abv_msgs/msg/abv_state.hpp"
 #include <map>

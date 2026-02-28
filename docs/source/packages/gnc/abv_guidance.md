@@ -71,7 +71,7 @@ Core components include:
 
 ### Published
 
-- `/abv/command`  
+- `/abv/controller/command`  
   Target waypoints for the controller.
 
 ---

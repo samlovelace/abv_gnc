@@ -3,7 +3,7 @@
 
 #include "common/RosTopicManager.h"
 
-#include "abv_msgs/msg/abv_command.hpp"
+#include "abv_msgs/msg/abv_controller_command.hpp"
 #include "abv_controller/StateMachine.h"
 #include "abv_controller/Vehicle.h"
 
@@ -47,7 +47,7 @@ public:
      * 
      * @param aCmdMsg a pointer to the data contained in the message
      */
-    void commandCallback(abv_msgs::msg::AbvCommand::SharedPtr aCmdMsg); 
+    void commandCallback(abv_msgs::msg::AbvControllerCommand::SharedPtr aCmdMsg); 
 
     /**
      * @brief toEnum converts the string representation of the type of command to an equivalent 

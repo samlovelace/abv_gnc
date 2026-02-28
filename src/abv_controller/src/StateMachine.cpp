@@ -11,7 +11,7 @@
 StateMachine::StateMachine(std::shared_ptr<Vehicle> abv) : 
     mDone(false), mActiveState(States::STARTUP), mVehicle(abv)
 {
-    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvControllerStatus>("abv/controller_status"); 
+    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvControllerStatus>("abv/controller/status"); 
 }
 
 StateMachine::~StateMachine()
@@ -139,7 +139,7 @@ void StateMachine::controlStatusPublishLoop()
         
         statusToSend.set__arrival((uint8_t)status.mStatus); 
 
-        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvControllerStatus>("abv/controller_status", statusToSend); 
+        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvControllerStatus>("abv/controller/status", statusToSend); 
 
         rate.block(); 
     }

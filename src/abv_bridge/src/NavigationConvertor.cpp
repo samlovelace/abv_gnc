@@ -17,7 +17,7 @@ NavigationConvertor::~NavigationConvertor()
 
 }
 
-robot_idl::msg::RobotState NavigationConvertor::convert(const abv_msgs::msg::AbvState::SharedPtr& anAbvState)
+void NavigationConvertor::convert(const abv_msgs::msg::AbvState::SharedPtr& anAbvState)
 {
     robot_idl::msg::Vec3 pos; 
     pos.set__x(anAbvState->position.x); 

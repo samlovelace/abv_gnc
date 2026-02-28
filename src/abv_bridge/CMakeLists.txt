@@ -12,8 +12,10 @@ find_package(abv_msgs REQUIRED)
 find_package(robot_idl REQUIRED)
 
 set(SOURCES 
+  ${CMAKE_CURRENT_LIST_DIR}/src/ControllerStatusConvertor.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/NavigationConvertor.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/WaypointConvertor.cpp
 )
 
 # include the common dir cmake file

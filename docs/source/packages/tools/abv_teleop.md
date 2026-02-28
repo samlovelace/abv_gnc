@@ -27,4 +27,4 @@ After running the program, using the computer keyboard is enabled by default. Th
 
 ### Published
 
-- `/abv/command` - publishes the desired thrust vector to the ABV
+- `/abv/controller/command` - publishes the desired thrust vector to the ABV

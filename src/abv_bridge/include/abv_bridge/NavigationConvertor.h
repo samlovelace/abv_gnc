@@ -11,13 +11,11 @@ public:
     ~NavigationConvertor();
 
 private: 
-    void publish(robot_idl::msg::RobotState& aState);
-    robot_idl::msg::RobotState convert(const abv_msgs::msg::AbvState::SharedPtr& anAbvState); 
+    void convert(const abv_msgs::msg::AbvState::SharedPtr& anAbvState); 
 
 private:
     std::string mIncomingTopic; 
     std::string mOutgoingTopic; 
-
    
 };
 #endif //NAVIGATIONCONVERTOR_H  

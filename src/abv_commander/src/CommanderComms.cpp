@@ -16,7 +16,7 @@ bool CommanderComms::start()
 {
     auto topicManager = RosTopicManager::getInstance(); 
 
-    topicManager->createPublisher<abv_msgs::msg::AbvCommand>("abv/command");
+    topicManager->createPublisher<abv_msgs::msg::AbvControllerCommand>("abv/controller/command");
     topicManager->createPublisher<abv_msgs::msg::AbvGuidanceCommand>("abv/guidance/command"); 
     
     topicManager->spinNode(); 

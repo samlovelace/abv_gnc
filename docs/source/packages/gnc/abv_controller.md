@@ -43,7 +43,7 @@ This packages supports two operating modes:
 - Converts control inputs to thruster firing sequences
 - Does not perform internal feedback control
 
-Mode selection is handled in the command topic. ''TODO: add link to abv_msgs/AbvCommand''
+Mode selection is handled in the command topic. ''TODO: add link to abv_msgs/AbvControllerCommand''
 
 ---
 
@@ -68,12 +68,12 @@ Core classes within this package include:
 - `/abv/state`  
   Estimated vehicle state from `abv_navigation`.
 
-- `/abv/command`  
+- `/abv/controller/command`  
   Commands from `abv_guidance` or `abv_teleop` or `abv_commander`
 
 ### Published
 
-- `/abv/controller_status`  
+- `/abv/controller/status`  
   Arrival status and theoretical thrust vector.
 
 ---

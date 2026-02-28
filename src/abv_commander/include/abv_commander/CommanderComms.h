@@ -1,7 +1,7 @@
 #ifndef COMMANDERCOMMS_H
 #define COMMANDERCOMMS_H
 
-#include "abv_msgs/msg/abv_command.hpp"
+#include "abv_msgs/msg/abv_controller_command.hpp"
 #include "abv_msgs/msg/abv_guidance_command.hpp"
 
 class CommanderComms 

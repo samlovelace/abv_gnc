@@ -33,5 +33,9 @@ tmux split-window -h -t $SESSION
 tmux send-keys -t $SESSION \
   "cd $WS2 && source $WS/install/setup.bash && python3 main.py" C-m
 
+tmux split-window -h -t $SESSION 
+tmux send-keys -t $SESSION \
+  "cd $WS && source install/setup.bash && ros2 run abv_bridge abv_bridge" C-m
+
 tmux select-layout -t $SESSION tiled
 tmux attach -t $SESSION

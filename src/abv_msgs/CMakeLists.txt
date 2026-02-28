@@ -10,7 +10,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/AbvCommand.msg"
+  "msg/AbvControllerCommand.msg"
   "msg/AbvControllerStatus.msg"
   "msg/AbvGuidanceCommand.msg"
   "msg/AbvResponse.msg"
@@ -18,7 +18,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/AbvVec3.msg"
   "msg/Euler.msg"
   "msg/Quaternion.msg"
-  "msg/RobotState.msg"
   "msg/Vec3.msg"
   "msg/VehicleWaypoint.msg"
   DEPENDENCIES std_msgs geometry_msgs sensor_msgs

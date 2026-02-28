@@ -56,9 +56,9 @@ Fill in the fields and descriptions as needed.
 
 ---
 
-## AbvCommand
+## AbvControllerCommand
 
-### Message Definition (msg/AbvCommand.msg)
+### Message Definition (msg/AbvControllerCommand.msg)
 
 - `type` - a string representing the type of command, i.e "thruster", "pose", "velocity"
 - `data` - a vector of 3 values, the meaning of which depends on the value of `type` (see Description below)
@@ -185,18 +185,6 @@ Describe quaternion representation:
 - Field ordering (x, y, z, w)?
 - Normalization requirement?
 - Frame definition?
-
----
-
-## RobotState
-
-### Message Definition (msg/RobotState.msg)
-
-<insert message fields here>
-
-### Description
-
-Explain how this differs from AbvState.
 
 ---
 
