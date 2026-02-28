@@ -155,32 +155,20 @@ void VehicleSimulator::addProcessNoise()
 
 abv_msgs::msg::AbvState VehicleSimulator::convertToIdl(VehicleState aState)
 {
-    abv_msgs::msg::Vec3 position; 
-    abv_msgs::msg::Vec3 velocity;
+    abv_msgs::msg::AbvVec3 position; 
+    abv_msgs::msg::AbvVec3 velocity;
 
     position.x = aState.x; 
     position.y = aState.y; 
-    position.z = 0.0; 
+    position.yaw = aState.yaw; 
 
     velocity.x = aState.vx; 
     velocity.y = aState.vy; 
-    velocity.z = 0.0; 
-
-    abv_msgs::msg::Vec3 orientation; 
-    orientation.x = 0.0; 
-    orientation.y = 0.0; 
-    orientation.z = aState.yaw; 
-
-    abv_msgs::msg::Vec3 ang_vel; 
-    ang_vel.x = 0.0; 
-    ang_vel.y = 0.0; 
-    ang_vel.z = aState.omega; 
+    velocity.yaw = aState.omega; 
 
     abv_msgs::msg::AbvState state; 
     state.set__position(position); 
     state.set__velocity(velocity); 
-    state.set__orientation(orientation); 
-    state.set__ang_vel(ang_vel); 
 
     return state;  
 }

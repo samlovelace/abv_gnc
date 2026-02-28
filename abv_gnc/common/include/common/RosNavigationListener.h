@@ -15,16 +15,15 @@ public:
     Eigen::Vector3d getCurrentVel(); 
 
     bool hasAcquiredStateData(); 
-    Eigen::Matrix<double, 12, 1> getCurrentState();
-    void setState(const Eigen::Matrix<double, 12, 1>& aState); 
+    Eigen::Matrix<double, 6, 1> getCurrentState();
+    void setState(const Eigen::Matrix<double, 6, 1>& aState); 
 
 private: 
-
     void stateCallback(const abv_msgs::msg::AbvState::SharedPtr aMsg); 
 
-    Eigen::Matrix<double, 12, 1> mCurrentState; 
+private: 
+    Eigen::Matrix<double, 6, 1> mCurrentState; 
     std::mutex mCurrentStateMutex; 
-
     bool mAcquiredState; 
 };
 #endif 
