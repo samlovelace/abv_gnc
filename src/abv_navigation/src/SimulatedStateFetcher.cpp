@@ -25,11 +25,11 @@ void SimulatedStateFetcher::stateCallback(abv_msgs::msg::AbvState::SharedPtr aSi
     AbvState state; 
     state.x = aSimState->position.x;
     state.y = aSimState->position.y; 
-    state.theta = aSimState->orientation.z; 
+    state.theta = aSimState->position.yaw; 
 
     state.vx = aSimState->velocity.x; 
     state.vy = aSimState->velocity.y; 
-    state.omega = aSimState->ang_vel.z; 
+    state.omega = aSimState->velocity.yaw;  
     
     // thread safe setting of state
     mBuffer.put(state);  
