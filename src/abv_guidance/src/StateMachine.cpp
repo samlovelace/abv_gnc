@@ -123,7 +123,8 @@ void StateMachine::generatePath()
     }
 
     setActiveState(States::SEND_WAYPOINT); 
-    mWatchdog.start(mCommand.mDuration, std::bind(&StateMachine::onTimeout, this));  
+    if (mCommand.mDuration != -1)
+        mWatchdog.start(mCommand.mDuration, std::bind(&StateMachine::onTimeout, this));  
 }
 
 void StateMachine::sendWaypoint()
