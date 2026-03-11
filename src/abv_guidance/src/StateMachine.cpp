@@ -122,10 +122,8 @@ void StateMachine::generatePath()
         return; 
     }
 
-    // reset watchdog 
-    //mWatchdog.setDuration(mCommand.mDuration); 
     setActiveState(States::SEND_WAYPOINT); 
-    //mWatchdog.reset();  
+    mWatchdog.start(mCommand.mDuration, std::bind(&StateMachine::onTimeout, this));  
 }
 
 void StateMachine::sendWaypoint()
@@ -189,6 +187,18 @@ void StateMachine::setActiveState(StateMachine::States aState)
 
     std::lock_guard<std::mutex> lock(mActiveStateMutex); 
     mActiveState = aState;    
+}
+
+void StateMachine::onTimeout()
+{
+    LOGV << "Commanded execution duration has been reached.";
+    
+    // send a STOP command to the controller  
+    abv_msgs::msg::AbvControllerCommand cmd; 
+    cmd.set__type("STOP"); 
+    RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvControllerCommand>("abv/controller/command", cmd);
+    
+    setActiveState(StateMachine::States::IDLE); 
 }
 
 std::string StateMachine::toString(StateMachine::States aState)

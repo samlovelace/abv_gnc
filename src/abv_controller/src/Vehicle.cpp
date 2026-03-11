@@ -126,6 +126,7 @@ bool Vehicle::hasAcquiredStateData()
 
 void Vehicle::stop()
 {
+    LOGV << "Recieved STOP command!"; 
     Eigen::Vector3d zeros = Eigen::Vector3d::Zero();  
     setControlInput(zeros); 
     doThrusterControl(); 

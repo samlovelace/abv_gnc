@@ -14,6 +14,7 @@
 #include "abv_guidance/IPathGenerator.hpp"
 #include "abv_guidance/InternalTypes.hpp"
 #include "abv_guidance/ICommandSink.hpp"
+#include "abv_guidance/PathWatchdog.h"
 
 class StateMachine : public ICommandSink
 {
@@ -52,6 +53,7 @@ private:
 
     std::unique_ptr<IPathGenerator> mPathGenerator; 
     RosNavigationListener mNavSource; 
+    PathWatchdog mWatchdog; 
 
     ThreadSafe<Arrival::Status> mArrivalStatus; 
 
@@ -63,6 +65,7 @@ private:
     void waitForArrival();  
 
     void onCommand(const Command& aCommand) override; 
+    void onTimeout(); 
     void controllerStatusCallback(abv_msgs::msg::AbvControllerStatus::SharedPtr aStatus); 
 
 };
