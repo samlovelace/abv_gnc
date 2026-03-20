@@ -6,20 +6,13 @@
 #include "abv_common/DataLogger.h"
 #include "abv_common/SignalHandler.hpp"
 #include "abv_common/ConfigurationManager.h"
-#include <ament_index_cpp/get_package_share_directory.hpp>
 
 int main()
 {
     std::signal(SIGINT, signalHandler); 
 
     DataLogger::get().createMainLog("abv_controller");
-
-    std::string configFilePath = ament_index_cpp::get_package_share_directory("abv_gnc") + "/configuration/config.yaml"; 
-    if(!ConfigurationManager::getInstance()->loadConfiguration(configFilePath))
-    {
-        printf("Could not load config file at %s\n", configFilePath.c_str()); 
-        return 0; 
-    }
+    ConfigurationManager::getInstance()->loadConfiguration();
     
     rclcpp::init(0, nullptr);
     RosTopicManager::getInstance("abv_controller"); 

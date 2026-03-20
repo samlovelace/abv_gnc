@@ -24,12 +24,10 @@ public:
     }
 
     /**
-     * @brief loadConfiguration loads the config file and parsing its contents. 
-     * 
-     * @param aFilePath the path ot the config file to load and parse. 
-     * @return true if the config file was parsed successfully, false otherwise. 
+     * @brief loadConfiguration loads the config file from the abv_bringup pkg 
+     *        and parses its contents. Throws if any issues occur
      */
-    bool loadConfiguration(const std::string& aFilePath);
+    void loadConfiguration();
 
     /**
      * @brief Getters for various sub-configs

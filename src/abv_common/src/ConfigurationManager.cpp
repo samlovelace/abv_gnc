@@ -3,6 +3,9 @@
 #include "plog/Log.h"
 #include <yaml-cpp/yaml.h>
 
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <filesystem> 
+
 ConfigurationManager::ConfigurationManager()
 {
     // do nothing 
@@ -13,7 +16,7 @@ ConfigurationManager::~ConfigurationManager()
     // do nothing
 }
 
-bool ConfigurationManager::loadConfiguration(const std::string& aFilePath)
+void ConfigurationManager::loadConfiguration()
 {   
     LOGD << R"(
         __    __   _______  __       __        ______               ___      .______   ____    ____ 
@@ -24,8 +27,14 @@ bool ConfigurationManager::loadConfiguration(const std::string& aFilePath)
        |__|  |__| |_______||_______||_______| \______/  (_ )   /__/     \__\ |______/      \__/     
                                                          |/                                         
        )";
-   
-    YAML::Node config = YAML::LoadFile(aFilePath); 
+
+    std::string configFilePath = ament_index_cpp::get_package_share_directory("abv_bringup") + "/config/config.yaml";
+    if (!std::filesystem::exists(configFilePath))
+    {
+        throw std::runtime_error("Missing configuration file at " + configFilePath); 
+    }
+
+    YAML::Node config = YAML::LoadFile(configFilePath); 
     std::stringstream s; 
     s << "Configuration: \n";
     s << YAML::Dump(config);
@@ -40,8 +49,6 @@ bool ConfigurationManager::loadConfiguration(const std::string& aFilePath)
 
     YAML::Node controlNode = config["Control"]; 
     parseControlConfig(controlNode); 
-    
-    return true; 
 }
 
 void ConfigurationManager::parseGuidanceConfig(const YAML::Node& aNode)

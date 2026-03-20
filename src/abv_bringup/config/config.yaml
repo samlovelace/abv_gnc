@@ -24,7 +24,7 @@ Control:
     Rate: 10 # hz
 
   Arrival:
-    Tolerance: [0.05, 0.05, 1] # [m, m, deg]
+    Tolerance: [0.05, 0.05, 3] # [m, m, deg]
     Duration: 3 # seconds
 
   Gains:
