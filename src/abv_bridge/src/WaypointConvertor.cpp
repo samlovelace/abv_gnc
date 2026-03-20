@@ -1,7 +1,7 @@
 
 #include "abv_bridge/WaypointConvertor.h"
 #include "abv_msgs/msg/abv_guidance_command.hpp"
-#include "common/RosTopicManager.h"
+#include "abv_common/RosTopicManager.h"
 
 WaypointConvertor::WaypointConvertor(const std::string& anIncomingTopic, const std::string& anOutgoingTopic) : 
     mIncomingTopic(anIncomingTopic), mOutgoingTopic(anOutgoingTopic)

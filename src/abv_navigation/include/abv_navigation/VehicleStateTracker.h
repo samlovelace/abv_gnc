@@ -5,9 +5,9 @@
 #include <thread> 
 
 #include "abv_navigation/IStateFetcher.h"
-#include "common/Configurations.h"
-#include "common/ConfigurationManager.h"
-#include "common/ConsumableBuffer.hpp"
+#include "abv_common/Configurations.h"
+#include "abv_common/ConfigurationManager.h"
+#include "abv_common/ConsumableBuffer.hpp"
 #include "RosStatePublisher.h"
 #include "ExtendedKalmanFilter.h"
 

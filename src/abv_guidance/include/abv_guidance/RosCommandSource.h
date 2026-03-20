@@ -1,7 +1,7 @@
 #ifndef ROSCOMMANDSOURCE_H
 #define ROSCOMMANDSOURCE_H
  
-#include "common/RosTopicManager.h"
+#include "abv_common/RosTopicManager.h"
 #include "abv_guidance/ICommandSource.hpp"
 
 #include "abv_msgs/msg/abv_guidance_command.hpp"

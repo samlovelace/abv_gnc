@@ -1,6 +1,6 @@
 
 #include "abv_guidance/RosCommandSource.h"
-#include "common/RosTopicManager.h"
+#include "abv_common/RosTopicManager.h"
 
 RosCommandSource::RosCommandSource(ICommandSink& aSink) : ICommandSource(aSink)
 {

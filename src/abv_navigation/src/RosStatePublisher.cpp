@@ -1,6 +1,6 @@
 
-#include "common/RosTopicManager.h"
-#include "common/RateController.hpp"
+#include "abv_common/RosTopicManager.h"
+#include "abv_common/RateController.hpp"
 
 #include "abv_navigation/RosStatePublisher.h"
 

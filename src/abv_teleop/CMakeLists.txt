@@ -9,6 +9,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(abv_msgs REQUIRED)
+find_package(abv_common REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(SFML COMPONENTS window graphics REQUIRED)
 
@@ -24,8 +25,9 @@ include_directories(${PROJECT_NAME}
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+
+target_link_libraries(${PROJECT_NAME} abv_common::abv_common sfml-window sfml-graphics)
 ament_target_dependencies(${PROJECT_NAME} rclcpp abv_msgs Eigen3)
-target_link_libraries(${PROJECT_NAME} sfml-window sfml-graphics )
 
 install(TARGETS ${PROJECT_NAME}
   DESTINATION lib/${PROJECT_NAME}

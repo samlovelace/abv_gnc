@@ -5,9 +5,9 @@
 #include <mutex> 
 #include <memory>
 
-#include "common/ArrivalStatus.hpp"
-#include "common/ThreadSafe.hpp"
-#include "common/RosNavigationListener.h"
+#include "abv_common/ArrivalStatus.hpp"
+#include "abv_common/ThreadSafe.hpp"
+#include "abv_common/RosNavigationListener.h"
 
 #include "abv_controller/ThrusterCommander.h"
 #include "abv_controller/Controller.h"

@@ -1,3 +1,0 @@
-[submodule "dependencies/libmotioncapture"]
-	path = dependencies/libmotioncapture
-	url = https://github.com/IMRCLab/libmotioncapture.git

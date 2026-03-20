@@ -10,23 +10,23 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(abv_msgs REQUIRED)
+find_package(abv_common REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(plog REQUIRED)
 find_package(libmotioncapture REQUIRED)
 
 set(SOURCES
-  src/ExtendedKalmanFilter.cpp
+	src/ExtendedKalmanFilter.cpp
 	src/OptitrackStateFetcher_LibMocap.cpp
-  src/RosStatePublisher.cpp
+	src/RosStatePublisher.cpp
 	src/SimulatedStateFetcher.cpp
 	src/VehicleStateTracker.cpp
 	src/main.cpp
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/../../abv_gnc/common/CMakeLists.txt)
+add_executable(${PROJECT_NAME} ${SOURCES})
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${COMMON_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE 
     ${CMAKE_CURRENT_LIST_DIR}/include
     ${COMMON_INCLUDE_DIR}
@@ -34,13 +34,18 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 # Dependencies
+target_link_libraries(${PROJECT_NAME} 
+	abv_common::abv_common
+	yaml-cpp 
+	plog::plog 
+	libmotioncapture::libmotioncapture
+)
 ament_target_dependencies(${PROJECT_NAME}
-  rclcpp
-  abv_msgs
-  Eigen3
+	rclcpp
+	abv_msgs
+	Eigen3
 )
 
-target_link_libraries(${PROJECT_NAME} yaml-cpp plog::plog libmotioncapture::libmotioncapture)
 install(TARGETS ${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
 
 ament_package()

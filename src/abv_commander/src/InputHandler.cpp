@@ -6,7 +6,7 @@
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
 #include "abv_commander/InputHandler.h"
-#include "common/RosTopicManager.h"
+#include "abv_common/RosTopicManager.h"
 #include "abv_commander/CommanderComms.h"
 
 InputHandler::InputHandler()

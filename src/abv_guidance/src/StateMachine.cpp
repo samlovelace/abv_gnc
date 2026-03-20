@@ -4,9 +4,9 @@
 
 #include "abv_msgs/msg/abv_controller_command.hpp"
 
-#include "common/RateController.hpp"
-#include "common/ConfigurationManager.h"
-#include "common/RosTopicManager.h"
+#include "abv_common/RateController.hpp"
+#include "abv_common/ConfigurationManager.h"
+#include "abv_common/RosTopicManager.h"
 
 #include "abv_guidance/StateMachine.h"
 #include "abv_guidance/StraightLineGenerator.h"

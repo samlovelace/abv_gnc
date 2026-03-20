@@ -8,6 +8,7 @@
   <license>TODO: License declaration</license>
 
   <depend>abv_msgs</depend>
+  <depend>abv_common</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

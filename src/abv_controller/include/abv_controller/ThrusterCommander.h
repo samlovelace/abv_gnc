@@ -2,8 +2,8 @@
 #define THRUSTERCOMMANDER_H
 
 #include <eigen3/Eigen/Dense>
-#include "common/Configurations.h"
-#include "common/ConfigurationManager.h"
+#include "abv_common/Configurations.h"
+#include "abv_common/ConfigurationManager.h"
 #include "abv_controller/IThrusterDriver.hpp"
 
 #include <mutex> 

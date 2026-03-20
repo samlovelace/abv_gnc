@@ -1,13 +1,15 @@
 #ifndef VEHICLESIMULATOR_H
 #define VEHICLESIMULATOR_H
 
-#include "UdpServer.h"
-#include <mutex> 
-#include <eigen3/Eigen/Dense>
-#include "VehicleState.h"
-#include "RosTopicManager.h"
+#include <mutex>
 #include <deque>
 #include <random>
+
+#include <eigen3/Eigen/Dense>
+
+#include "abv_msgs/msg/abv_state.hpp"
+#include "UdpServer.h" 
+#include "VehicleState.h"
 
 class VehicleSimulator
 {
@@ -69,8 +71,6 @@ private:
     void addSensorNoise(); 
     void addProcessNoise(); 
     void makeMeasurement(VehicleState& aStateToAlter);
-
-    std::unique_ptr<RosTopicManager> mTopicManager; 
 };
 #endif //VEHICLESIMULATOR_H
 

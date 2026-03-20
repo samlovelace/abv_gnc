@@ -3,7 +3,7 @@
 
 #include "abv_controller/Vehicle.h"
 #include "plog/Log.h"
-#include "common/RateController.hpp"
+#include "abv_common/RateController.hpp"
 
 
 Vehicle::Vehicle() : 

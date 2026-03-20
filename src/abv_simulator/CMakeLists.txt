@@ -10,6 +10,7 @@ find_package(ament_cmake REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(abv_msgs REQUIRED)
+find_package(abv_common REQUIRED)
 
 set(SIMULATOR_SOURCES 
   ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
@@ -23,7 +24,12 @@ include_directories(${PROJECT_NAME}
   ${CMAKE_CURRENT_LIST_DIR}/include
 )
 
-ament_target_dependencies(${PROJECT_NAME} Eigen3 rclcpp abv_msgs)
+target_link_libraries(${PROJECT_NAME} abv_common::abv_common)
+ament_target_dependencies(${PROJECT_NAME} 
+	Eigen3 
+	rclcpp 
+	abv_msgs
+)
 
 # Install the executable
 install(TARGETS

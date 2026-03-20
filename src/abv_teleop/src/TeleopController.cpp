@@ -1,9 +1,13 @@
 
-#include "TeleopController.h"
 #include <iostream>
-#include "RosTopicManager.h"
 
-TeleopController::TeleopController(std::shared_ptr<IControlDevice> aControlDevice) : mControlDevice(aControlDevice)
+#include "abv_msgs/msg/abv_controller_command.hpp"
+#include "abv_common/RosTopicManager.h"
+#include "abv_teleop/TeleopController.h"
+#include "abv_teleop/CommsUtils.h"
+
+TeleopController::TeleopController(std::shared_ptr<IControlDevice> aControlDevice) 
+    : mControlDevice(aControlDevice)
 {
 
 }
@@ -19,7 +23,7 @@ void TeleopController::run()
 
     // TODO: put this in a config file 
     // Desired frequency in Hz
-    const double frequency = 2.0;
+    const double frequency = 10.0;
     // Calculate the loop duration
     const std::chrono::duration<double> loop_duration(1.0 / frequency);
     
@@ -58,7 +62,8 @@ void TeleopController::commandPublishLoop()
         auto start = std::chrono::high_resolution_clock::now(); 
         auto data = mControlDevice->getCommand(); 
 
-        commsHandler->publishMessage<abv_msgs::msg::AbvControllerCommand>("abv/controller/command", CommsUtils::commandMsgToIdl(data)); 
+        commsHandler->publishMessage<abv_msgs::msg::AbvControllerCommand>("abv/controller/command", 
+                                                                        CommsUtils::commandMsgToIdl(data)); 
 
         // Calculate the time taken for the loop iteration
         auto end = std::chrono::high_resolution_clock::now();

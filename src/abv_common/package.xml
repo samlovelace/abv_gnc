@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>abv_bridge</name>
+  <name>abv_common</name>
   <version>0.0.0</version>
-  <description>bridge to convert between abv_msgs and external interface</description>
+  <description>TODO: Package description</description>
   <maintainer email="samlovelace12@gmail.com">sam</maintainer>
   <license>TODO: License declaration</license>
 
@@ -12,9 +12,9 @@
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
   <depend>abv_msgs</depend>
-  <depend>abv_common</depend>
-  <depend>robot_idl</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

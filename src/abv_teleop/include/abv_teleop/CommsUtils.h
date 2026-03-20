@@ -2,6 +2,7 @@
 #define COMMSUTILS_H
 
 #include "abv_msgs/msg/abv_controller_command.hpp"
+#include <eigen3/Eigen/Dense>
 
 namespace CommsUtils
 {

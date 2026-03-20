@@ -7,9 +7,9 @@
 
 #include "abv_msgs/msg/abv_controller_status.hpp"
 
-#include "common/ArrivalStatus.hpp"
-#include "common/RosNavigationListener.h"
-#include "common/ThreadSafe.hpp"
+#include "abv_common/ArrivalStatus.hpp"
+#include "abv_common/RosNavigationListener.h"
+#include "abv_common/ThreadSafe.hpp"
 
 #include "abv_guidance/IPathGenerator.hpp"
 #include "abv_guidance/InternalTypes.hpp"

@@ -5,8 +5,8 @@
 #include <thread> 
 
 #include "IStateFetcher.h"
-#include "common/ConfigurationManager.h"
-#include "common/Configurations.h" 
+#include "abv_common/ConfigurationManager.h"
+#include "abv_common/Configurations.h" 
 #include "libmotioncapture/motioncapture.h"
 
 class OptitrackStateFetcher_LibMocap : public IStateFetcher

@@ -1,6 +1,6 @@
 
 #include "abv_bridge/NavigationConvertor.h"
-#include "common/RosTopicManager.h"
+#include "abv_common/RosTopicManager.h"
 
 NavigationConvertor::NavigationConvertor(const std::string& anIncomingTopic, const std::string& anOutgoingTopic) : 
     mIncomingTopic(anIncomingTopic), mOutgoingTopic(anOutgoingTopic)

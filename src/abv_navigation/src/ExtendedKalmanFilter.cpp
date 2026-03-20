@@ -1,6 +1,6 @@
 
 #include "abv_navigation/ExtendedKalmanFilter.h"
-#include "common/RateController.hpp"
+#include "abv_common/RateController.hpp"
 #include "plog/Log.h"
 
 ExtendedKalmanFilter::ExtendedKalmanFilter()

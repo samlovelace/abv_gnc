@@ -3,9 +3,9 @@
 #include "abv_controller/CommandHandler.h"
 #include "abv_controller/StateMachine.h"
 #include "abv_controller/Vehicle.h"
-#include "common/DataLogger.h"
-#include "common/SignalHandler.hpp"
-#include "common/ConfigurationManager.h"
+#include "abv_common/DataLogger.h"
+#include "abv_common/SignalHandler.hpp"
+#include "abv_common/ConfigurationManager.h"
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
 int main()

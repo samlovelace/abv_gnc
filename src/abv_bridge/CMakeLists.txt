@@ -9,6 +9,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(abv_msgs REQUIRED)
+find_package(abv_common REQUIRED)
 find_package(robot_idl REQUIRED)
 
 set(SOURCES 
@@ -18,17 +19,15 @@ set(SOURCES
   ${CMAKE_CURRENT_LIST_DIR}/src/WaypointConvertor.cpp
 )
 
-# include the common dir cmake file
-include(${CMAKE_CURRENT_LIST_DIR}/../../abv_gnc/common/CMakeLists.txt)
+add_executable(${PROJECT_NAME} ${SOURCES})
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${COMMON_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE 
   ${CMAKE_CURRENT_LIST_DIR}/include
   ${COMMON_INCLUDE_DIR}
 )
 
 # Link libraries
-target_link_libraries(${PROJECT_NAME} yaml-cpp)
+target_link_libraries(${PROJECT_NAME} abv_common::abv_common yaml-cpp)
 ament_target_dependencies(${PROJECT_NAME}
   rclcpp
   abv_msgs

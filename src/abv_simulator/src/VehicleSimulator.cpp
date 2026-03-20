@@ -1,16 +1,13 @@
-
-#include "abv_simulator/VehicleSimulator.h"
-#include "abv_simulator/RosTopicManager.h"
-#include "abv_msgs/msg/abv_state.hpp"
-#include "abv_msgs/msg/vec3.hpp"
 #include <string> 
 #include <random>
+
+#include "abv_simulator/VehicleSimulator.h"
+#include "abv_common/RosTopicManager.h"
 
 VehicleSimulator::VehicleSimulator(/* args */) : 
     mUdpServer(std::make_unique<UdpServer>(6969, std::bind(&VehicleSimulator::onRecieved, this, std::placeholders::_1))), 
     mMass(12.7), mIzz(0.35), mThrusterForce(0.15), mMomentArm(0.1235), mTimestep(0.01), mDamping(0.0005),
-    mVelocity(Eigen::Vector2d::Zero()), mThrustForce(Eigen::Vector3d::Zero()), 
-    mTopicManager(std::make_unique<RosTopicManager>())
+    mVelocity(Eigen::Vector2d::Zero()), mThrustForce(Eigen::Vector3d::Zero())
 { 
 
 }
@@ -22,8 +19,8 @@ VehicleSimulator::~VehicleSimulator()
 void VehicleSimulator::listen()
 {
     mUdpServer->start(); 
-    mTopicManager->createPublisher<abv_msgs::msg::AbvState>("abv/sim/state"); 
-    mTopicManager->spinNode(); 
+    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvState>("abv/sim/state"); 
+    RosTopicManager::getInstance()->spinNode(); 
 }
 
 void VehicleSimulator::onRecieved(const std::string& message)
@@ -103,7 +100,7 @@ void VehicleSimulator::update(const double dt)
     // Publish only if not in dropout
     if (!mDropoutActive)
     {
-        mTopicManager->publishMessage<abv_msgs::msg::AbvState>(
+        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvState>(
             "abv/sim/state",
             convertToIdl(mNoisyState));
     }

@@ -1,6 +1,6 @@
 
 #include "abv_navigation/SimulatedStateFetcher.h"
-#include "common/RosTopicManager.h"
+#include "abv_common/RosTopicManager.h"
 
 
 SimulatedStateFetcher::SimulatedStateFetcher(ConsumableBuffer<AbvState>& aBuffer) : IStateFetcher(aBuffer)

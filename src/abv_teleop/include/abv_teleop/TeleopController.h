@@ -6,7 +6,6 @@
 #include <mutex> 
 
 #include "IControlDevice.h"
-
 class TeleopController 
 { 
 public:
