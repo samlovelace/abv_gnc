@@ -14,7 +14,7 @@ Run the `abv_teleop` package from the `abv_gnc` folder
 sudo ./run.sh abv_teleop
 ```
 
-After running the program, using the computer keyboard is enabled by default. The mapping of the keys to command is shown below. Note, all commands are in the ABV body frame.
+After running the program, using the computer keyboard is enabled by default. The mapping of the keys to command is shown below. Note, all commands are in the ABV body frame. Meaning, regardless of the orientation of the ABV, pressing the `arrow up` key will drive the ABV forward from its current perspective.
 
 - `arrow up` +x
 - `arrow down` -x
