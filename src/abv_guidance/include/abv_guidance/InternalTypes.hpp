@@ -4,22 +4,24 @@
 #include <string> 
 #include <Eigen/Dense>
 
-struct Command
-{
-    std::string mType; 
-    double mDuration; 
-};
-
 struct Waypoint
 {
     std::string mType; 
     Eigen::Vector3d mPose;
     Eigen::Vector3d mVel; 
 
+    Waypoint() {}
     Waypoint(double x, double y, double yaw, const std::string& aType) 
         : mType(aType), mPose(Eigen::Vector3d(x, y, yaw))
     {;}
     
+};
+
+struct Command
+{
+    std::string mType; 
+    double mDuration; 
+    Waypoint mGoal; 
 };
 
 #endif 

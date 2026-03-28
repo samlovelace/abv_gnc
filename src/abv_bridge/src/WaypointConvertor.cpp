@@ -22,7 +22,7 @@ void WaypointConvertor::convert(robot_idl::msg::VehicleWaypoint::SharedPtr aWayp
     abv_msgs::msg::AbvVec3 pos; 
     pos.set__x(aWaypoint->position.x); 
     pos.set__y(aWaypoint->position.y); 
-    pos.set__x(aWaypoint->euler.yaw); 
+    pos.set__yaw(aWaypoint->euler.yaw); 
 
     abv_msgs::msg::AbvVec3 vel; 
     vel.set__x(0.0); 
