@@ -31,7 +31,7 @@ tmux send-keys -t $SESSION \
 
 tmux split-window -h -t $SESSION
 tmux send-keys -t $SESSION \
-  "cd $WS2 && source $WS/install/setup.bash && python3 main.py" C-m
+  "cd $WS2 && source $WS/install/setup.bash && export DISPLAY=:1 && python3 main.py" C-m
 
 tmux split-window -h -t $SESSION 
 tmux send-keys -t $SESSION \
