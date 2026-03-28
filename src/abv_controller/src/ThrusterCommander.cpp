@@ -1,24 +1,19 @@
+#include <plog/Log.h>
 
+#include "abv_controller/ThrusterDriverFactory.hpp"
 #include "abv_controller/ThrusterCommander.h"
-#include "plog/Log.h"
-
-#if defined(ARCH_X86)
-    // not really arch specific but im too lazy to make configurable rn
-    #include "abv_controller/UdpThrusterDriver.h"
-    using ThrusterDriverImpl = UdpThrusterDriver;
-#elif defined(ARCH_ARM)
-    #include "abv_controller/GpioThrusterDriver.h"
-    using ThrusterDriverImpl = GpioThrusterDriver;
-#else
-    #error "Unsupported architecture. Define ARCH_X86 or ARCH_ARM."
-#endif
-
 
 ThrusterCommander::ThrusterCommander() : 
     mThrusterCommand("00000000"),
     mConfig(ConfigurationManager::getInstance()->getControlConfig()),
-    mThrusterDriver(std::make_unique<ThrusterDriverImpl>(mConfig.mGpioPins))
+    mThrusterDriver(nullptr)
 {
+    mThrusterDriver = ThrusterDriverFactory::create(mConfig.mThrusterDriverType, 
+                                                    mConfig.mThrusterDriverConfig);
+
+    if(nullptr == mThrusterDriver)
+        throw std::runtime_error("Failed to create thruster driver"); 
+
     mThrusterDriver->init(); 
 
     mThrusterForce = mConfig.mForce; 

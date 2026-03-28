@@ -15,6 +15,8 @@ find_package(Eigen3 REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(plog REQUIRED)
 
+find_package(pca9685 REQUIRED)
+
 # Architecture detection
 set(ARCH_X86 FALSE)
 set(ARCH_ARM FALSE)
@@ -31,6 +33,7 @@ endif()
 set(ABV_CONTROLLER_SOURCES 
   src/CommandHandler.cpp
   src/Controller.cpp
+  src/I2cThrusterDriver.cpp
   src/main.cpp 
   src/StateMachine.cpp
   src/ThrusterCommander.cpp
@@ -59,7 +62,13 @@ if(ARCH_ARM)
 endif()
 
 # Link libraries
-target_link_libraries(${PROJECT_NAME} abv_common::abv_common yaml-cpp plog::plog)
+target_link_libraries(${PROJECT_NAME} 
+  abv_common::abv_common 
+  yaml-cpp 
+  plog::plog 
+  pca9685::pca9685
+)
+
 ament_target_dependencies(${PROJECT_NAME}
   rclcpp
   abv_msgs

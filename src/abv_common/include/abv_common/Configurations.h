@@ -43,7 +43,7 @@ struct ControlConfig
 
     // ThrusterCommander & ThrusterDriver configs
     std::string mThrusterDriverType; 
-    std::vector<int> mGpioPins;
+    YAML::Node mThrusterDriverConfig;
     double mSchmittTriggerOn;
     double mSchmittTriggerOff;
     double mForce; 

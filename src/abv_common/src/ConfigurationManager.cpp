@@ -79,12 +79,8 @@ void ConfigurationManager::parseControlConfig(const YAML::Node& aNode)
     mControlConfig.mSchmittTriggerOn = aNode["Thrusters"]["InputDiscretization"]["On"].as<double>(); 
     mControlConfig.mSchmittTriggerOff = aNode["Thrusters"]["InputDiscretization"]["Off"].as<double>();
 
-    mControlConfig.mThrusterDriverType = aNode["Thrusters"]["ThrusterDriver"]["Type"].as<std::string>(); 
-    if("JETGPIO" == mControlConfig.mThrusterDriverType)
-    {
-        // parse GPIO pins 
-        mControlConfig.mGpioPins = ConfigUtils::parseIntVector(aNode["Thrusters"]["ThrusterDriver"]["GPIO"]["pins"]); 
-    }
+    mControlConfig.mThrusterDriverType = aNode["Thrusters"]["ThrusterDriver"]["Type"].as<std::string>();
+    mControlConfig.mThrusterDriverConfig = aNode["Thrusters"]["ThrusterDriver"][mControlConfig.mThrusterDriverType].as<YAML::Node>();  
 
     mControlConfig.mForce = aNode["Dynamics"]["ThrusterForce"].as<double>(); 
     mControlConfig.mMomentArm = aNode["Dynamics"]["MomentArm"].as<double>(); 

@@ -1,11 +1,14 @@
 
 #include "abv_controller/GpioThrusterDriver.h"
-#include "plog/Log.h"
+#include <plog/Log.h>
 #include <algorithm>
 
-GpioThrusterDriver::GpioThrusterDriver(std::vector<int> aSetOfOutputPins) : mOutputPins(aSetOfOutputPins)
+#include "abv_common/Configurations.h"
+
+GpioThrusterDriver::GpioThrusterDriver(const YAML::Node& aConfig)
 {
-    // do nothing 
+    mOutputPins = ConfigUtils::parseIntVector(aNode["pins"]);
+    mOutputPins.shrink_to_fit();
 }
 
 GpioThrusterDriver::~GpioThrusterDriver()

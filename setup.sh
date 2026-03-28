@@ -17,6 +17,7 @@ DEPENDENCIES=(
     libsfml-dev
     libboost-system-dev 
     libboost-thread-dev
+    libi2c-dev
 )
 
 # Function to check and install a package 
@@ -149,6 +150,7 @@ done
 # install deps from source
 install_from_source plog SergiusTheBest/plog 1.1.10 $LIBS_DIR
 install_from_source libmotioncapture samlovelace/libmotioncapture main "$LIBS_DIR" 
+install_from_source pca9685-cpp samlovelace/pca9685-cpp main "$LIBS_DIR"
 
 # custom steps for JETGPIO 
 clone_and_checkout JETGPIO Rubberazer/JETGPIO v1.2 "$LIBS_DIR"
@@ -159,3 +161,11 @@ make && sudo make install
 # build the packages 
 cd $SCRIPT_DIR
 source /opt/ros/humble/setup.bash && colcon build
+
+if ! groups | grep -q '\bi2c\b'; then
+    sudo usermod -aG i2c $USER
+    echo "[i2c] Added $USER to i2c group. Starting new session..."
+    exec su - $USER
+else
+    echo "[i2c] $USER is already in the i2c group."
+fi

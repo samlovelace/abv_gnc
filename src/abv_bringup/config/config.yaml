@@ -38,9 +38,15 @@ Control:
       Off: 0.09
 
     ThrusterDriver:
-      Type: JETGPIO
-      GPIO:
+      Type: UDP
+
+      JETGPIO:
         pins: [12, 7, 8, 24, 19, 22, 15, 13]
+      I2C:
+        device: /dev/i2c-1
+      UDP:
+        ip: 127.0.0.1
+        port: 6969
 
   Dynamics:
     Mass: 12.7 # kg

@@ -1,14 +1,14 @@
 #ifndef UDPTHRUSTERDRIVER_H
 #define UDPTHRUSTERDRIVER_H
 
-#include "IThrusterDriver.hpp"
+#include <memory> 
 #include "abv_common/UdpClient.h"
-#include <vector> 
+#include "IThrusterDriver.hpp"
 
 class UdpThrusterDriver : public IThrusterDriver
 {
 public: 
-    UdpThrusterDriver(std::vector<int> aSet); 
+    UdpThrusterDriver(const YAML::Node& aConfig); 
     ~UdpThrusterDriver(); 
 
     bool init() override; 
@@ -17,6 +17,8 @@ public:
     bool send(const std::string& aThrusterCommand) override;
 private: 
 
-    UdpClient mClient; 
+    std::string mServerIp; 
+    int mPort; 
+    std::unique_ptr<UdpClient> mClient; 
 };
 #endif 

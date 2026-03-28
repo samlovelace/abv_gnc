@@ -1,9 +1,10 @@
 
 #include "abv_controller/UdpThrusterDriver.h"
 
-UdpThrusterDriver::UdpThrusterDriver(std::vector<int> aSet) : mClient("127.0.0.1", 6969)
-{
-
+UdpThrusterDriver::UdpThrusterDriver(const YAML::Node& aConfig)
+{       
+    mServerIp = aConfig["ip"].as<std::string>(); 
+    mPort = aConfig["port"].as<int>(); 
 }
 
 UdpThrusterDriver::~UdpThrusterDriver()
@@ -13,6 +14,13 @@ UdpThrusterDriver::~UdpThrusterDriver()
 
 bool UdpThrusterDriver::init()
 {
+    mClient = std::make_unique<UdpClient>(mServerIp, mPort);
+    
+    if(nullptr == mClient)
+    {
+        return false; 
+    } 
+
     return true; 
 }
 
@@ -23,5 +31,5 @@ bool UdpThrusterDriver::fini()
 
 bool UdpThrusterDriver::send(const std::string& aThrusterCommand)
 {
-    return mClient.send(aThrusterCommand); 
+    return mClient->send(aThrusterCommand); 
 }

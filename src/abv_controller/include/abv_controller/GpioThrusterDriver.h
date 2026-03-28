@@ -13,7 +13,7 @@
 class GpioThrusterDriver : public IThrusterDriver
 {
 public:
-    GpioThrusterDriver(std::vector<int> aSetOfOutputPins);
+    GpioThrusterDriver(const YAML::Node& aConfig);
     ~GpioThrusterDriver() override; 
 
     bool init() override; 

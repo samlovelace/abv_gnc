@@ -2,6 +2,7 @@
 #define ITHRUSTERDRIVER_HPP
  
 #include <string> 
+#include <yaml-cpp/yaml.h> // to avoid including in all implementations 
 
 class IThrusterDriver 
 { 
