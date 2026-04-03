@@ -108,29 +108,12 @@ void VehicleSimulator::update(const double dt)
 
 void VehicleSimulator::makeMeasurement(VehicleState& s)
 {
-    std::normal_distribution<double> posNoise(0.0, 0.02);
+    std::normal_distribution<double> posNoise(0.0, 0.025);
     std::normal_distribution<double> yawNoise(0.0, 0.003);
 
     s.x += posNoise(mRng);
     s.y += posNoise(mRng);
     s.yaw += yawNoise(mRng);
-
-    // Add small high frequency vibration
-    double freq = 60.0; // Hz
-    s.x += 0.005 * sin(2.0 * M_PI * freq * mSimTime);
-    s.y += 0.005 * cos(2.0 * M_PI * freq * mSimTime);
-}
-
-void VehicleSimulator::addSensorNoise()
-{
-    const double stddev = 0.2; 
-    std::default_random_engine gen; 
-    std::normal_distribution<double> dist(0.0, stddev); 
-
-    double noise = dist(gen); 
-    mVehicleState.x += dist(gen); 
-    mVehicleState.y += dist(gen); 
-    mVehicleState.yaw += dist(gen); 
 }
 
 void VehicleSimulator::addProcessNoise()

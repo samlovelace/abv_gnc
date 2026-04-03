@@ -107,7 +107,7 @@ Eigen::Vector3d Vehicle::convertToBodyFrame(Eigen::Vector3d aControlInputGlobal)
     auto state = mNavManager->getCurrentState();
 
     // yaw is element 3 TODO: make this more explicit 
-    double yaw = state[3]; 
+    double yaw = state[2]; 
 
     // invert rotation relative to global 
     Eigen::Matrix3d Rz;
