@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
+##########################################################################
+# DEV TOOL - Simulation launcher (tmux)
+#
+# Spins up a tmux session with each node in its own pane for local
+# simulation. Not intended for production or hardware use.
+#
+# Requires: tmux, a built workspace at $WS, and a display for the GUI.
+##########################################################################
 
-SESSION=robot_stack
+SESSION=abv-sim
 WS=~/dev/cpp/robot_ws/src/abv_gnc
 WS2=~/dev/python/robot_gui
 

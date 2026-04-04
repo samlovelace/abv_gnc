@@ -73,7 +73,7 @@ The software suite is comprised of multiple ROS 2 packages, each implementing a 
 
 <h2>Quick Start </h2>
 After cloning the repo, run the setup script to install any missing dependencies and build the packages.
-<pre><code>./setup.sh
+<pre><code>./scripts/setup.sh
 </code></pre>
 
 After the script finishes, launch the core GNC nodes.

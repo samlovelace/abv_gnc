@@ -1,5 +1,25 @@
 ##########################################################################
-# Setup script to install ROS2 and system dependencies for the ABV stack
+# ABV GNC - Environment Setup
+#
+# Installs ROS2 Humble, system dependencies, and third-party libraries
+# required to build and run the ABV GNC stack.
+#
+# Usage:
+#   chmod +x setup.sh
+#   ./setup.sh
+#
+# Assumptions:
+#   - Ubuntu 22.04 (Jammy) on x86_64 or ARM64 (Jetson Orin)
+#   - Internet access for apt and git
+#   - sudo privileges
+#
+# What this script does:
+#   1. Installs ROS2 Humble Desktop
+#   2. Installs system dependencies via apt
+#   3. Builds and installs third-party libs from source (plog, libmotioncapture, JETGPIO)
+#   4. Builds the ABV ROS2 packages via colcon
+#
+# Third-party libs are cloned to ~/libs by default (see LIBS_DIR)
 ##########################################################################
 
 # where to clone libs that need built from source 
