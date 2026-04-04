@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'abv_gnc'
-copyright = '2026, Sam Lovelace'
+copyright = '2026, The Autonomy Lab'
 author = 'Sam Lovelace'
 
 # -- General configuration ---------------------------------------------------
