@@ -18,6 +18,8 @@ The Air-Bearing Vehicle's are a pair of 3DOF spacecraft simulators used for expe
 
 <h2> Architecture </h2>
 The software suite is comprised of multiple ROS 2 packages, each implementing a primary functionality. The table below shows the packages and summarizes their responsibility.
+
+<table style="margin: 16px 0;">
 <table>
   <thead>
     <tr>
