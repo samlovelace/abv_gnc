@@ -22,11 +22,17 @@ public:
 protected:
     Eigen::Vector3i convertToThrustVector(Eigen::Vector3d aControlInput); 
     void determineThrusterCommand(Eigen::Vector3i aThrustDirVec);
+    void allocate(const Eigen::Vector3i& aThrustDir);
 
     ControlConfig mConfig;  
     std::string mThrusterCommand; 
     std::mutex mThrusterCommandMutex;
     Eigen::Matrix<int, 3, 27> mMatrixOfThrustDirCombinations; 
+    static constexpr double THRESHOLD = 0.2;
+
+    Eigen::Matrix<double, 3, 8> mB;
+    Eigen::Matrix<double, 8, 3> mBpinv;
+    Eigen::Array<bool, 8, 1>    mThrusterCommands;
 
     double mThrusterForce; 
     double mMomentArm; 

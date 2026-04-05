@@ -28,14 +28,19 @@ Control:
     Duration: 3 # seconds
 
   Gains:
-    Kp: [5.0, 5.0, 5.0]
-    Ki: [0, 0, 0]
-    Kd: [15.0, 15.0, 15.0]
+    Kp: [50.0, 50.0, 25.0]
+    Ki: [0.001, 0.001, 0.001]
+    Kd: [315.0, 315.0, 75.0]
 
   Thrusters:
     InputDiscretization:
       On: 0.2
       Off: 0.09
+
+    Allocation:
+      x: [0, 0, -1, -1, 0, 0, 1, 1]
+      y: [1, 1, 0, 0, -1, -1, 0, 0]
+      yaw: [-1, 1, -1, 1, -1, 1, -1, 1]
 
     ThrusterDriver:
       Type: JETGPIO

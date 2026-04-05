@@ -42,7 +42,8 @@ private:
     double mThrusterTau = 0.015;        // 50 ms time constant
     int mDelaySteps = 2;               // 100 ms dead-time (optional)
     std::deque<Eigen::Vector3d> mCmdBuffer; // for dead-time
-
+    
+    Eigen::Matrix<double, 3, 8> mB;
 
     Eigen::Vector2d mVelocity; // vx, vy
     Eigen::Vector3d mThrustForce; // fx, fy, tz
