@@ -98,16 +98,13 @@ This message is used to inform other components of the feedback control state oc
 
 ### Message Definition (msg/AbvGuidanceCommand.msg)
 
-<insert message fields here>
+- `goal_state` - the goal state at the end of a trajectory
+- `type` - the type of trajectory to execute
+- `duration` the duration to execute the trajectory for
 
 ### Description
 
-Describe the structure of guidance commands:
-
-- Desired pose?
-- Velocity?
-- Waypoint index?
-- Mode selection?
+Provides a way for commanding the `abv_guidance` node to coordinate sending a sequence of waypoints to the `abv_controller`.
 
 ---
 
@@ -127,96 +124,24 @@ Describe how acknowledgements or responses are represented.
 
 ### Message Definition (msg/AbvState.msg)
 
-<insert message fields here>
+- `position` - the x, y, yaw position of the abv
+- `velocity` - the x, y, yaw velocity of the abv
 
 ### Description
 
-Describe the estimated vehicle state:
-
-- Position?
-- Velocity?
-- Orientation?
-- Frame convention?
-- Units?
-
----
+## Used to represent the position and velocity of the abv in its 3 degrees of freedom. Used as the data type for publishing navigation data.
 
 ## AbvVec3
 
 ### Message Definition (msg/AbvVec3.msg)
 
-<insert message fields here>
+- `x` - a float representing the x axis
+- `y` - a float representing the y axis
+- `yaw` - a float representing the yaw axis
 
 ### Description
 
-Explain the purpose of this vector type:
-
-- Why not use geometry_msgs/Vector3?
-- Is it planar-specific?
-
----
-
-## Euler
-
-### Message Definition (msg/Euler.msg)
-
-<insert message fields here>
-
-### Description
-
-Describe the Euler angle convention:
-
-- Rotation order (e.g., ZYX)?
-- Units (radians)?
-- Frame reference?
-
----
-
-## Quaternion
-
-### Message Definition (msg/Quaternion.msg)
-
-<insert message fields here>
-
-### Description
-
-Describe quaternion representation:
-
-- Field ordering (x, y, z, w)?
-- Normalization requirement?
-- Frame definition?
-
----
-
-## Vec3
-
-### Message Definition (msg/Vec3.msg)
-
-<insert message fields here>
-
-### Description
-
-Explain how this differs from AbvVec3 or geometry_msgs/Vector3.
-
----
-
-## VehicleWaypoint
-
-### Message Definition (msg/VehicleWaypoint.msg)
-
-<insert message fields here>
-
-### Description
-
-Describe the waypoint structure:
-
-- Position?
-- Orientation?
-- Tolerances?
-- Timeout?
-- Identifier?
-
----
+Used to represent the 3 degrees of freedom of the abv. Used as the data type in the `AbvState` msg to represent the position and velocity of the abv.
 
 ## Notes
 

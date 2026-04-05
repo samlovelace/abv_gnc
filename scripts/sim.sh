@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
+##########################################################################
+# DEV TOOL - Simulation launcher (tmux)
+#
+# Spins up a tmux session with each node in its own pane for local
+# simulation. Not intended for production or hardware use.
+#
+# Requires: tmux, a built workspace at $WS, and a display for the GUI.
+##########################################################################
 
-SESSION=robot_stack
+SESSION=abv-sim
 WS=~/dev/cpp/robot_ws/src/abv_gnc
 WS2=~/dev/python/robot_gui
 
@@ -31,7 +39,7 @@ tmux send-keys -t $SESSION \
 
 tmux split-window -h -t $SESSION
 tmux send-keys -t $SESSION \
-  "cd $WS2 && source $WS/install/setup.bash && python3 main.py" C-m
+  "cd $WS2 && source $WS/install/setup.bash && export DISPLAY=:1 && python3 main.py" C-m
 
 tmux split-window -h -t $SESSION 
 tmux send-keys -t $SESSION \
