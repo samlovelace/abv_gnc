@@ -37,12 +37,14 @@ void StateMachine::run()
         {
         case States::STARTUP: 
             
-            if(mVehicle->hasAcquiredStateData())
-            {
-                mControlStatusPublishThread = std::thread(&StateMachine::controlStatusPublishLoop, this);
-                setActiveState(States::IDLE); 
-                break; 
-            }
+            mControlStatusPublishThread = std::thread(&StateMachine::controlStatusPublishLoop, this);
+            setActiveState(States::IDLE); 
+            
+            // if(mVehicle->hasAcquiredStateData())
+            // {
+            //     setActiveState(States::IDLE); 
+            //     break; 
+            // }
 
         case States::IDLE:
             // do nothing 
