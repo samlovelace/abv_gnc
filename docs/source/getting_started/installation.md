@@ -44,7 +44,7 @@ The `setup.sh` script performs a full environment setup, including:
 To run the setup script:
 
 ```bash
-./setup.sh
+./scripts/setup.sh
 ```
 
 ## Verify Installation

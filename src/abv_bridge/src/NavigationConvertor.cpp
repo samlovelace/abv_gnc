@@ -2,6 +2,8 @@
 #include "abv_bridge/NavigationConvertor.h"
 #include "abv_common/RosTopicManager.h"
 
+#include <eigen3/Eigen/Dense>
+
 NavigationConvertor::NavigationConvertor(const std::string& anIncomingTopic, const std::string& anOutgoingTopic) : 
     mIncomingTopic(anIncomingTopic), mOutgoingTopic(anOutgoingTopic)
 {
@@ -34,6 +36,17 @@ void NavigationConvertor::convert(const abv_msgs::msg::AbvState::SharedPtr& anAb
     orient.set__pitch(0.0); 
     orient.set__yaw(anAbvState->position.yaw); 
 
+    // compute quaternion 
+    Eigen::Quaterniond q = Eigen::AngleAxisd(0,     Eigen::Vector3d::UnitX())
+                         * Eigen::AngleAxisd(0,     Eigen::Vector3d::UnitY())
+                         * Eigen::AngleAxisd(anAbvState->position.yaw,   Eigen::Vector3d::UnitZ());
+    
+    robot_idl::msg::Quaternion qm;
+    qm.set__w(q.w());
+    qm.set__x(q.x()); 
+    qm.set__y(q.y()); 
+    qm.set__z(q.z()); 
+
     robot_idl::msg::Vec3 angVel; 
     angVel.set__x(0.0); 
     angVel.set__y(0.0); 
@@ -43,9 +56,8 @@ void NavigationConvertor::convert(const abv_msgs::msg::AbvState::SharedPtr& anAb
     state.set__position(pos); 
     state.set__velocity(vel); 
     state.set__euler(orient); 
+    state.set__quat(qm); 
     state.set__angular_velocity(angVel); 
-
-    // TODO: compute quaternion 
 
     RosTopicManager::getInstance()->publishMessage(mOutgoingTopic, state);  
 }

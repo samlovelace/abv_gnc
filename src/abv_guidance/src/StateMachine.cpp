@@ -99,7 +99,7 @@ void StateMachine::generatePath()
     // and do any startup/init stuff for that IPathGenerator 
     if("line" == mCommand.mType)
     {
-        auto pathGen = std::make_unique<StraightLineGenerator>(); 
+        auto pathGen = std::make_unique<StraightLineGenerator>(mCommand.mGoal, mNavSource.getCurrentPose()); 
         mPathGenerator = std::move(pathGen);         
     }
     else if("file" == mCommand.mType)

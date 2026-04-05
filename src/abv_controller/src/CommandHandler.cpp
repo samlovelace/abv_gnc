@@ -26,28 +26,35 @@ CommandHandler::~CommandHandler()
 
 void CommandHandler::commandCallback(abv_msgs::msg::AbvControllerCommand::SharedPtr aCmdMsg)
 {   
-    if(CommandType::STOP == toEnum(aCmdMsg->type))
+    auto command = toEnum(aCmdMsg->type); 
+    if(CommandType::NUM_TYPES == command)
+    {
+        LOGW << "Cannot execute command"; 
+        return; 
+    }
+
+    if(CommandType::STOP == command)
     {
         mVehicle->stop(); 
         setNewActiveState(StateMachine::States::IDLE); 
     }
 
-    if(CommandType::THRUSTER == toEnum(aCmdMsg->type))
+    if(CommandType::THRUSTER == command)
     {
         mVehicle->setControlInput(convertToEigen(aCmdMsg->data)); 
         setNewActiveState(StateMachine::States::THRUSTER_CONTROL); 
     }
-    else if (CommandType::POSE == toEnum(aCmdMsg->type))
+    else if (CommandType::POSE == command)
     {
         mVehicle->setGoalPose(convertToEigen(aCmdMsg->data)); 
         setNewActiveState(StateMachine::States::POSE_CONTROL);   
     }
-    else if (CommandType::VELOCITY == toEnum(aCmdMsg->type))
+    else if (CommandType::VELOCITY == command)
     {
         mVehicle->setGoalVelocity(convertToEigen(aCmdMsg->data));
         setNewActiveState(StateMachine::States::VELOCITY_CONTROL); 
     }
-    else if (CommandType::IDLE == toEnum(aCmdMsg->type))
+    else if (CommandType::IDLE == command)
     {
         setNewActiveState(StateMachine::States::IDLE); 
     }
@@ -99,7 +106,7 @@ CommandHandler::CommandType CommandHandler::toEnum(const std::string& aType)
     }
     else
     {
-        printf("Unsupported CommandType: %s", aType.c_str()); 
+        LOGW << "Unsupported CommandType: " << aType; 
         enumToReturn = CommandType::NUM_TYPES; 
     }
 

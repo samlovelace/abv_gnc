@@ -28,9 +28,13 @@ void RosCommandSource::listen()
 
 void RosCommandSource::commandCallback(abv_msgs::msg::AbvGuidanceCommand::SharedPtr aCmd)
 {
+    abv_msgs::msg::AbvVec3 goal = aCmd->goal_state.position; 
+    Waypoint wp(goal.x, goal.y, goal.yaw, "pose");  // TODO: support sending vel commands
+
     Command cmd; 
     cmd.mType = aCmd->type; 
-    cmd.mDuration = aCmd->duration; 
+    cmd.mDuration = aCmd->duration;
+    cmd.mGoal = wp; 
 
     mCommandSink.onCommand(cmd); 
 }

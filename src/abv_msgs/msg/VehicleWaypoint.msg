@@ -1,2 +1,0 @@
-Vec3 position
-Quaternion orientation
