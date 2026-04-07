@@ -35,6 +35,7 @@ html_theme_options = {
 }
 
 html_static_path = ['_static', '../media']
+html_extra_path = ['../media']
 
 # conf.py
 import mimetypes

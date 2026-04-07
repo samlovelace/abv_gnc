@@ -8,7 +8,7 @@ visualization, and experimentation.
 
 <div style="margin: 2rem 0; padding: 0 2rem;">
   <video width="100%" controls>
-    <source src="../media/trajectory.mp4" type="video/mp4">
+    <source src="trajectory.mp4" type="video/mp4">
   </video>
 </div>
 
