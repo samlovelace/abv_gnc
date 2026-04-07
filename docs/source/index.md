@@ -6,6 +6,12 @@ The ABV software stack implements the core guidance, navigation, and control
 capabilities for the planar spacecraft testbed, along with tools for teleoperation,
 visualization, and experimentation.
 
+```{raw} html
+<video width="100%" controls>
+  <source src="../media/trajectory.mp4" type="video/mp4">
+</video>
+```
+
 ```{toctree}
 :maxdepth: 1
 
