@@ -33,7 +33,8 @@ html_theme = 'sphinx_rtd_theme'
 html_theme_options = {
     "navigation_depth": 4,
 }
-html_static_path = ['_static']
+
+html_static_path = ['_static', '../media']
 
 # conf.py
 import mimetypes
