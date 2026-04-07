@@ -8,6 +8,8 @@
 ![C++](https://img.shields.io/badge/C++-17-blue?logo=cplusplus)
 ![Eigen](https://img.shields.io/badge/Eigen-3.4-orange)
 
+<img src="docs/media/trajectory.gif" width="600" alt="Demo"/>
+
 </div>
 <div align="left">
 <h2> Documentation </h2>
