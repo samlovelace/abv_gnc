@@ -34,3 +34,7 @@ html_theme_options = {
     "navigation_depth": 4,
 }
 html_static_path = ['_static']
+
+# conf.py
+import mimetypes
+mimetypes.add_type("video/mp4", ".mp4")
