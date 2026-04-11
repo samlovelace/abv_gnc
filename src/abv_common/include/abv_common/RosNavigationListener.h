@@ -8,7 +8,7 @@
 class RosNavigationListener
 {
 public:
-    RosNavigationListener();
+    RosNavigationListener(std::function<void(abv_msgs::msg::AbvState::SharedPtr)> aCallback = nullptr);
     ~RosNavigationListener();
 
     Eigen::Vector3d getCurrentPose(); 

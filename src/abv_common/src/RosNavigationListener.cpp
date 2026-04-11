@@ -2,12 +2,23 @@
 #include "abv_common/RosNavigationListener.h"
 #include "abv_common/RosTopicManager.h"
 
-RosNavigationListener::RosNavigationListener(/* args */) : mAcquiredState(false)
+RosNavigationListener::RosNavigationListener(
+    std::function<void(abv_msgs::msg::AbvState::SharedPtr)> aCallback)
+    : mAcquiredState(false)
 {
-    RosTopicManager::getInstance()->createSubscriber<abv_msgs::msg::AbvState>("abv/state", 
-                                                                               std::bind(&RosNavigationListener::stateCallback,
-                                                                                         this, 
-                                                                                         std::placeholders::_1));                                                                                
+    auto cb = [this, aCallback](abv_msgs::msg::AbvState::SharedPtr msg)
+    {
+        this->stateCallback(msg);
+
+        if (aCallback) {
+            aCallback(msg);
+        }
+    };
+
+    RosTopicManager::getInstance()->createSubscriber<abv_msgs::msg::AbvState>(
+        "abv/state",
+        cb
+    );
 }
 
 RosNavigationListener::~RosNavigationListener()

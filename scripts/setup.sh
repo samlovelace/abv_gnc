@@ -38,6 +38,8 @@ DEPENDENCIES=(
     libsfml-dev
     libboost-system-dev 
     libboost-thread-dev
+    qt6-base-dev
+    libqt6charts6-dev
 )
 
 # Function to check and install a package 
