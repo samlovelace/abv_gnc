@@ -16,14 +16,26 @@
 #include <QDebug>
 #include <cmath>
 
+#include "abv_msgs/msg/abv_controller_command.hpp"
+#include "abv_msgs/msg/abv_guidance_command.hpp"
+
 #include "abv_gui/LivePlot.h"
 #include "abv_gui/TopicAdapter.hpp"
 #include "abv_gui/TopicConversions.hpp"
+
+#include "abv_gui/ButtonActions.hpp"
+#include "abv_gui/ButtonAdapter.hpp"
+
+#include "abv_gui/CommandPanel.h"
+
+#include "abv_gui/StatusIndicator.hpp"
 
 int main(int argc, char *argv[])
 {
     rclcpp::init(0, nullptr); 
     RosTopicManager::getInstance("abv_gui")->spinNode();
+    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvControllerCommand>("abv/controller/command"); 
+    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvGuidanceCommand>("abv/guidance/command"); 
 
     QApplication app(argc, argv);
     app.setStyle("Fusion"); 
@@ -32,6 +44,9 @@ int main(int argc, char *argv[])
     auto *posPlot  = new LivePlot("Position",       0.0,  2.0,  {"x", "y", "yaw"});
     auto *velPlot  = new LivePlot("Velocity",      -2.0,  2.0,  {"vx", "vy", "w"});
     auto *ctrlPlot = new LivePlot("Control Input", -10.0, 10.0, {"fx", "fy", "tz"});
+
+    posPlot->setReadoutVisible(true); 
+    velPlot->setReadoutVisible(true); 
 
     auto* posAdapter  = 
         new TopicAdapter<abv_msgs::msg::AbvState, QVector<double>>(
@@ -63,6 +78,15 @@ int main(int argc, char *argv[])
     leftLayout->addWidget(posPlot);
     leftLayout->addWidget(velPlot);
     leftLayout->addWidget(ctrlPlot);
+
+    // STOP BUTTON 
+    auto stopBtn = new ButtonAdapter("Stop", std::bind(&btn::action::stop), ButtonStyle::danger());
+    stopBtn->resize(50, 50); 
+     
+    rightLayout->addWidget(stopBtn); 
+
+    CommandPanel* panel = new CommandPanel(); 
+    rightLayout->addWidget(panel); 
 
     QMainWindow window; 
     window.setWindowTitle("ABV Ground Station"); 

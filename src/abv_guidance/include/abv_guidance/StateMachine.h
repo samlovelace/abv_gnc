@@ -57,6 +57,8 @@ private:
 
     ThreadSafe<Arrival::Status> mArrivalStatus; 
 
+    std::thread mStatusPublishThread; 
+
 private: 
     void startup(); 
     void generatePath(); 
@@ -67,6 +69,8 @@ private:
     void onCommand(const Command& aCommand) override; 
     void onTimeout(); 
     void controllerStatusCallback(abv_msgs::msg::AbvControllerStatus::SharedPtr aStatus); 
+
+    void statusPublishLoop();
 
 };
 #endif // STATEMACHINE_H

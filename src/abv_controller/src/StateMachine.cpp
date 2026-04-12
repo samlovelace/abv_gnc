@@ -27,6 +27,8 @@ void StateMachine::run()
     int rateConfig = ConfigurationManager::getInstance()->getControlConfig().mStateMachineRate; 
     RateController rate(rateConfig); 
 
+    mControlStatusPublishThread = std::thread(&StateMachine::controlStatusPublishLoop, this);
+
     LOGD << "State Machine starting in " << toString(mActiveState);
 
     while(!isDone())
@@ -37,7 +39,6 @@ void StateMachine::run()
         {
         case States::STARTUP: 
             
-            mControlStatusPublishThread = std::thread(&StateMachine::controlStatusPublishLoop, this);
             setActiveState(States::IDLE); 
             
             // if(mVehicle->hasAcquiredStateData())
@@ -124,17 +125,20 @@ void StateMachine::controlStatusPublishLoop()
     int rateConfig = ConfigurationManager::getInstance()->getControlConfig().mStateMachineRate; 
     RateController rate(rateConfig); 
 
+    abv_msgs::msg::AbvControllerStatus statusToSend;
+    abv_msgs::msg::AbvNodeStatus nodeStatus; 
+    nodeStatus.set__node_name("controller");
+ 
     LOGV << "Starting control status publish loop"; 
 
     while(!isDone())
     {
         rate.start(); 
 
-        // get needed data from wherever 
-        // TODO: maybe add state machine state to this msg being published
-        Vehicle::ControlStatus status = mVehicle->getControlStatus(); 
+        nodeStatus.set__node_state(toString(getActiveState())); 
+        statusToSend.set__status(nodeStatus); 
 
-        abv_msgs::msg::AbvControllerStatus statusToSend; 
+        Vehicle::ControlStatus status = mVehicle->getControlStatus(); 
         statusToSend.set__fx(status.mAppliedThrust.x()); 
         statusToSend.set__fy(status.mAppliedThrust.y()); 
         statusToSend.set__tz(status.mAppliedThrust.z());

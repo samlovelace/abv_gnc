@@ -19,9 +19,13 @@ set(CMAKE_AUTORCC ON)
 set(AUTOMOC_HDRS
   include/abv_gui/LivePlot.h
   include/abv_gui/TopicAdapter.hpp
+  include/abv_gui/ButtonAdapter.hpp
+  include/abv_gui/StatusIndicator.hpp
+  include/abv_gui/CommandPanel.h
 )
 
 set(SOURCES
+  src/CommandPanel.cpp
   src/main.cpp
   src/LivePlot.cpp
 )

@@ -1,3 +1,5 @@
+# node name and current state
+AbvNodeStatus status
 
 # Applied forces/torque 
 float64 fx
@@ -10,4 +12,3 @@ uint8 RUNNING=1
 uint8 ARRIVED=2
 
 uint8 arrival
-

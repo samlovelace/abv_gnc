@@ -5,6 +5,7 @@
 // incoming types 
 #include "abv_msgs/msg/abv_state.hpp"
 #include "abv_msgs/msg/abv_controller_status.hpp"
+#include "abv_msgs/msg/abv_controller_command.hpp"
 
 // outgoing types
 #include <QVector>
@@ -42,5 +43,4 @@ namespace conversions
     }
 
 } // namespace topic
-
 #endif

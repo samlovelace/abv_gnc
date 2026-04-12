@@ -16,7 +16,8 @@ add_library(${PROJECT_NAME} SHARED
   src/DataLogger.cpp
   src/RosTopicManager.cpp
   src/UdpClient.cpp
-  src/RosNavigationListener.cpp)
+  src/RosNavigationListener.cpp
+)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>

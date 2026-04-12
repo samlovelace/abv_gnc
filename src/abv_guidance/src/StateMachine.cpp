@@ -3,6 +3,7 @@
 #include "plog/Log.h"
 
 #include "abv_msgs/msg/abv_controller_command.hpp"
+#include "abv_msgs/msg/abv_guidance_status.hpp"
 
 #include "abv_common/RateController.hpp"
 #include "abv_common/ConfigurationManager.h"
@@ -16,13 +17,18 @@ StateMachine::StateMachine() :
     mDone(false), mActiveState(States::STARTUP)
 {
     RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvControllerCommand>("abv/controller/command"); 
+    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvGuidanceStatus>("abv/guidance/status"); 
+
     RosTopicManager::getInstance()->createSubscriber<abv_msgs::msg::AbvControllerStatus>("abv/controller/status", 
             std::bind(&StateMachine::controllerStatusCallback, this, std::placeholders::_1)); 
 }
 
 StateMachine::~StateMachine()
 {
-
+    if(mStatusPublishThread.joinable())
+    {
+        mStatusPublishThread.join(); 
+    }
 }
 
 void StateMachine::onCommand(const Command& aCommand)
@@ -42,6 +48,8 @@ void StateMachine::run()
 {
     int rateConfig = ConfigurationManager::getInstance()->getGuidanceConfig().mStateMachineRate; 
     RateController rate(rateConfig); 
+
+    mStatusPublishThread = std::thread(&StateMachine::statusPublishLoop, this);
 
     LOGD << "State Machine starting in " << toString(mActiveState);
 
@@ -97,12 +105,12 @@ void StateMachine::generatePath()
 {
     // get the latest command, instantiate the proper IPathGenerator based on the command
     // and do any startup/init stuff for that IPathGenerator 
-    if("line" == mCommand.mType)
+    if("line" == mCommand.mType || "Line" == mCommand.mType)
     {
         auto pathGen = std::make_unique<StraightLineGenerator>(mCommand.mGoal, mNavSource.getCurrentPose()); 
         mPathGenerator = std::move(pathGen);         
     }
-    else if("file" == mCommand.mType)
+    else if("file" == mCommand.mType || "File" == mCommand.mType)
     {
         auto pathGen = std::make_unique<FromFileGenerator>(); 
         mPathGenerator = std::move(pathGen); 
@@ -231,4 +239,30 @@ std::string StateMachine::toString(StateMachine::States aState)
     }
 
     return stringToReturn; 
+}
+
+void StateMachine::statusPublishLoop()
+{
+    // publish control status at same rate as StateMachine loop 
+    int rateConfig = ConfigurationManager::getInstance()->getGuidanceConfig().mStateMachineRate; 
+    RateController rate(rateConfig); 
+
+    abv_msgs::msg::AbvGuidanceStatus statusToSend;
+    abv_msgs::msg::AbvNodeStatus nodeStatus; 
+    nodeStatus.set__node_name("guidance");
+ 
+    LOGV << "Starting status publish loop"; 
+
+    while(!isDone())
+    {
+        rate.start(); 
+
+        nodeStatus.set__node_state(toString(getActiveState())); 
+        statusToSend.set__status(nodeStatus); 
+
+        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvGuidanceStatus>(
+                "abv/guidance/status", statusToSend); 
+
+        rate.block(); 
+    }
 }
