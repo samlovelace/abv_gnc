@@ -57,6 +57,27 @@ public:
         connect(mButton, &QPushButton::clicked, [this]() { mAction(); });
     }
 
+    // Two-action constructor for momentary/hold behavior
+    ButtonAdapter(const std::string& name,
+                Action onPress,
+                Action onRelease,
+                ButtonStyle style,
+                QWidget* parent = nullptr)
+        : QWidget(parent)
+    {
+        mButton = new QPushButton(QString::fromStdString(name), this);
+        mButton->setStyleSheet(style.styleSheet);
+        if (!style.fixedSize.isEmpty())
+            mButton->setFixedSize(style.fixedSize);
+
+        auto* layout = new QVBoxLayout(this);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->addWidget(mButton);
+
+        connect(mButton, &QPushButton::pressed,  [onPress]()   { onPress();   });
+        connect(mButton, &QPushButton::released, [onRelease]() { onRelease(); });
+    }
+
     QPushButton* button() {return mButton;}
 
     void resize(int minw, int minh) 

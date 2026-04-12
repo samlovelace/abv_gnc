@@ -39,7 +39,7 @@ CommandPanel::CommandPanel(QWidget* parent)
     // Command type selector
     auto* typeLabel = new QLabel("Command");
     auto* selector  = new QComboBox();
-    selector->addItems({"Pose", "Velocity", "Path"});
+    selector->addItems({"Pose", "Velocity", "Path", "Thruster"});
     layout->addWidget(typeLabel);
     layout->addWidget(selector);
 
@@ -48,6 +48,7 @@ CommandPanel::CommandPanel(QWidget* parent)
     stack->addWidget(makePosePanel());
     stack->addWidget(makeVelocityPanel());
     stack->addWidget(makePathPanel()); 
+    stack->addWidget(makeThrusterPanel()); 
     layout->addWidget(stack);
 
     connect(selector, &QComboBox::currentIndexChanged,
@@ -126,6 +127,135 @@ QWidget* CommandPanel::makePathPanel()
     layout->addWidget(sendBtn);
     layout->addStretch(); 
     return panel;
+}
+
+QWidget* CommandPanel::makeThrusterPanel()
+{
+    auto* panel = new QWidget();
+    auto* main  = new QVBoxLayout(panel);
+    main->setContentsMargins(0, 0, 0, 0);
+    main->setSpacing(8);
+
+    // ── Thruster header ───────────────────────────────────────────────────────
+    auto* thrusterHeader = new QLabel("Thrusters");
+    thrusterHeader->setStyleSheet("color: #cccccc; font-weight: bold; font-size: 12px;");
+    main->addWidget(thrusterHeader);
+
+    auto* thrusterLine = new QFrame();
+    thrusterLine->setFrameShape(QFrame::HLine);
+    thrusterLine->setStyleSheet("color: #444444;");
+    main->addWidget(thrusterLine);
+
+    // ── Thruster grid ─────────────────────────────────────────────────────────
+    auto* grid = new QGridLayout();
+    grid->setSpacing(4);
+    grid->setContentsMargins(0, 0, 0, 0);
+
+    for (int i = 1; i <= 8; i++) {
+        std::string name = "T" + std::to_string(i);
+        auto* btn = makeThrusterButton(name, i);
+        grid->addWidget(btn, (i - 1) / 4, (i - 1) % 4);
+    }
+    main->addLayout(grid);
+
+    // ── Axes header ───────────────────────────────────────────────────────────
+    auto* axesHeader = new QLabel("Axes");
+    axesHeader->setStyleSheet("color: #cccccc; font-weight: bold; font-size: 12px;");
+    main->addWidget(axesHeader);
+
+    auto* axesLine = new QFrame();
+    axesLine->setFrameShape(QFrame::HLine);
+    axesLine->setStyleSheet("color: #444444;");
+    main->addWidget(axesLine);
+
+    // ── Axes grid ─────────────────────────────────────────────────────────────
+    auto* axesGrid = new QGridLayout();
+    axesGrid->setSpacing(4);
+    axesGrid->setContentsMargins(0, 0, 0, 0);
+
+    const QList<std::string> axisNames = {"+X", "-X", "+Y", "-Y", "+Yaw", "-Yaw"};
+    for (int i = 0; i < axisNames.size(); i++) {
+    
+        auto* btn = makeAxisButton(axisNames[i], i);
+        axesGrid->addWidget(btn, i / 3, i % 3);  // 2 rows of 3
+    }
+    main->addLayout(axesGrid);
+
+    main->addStretch();
+    return panel;
+}
+
+abv_msgs::msg::AbvControllerCommand CommandPanel::makeCommand(int axis)
+{
+    // assumes axis order of +x, -x, +y, -y, +yaw, -yaw
+    abv_msgs::msg::AbvControllerCommand cmd;
+    cmd.set__type("thruster");
+    
+    abv_msgs::msg::AbvVec3 msg;
+
+    switch (axis)
+    {
+    case 0: // +x
+        msg.x = 1;  
+        break;
+    case 1: 
+        msg.x = -1; 
+        break; 
+    case 2: 
+        msg.y = 1; 
+        break; 
+    case 3: 
+        msg.y = -1; 
+        break; 
+    case 4: 
+        msg.yaw = 1; 
+        break; 
+    case 5: 
+        msg.yaw = -1; 
+        break; 
+    default:
+        msg.x = 0; 
+        msg.y = 0; 
+        msg.yaw = 0; 
+        break;      
+    }
+    
+    cmd.set__data(msg); 
+    return cmd; 
+}
+
+abv_msgs::msg::AbvControllerCommand CommandPanel::makeThruster(int thruster)
+{
+    abv_msgs::msg::AbvControllerCommand cmd;
+    cmd.set__type("thruster");  
+    return cmd;
+}
+
+QWidget* CommandPanel::makeThrusterButton(const std::string& name, int number)
+{
+    auto* btn = new ButtonAdapter(
+        name,
+        [&]() { RosTopicManager::getInstance()->publishMessage("abv/controller/thrusters", 
+                makeThruster(number)); },  // pressed
+        [&]() { RosTopicManager::getInstance()->publishMessage("abv/controller/thrusters", 
+                makeThruster(-1)); },  // released
+        ButtonStyle::warning()
+    );
+
+    return btn; 
+}
+
+QWidget* CommandPanel::makeAxisButton(const std::string& name, int axis)
+{
+    auto* btn = new ButtonAdapter(
+        name,
+        [this, axis]() { RosTopicManager::getInstance()->publishMessage("abv/controller/command",
+            makeCommand(axis)); },
+        [this, axis]() { RosTopicManager::getInstance()->publishMessage("abv/controller/command",
+            makeCommand(-1)); },
+        ButtonStyle::warning()
+    );
+    return btn;
 }
 
 void CommandPanel::onSendPose()
