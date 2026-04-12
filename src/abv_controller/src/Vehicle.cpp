@@ -10,7 +10,8 @@ Vehicle::Vehicle() :
     mNavManager(std::make_shared<RosNavigationListener>()), mController(std::make_unique<Controller>()),
     mLastInputRecvdAt(std::chrono::steady_clock::now()), mStaleInputThreshold(std::chrono::duration<double>(std::chrono::milliseconds(500))), 
     mPoseError(), mVelError(), mPoseThresh(0.01, 0.01, 0.05), mVelThresh(0.1, 0.1, 0.1), 
-    mArrivalTimerActive(false), mConfig(ConfigurationManager::getInstance()->getControlConfig())
+    mArrivalTimerActive(false), mConfig(ConfigurationManager::getInstance()->getControlConfig()), 
+    mGoalType(GoalType::NUM_TYPES)
 { 
 
 }
@@ -64,7 +65,7 @@ void Vehicle::setControlInput(Eigen::Vector3d aControlInput)
 
 void Vehicle::setGoalPose(Eigen::Vector3d aGoalPose) 
 {
-    LOGV << "Recvd goal pose: " << aGoalPose; 
+    LOGV << "Received goal pose: " << aGoalPose; 
     std::lock_guard<std::mutex> lock(mGoalPoseMutex); 
     mGoalPose = aGoalPose;
     mGoalType = GoalType::POSE;
@@ -72,7 +73,7 @@ void Vehicle::setGoalPose(Eigen::Vector3d aGoalPose)
 }
 void Vehicle::setGoalVelocity(Eigen::Vector3d aGoalVel)
 {
-    LOGV << "Recd goal vel: " << aGoalVel; 
+    LOGV << "Received goal vel: " << aGoalVel; 
     std::lock_guard<std::mutex> lock(mGoalVelocityMutex); 
     mGoalVelocity = aGoalVel; 
     mGoalType = GoalType::VELOCITY;
@@ -126,10 +127,11 @@ bool Vehicle::hasAcquiredStateData()
 
 void Vehicle::stop()
 {
-    LOGV << "Recieved STOP command!"; 
+    LOGV << "Received STOP command!"; 
     Eigen::Vector3d zeros = Eigen::Vector3d::Zero();  
     setControlInput(zeros); 
-    doThrusterControl(); 
+    doThrusterControl();
+    mGoalType = GoalType::NUM_TYPES; // so arrival state goes to IDLE 
 }
 
 Vehicle::ControlStatus Vehicle::getControlStatus()

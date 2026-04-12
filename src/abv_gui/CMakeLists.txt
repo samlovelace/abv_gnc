@@ -22,12 +22,14 @@ set(AUTOMOC_HDRS
   include/abv_gui/ButtonAdapter.hpp
   include/abv_gui/StatusIndicator.hpp
   include/abv_gui/CommandPanel.h
+  include/abv_gui/StatusPanel.h
 )
 
 set(SOURCES
   src/CommandPanel.cpp
   src/main.cpp
   src/LivePlot.cpp
+  src/StatusPanel.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${AUTOMOC_HDRS})

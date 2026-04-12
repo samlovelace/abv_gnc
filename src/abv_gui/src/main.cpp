@@ -18,6 +18,7 @@
 
 #include "abv_msgs/msg/abv_controller_command.hpp"
 #include "abv_msgs/msg/abv_guidance_command.hpp"
+#include "abv_msgs/msg/abv_guidance_status.hpp"
 
 #include "abv_gui/LivePlot.h"
 #include "abv_gui/TopicAdapter.hpp"
@@ -27,8 +28,7 @@
 #include "abv_gui/ButtonAdapter.hpp"
 
 #include "abv_gui/CommandPanel.h"
-
-#include "abv_gui/StatusIndicator.hpp"
+#include "abv_gui/StatusPanel.h"
 
 int main(int argc, char *argv[])
 {
@@ -87,6 +87,49 @@ int main(int argc, char *argv[])
 
     CommandPanel* panel = new CommandPanel(); 
     rightLayout->addWidget(panel); 
+
+    StatusPanel* status = new StatusPanel(); 
+    rightLayout->addWidget(status); 
+
+    auto* gdnceStatus = 
+        new TopicAdapter<abv_msgs::msg::AbvGuidanceStatus, QString>("abv/guidance/status", 
+            [status](const abv_msgs::msg::AbvGuidanceStatus& msg){
+
+                status->setGuidanceSmState(QString::fromStdString(msg.status.node_state)); 
+                return ""; 
+            });
+
+    auto* ctrlStatus = 
+        new TopicAdapter<abv_msgs::msg::AbvControllerStatus, QString>("abv/controller/status", 
+            [status](const abv_msgs::msg::AbvControllerStatus& msg) {
+                
+                QString smState = QString::fromStdString(msg.status.node_state); 
+                status->setControllerSmState(smState); 
+
+                const auto idle =  abv_msgs::msg::AbvControllerStatus::IDLE; 
+                const auto running = abv_msgs::msg::AbvControllerStatus::RUNNING; 
+                const auto arrived = abv_msgs::msg::AbvControllerStatus::ARRIVED; 
+
+                QString ctrlState; 
+                
+                switch (msg.arrival)
+                {
+                case abv_msgs::msg::AbvControllerStatus::IDLE:
+                    ctrlState = "IDLE"; 
+                    break;
+                case abv_msgs::msg::AbvControllerStatus::RUNNING: 
+                    ctrlState = "RUNNING"; 
+                    break; 
+                case abv_msgs::msg::AbvControllerStatus::ARRIVED:
+                    ctrlState = "ARRIVED"; 
+                    break; 
+                default:
+                    "---";
+                }
+
+                status->setControllerCtrlState(ctrlState); 
+                return ""; 
+        });
 
     QMainWindow window; 
     window.setWindowTitle("ABV Ground Station"); 
