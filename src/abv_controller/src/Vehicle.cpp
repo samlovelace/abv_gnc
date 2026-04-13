@@ -28,9 +28,15 @@ bool Vehicle::init()
 
 void Vehicle::doThrusterControl()
 {
+    // bypass control and directly command a sequence of thrusters 
+    mThrusterCommander->commandThrusters(mThrusterCmdSequence.get()); 
+}
+
+void Vehicle::doDirectionControl()
+{
     Eigen::Vector3d controlInput = getControlInput(); 
     Eigen::Vector3d controlInputBodyFrame = convertToBodyFrame(controlInput); 
-    mThrusterCommander->commandThrusters(controlInputBodyFrame);
+    mThrusterCommander->command(controlInputBodyFrame);
 }
 
 void Vehicle::doPoseControl()
@@ -41,7 +47,7 @@ void Vehicle::doPoseControl()
     Eigen::Vector3d controlInput = mController->computeControlInput(mPoseError.get()); 
 
     setControlInput(controlInput);
-    doThrusterControl(); 
+    doDirectionControl(); 
 }
 
 void Vehicle::doVelocityControl()
@@ -52,7 +58,7 @@ void Vehicle::doVelocityControl()
     Eigen::Vector3d controlInput = mController->computeControlInput(mVelError.get()); 
 
     setControlInput(controlInput); 
-    doThrusterControl(); 
+    doDirectionControl(); 
 }
 
 void Vehicle::setControlInput(Eigen::Vector3d aControlInput)
@@ -78,6 +84,12 @@ void Vehicle::setGoalVelocity(Eigen::Vector3d aGoalVel)
     mGoalVelocity = aGoalVel; 
     mGoalType = GoalType::VELOCITY;
     mJustRecvdNewGoal.set(true); 
+}
+
+void Vehicle::setThrusterCmdSequence(const std::string& aCmd)
+{
+    LOGV << "Received thruster command sequence " << aCmd; 
+    mThrusterCmdSequence.set(aCmd);  
 }
 
 Eigen::Vector3d Vehicle::getGoalPose() 

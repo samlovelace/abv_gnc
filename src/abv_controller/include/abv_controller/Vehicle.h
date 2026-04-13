@@ -21,12 +21,14 @@ public:
     bool init(); 
 
     void doThrusterControl(); 
+    void doDirectionControl(); 
     void doPoseControl(); 
     void doVelocityControl(); 
 
     void setGoalPose(Eigen::Vector3d aGoalPose);
     void setGoalVelocity(Eigen::Vector3d aGoalVel); 
     void setControlInput(Eigen::Vector3d aControlInput); 
+    void setThrusterCmdSequence(const std::string& aCmd);
 
     void stop(); 
 
@@ -82,6 +84,8 @@ private:
     std::unique_ptr<ThrusterCommander> mThrusterCommander;
     std::shared_ptr<RosNavigationListener> mNavManager;
     std::unique_ptr<Controller> mController; 
+
+    ThreadSafe<std::string> mThrusterCmdSequence; 
 
 private: 
     Eigen::Vector3d convertToBodyFrame(Eigen::Vector3d aControlInputGlobal); 

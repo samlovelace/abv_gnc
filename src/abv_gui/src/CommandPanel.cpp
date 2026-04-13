@@ -189,7 +189,7 @@ abv_msgs::msg::AbvControllerCommand CommandPanel::makeCommand(int axis)
 {
     // assumes axis order of +x, -x, +y, -y, +yaw, -yaw
     abv_msgs::msg::AbvControllerCommand cmd;
-    cmd.set__type("thruster");
+    cmd.set__type("direction");
     
     abv_msgs::msg::AbvVec3 msg;
 
@@ -227,7 +227,13 @@ abv_msgs::msg::AbvControllerCommand CommandPanel::makeCommand(int axis)
 abv_msgs::msg::AbvControllerCommand CommandPanel::makeThruster(int thruster)
 {
     abv_msgs::msg::AbvControllerCommand cmd;
-    cmd.set__type("thruster");  
+    cmd.set__type("thruster");
+    
+    std::string seq = "00000000"; 
+    if(thruster != -1)
+        seq[thruster-1] = '1'; 
+    
+    cmd.set__thrusters(seq); 
     return cmd;
 }
 
@@ -235,10 +241,22 @@ QWidget* CommandPanel::makeThrusterButton(const std::string& name, int number)
 {
     auto* btn = new ButtonAdapter(
         name,
-        [&]() { RosTopicManager::getInstance()->publishMessage("abv/controller/thrusters", 
-                makeThruster(number)); },  // pressed
-        [&]() { RosTopicManager::getInstance()->publishMessage("abv/controller/thrusters", 
-                makeThruster(-1)); },  // released
+        [this, number]() { 
+        mFireTimer = RosTopicManager::getInstance()->create_wall_timer(
+            std::chrono::milliseconds(100),  // 10Hz
+            [this, number]() {
+                RosTopicManager::getInstance()->publishMessage(
+                    "abv/controller/command", makeThruster(number));
+            });
+    },  // pressed — starts timer,
+        [this]() {
+            if (mFireTimer) {
+                mFireTimer->cancel();
+                mFireTimer = nullptr;
+            }
+            RosTopicManager::getInstance()->publishMessage(
+                "abv/controller/command", makeThruster(-1));  // zero command on release
+        },  // released — stops timer
         ButtonStyle::warning()
     );
 
@@ -249,12 +267,25 @@ QWidget* CommandPanel::makeAxisButton(const std::string& name, int axis)
 {
     auto* btn = new ButtonAdapter(
         name,
-        [this, axis]() { RosTopicManager::getInstance()->publishMessage("abv/controller/command",
-            makeCommand(axis)); },
-        [this, axis]() { RosTopicManager::getInstance()->publishMessage("abv/controller/command",
-            makeCommand(-1)); },
+        [this, axis]() { 
+        mFireTimer = RosTopicManager::getInstance()->create_wall_timer(
+            std::chrono::milliseconds(100),  // 10Hz
+            [this, axis]() {
+                RosTopicManager::getInstance()->publishMessage(
+                    "abv/controller/command", makeCommand(axis));
+            });
+    },  // pressed — starts timer,
+        [this]() {
+            if (mFireTimer) {
+                mFireTimer->cancel();
+                mFireTimer = nullptr;
+            }
+            RosTopicManager::getInstance()->publishMessage(
+                "abv/controller/command", makeCommand(-1));  // zero command on release
+        },  // released — stops timer
         ButtonStyle::warning()
     );
+
     return btn;
 }
 

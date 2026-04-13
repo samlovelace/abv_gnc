@@ -17,7 +17,8 @@ public:
     {
         STARTUP,
         IDLE, 
-        THRUSTER_CONTROL, 
+        THRUSTER_CONTROL,
+        DIRECTION_CONTROL, 
         POSE_CONTROL, 
         VELOCITY_CONTROL, 
         NUM_TYPES

@@ -39,4 +39,6 @@ private:
 
     QComboBox*      mPathType{nullptr};
     QDoubleSpinBox* mPathDuration{nullptr};
+
+    rclcpp::TimerBase::SharedPtr mFireTimer{nullptr};
 };

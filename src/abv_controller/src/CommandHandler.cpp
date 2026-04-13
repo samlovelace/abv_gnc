@@ -38,11 +38,15 @@ void CommandHandler::commandCallback(abv_msgs::msg::AbvControllerCommand::Shared
         mVehicle->stop(); 
         setNewActiveState(StateMachine::States::IDLE); 
     }
-
-    if(CommandType::THRUSTER == command)
+    else if(CommandType::THRUSTER == command)
+    {
+        mVehicle->setThrusterCmdSequence(aCmdMsg->thrusters); 
+        setNewActiveState(StateMachine::States::THRUSTER_CONTROL); 
+    }
+    else if(CommandType::DIRECTION == command)
     {
         mVehicle->setControlInput(convertToEigen(aCmdMsg->data)); 
-        setNewActiveState(StateMachine::States::THRUSTER_CONTROL); 
+        setNewActiveState(StateMachine::States::DIRECTION_CONTROL); 
     }
     else if (CommandType::POSE == command)
     {
@@ -88,6 +92,10 @@ CommandHandler::CommandType CommandHandler::toEnum(const std::string& aType)
     {
         enumToReturn = CommandType::THRUSTER; 
     }
+    else if ("Direction" == aType || "direction" == aType)
+    {
+        enumToReturn = CommandType::DIRECTION; 
+    }
     else if ("Pose" == aType || "pose" == aType)
     {
         enumToReturn = CommandType::POSE; 
@@ -132,7 +140,9 @@ std::string CommandHandler::toString(CommandType aCmdType)
         break;
     case CommandType::STOP: 
         stringToReturn = "STOP"; 
-        break; 
+        break;
+    case CommandType::DIRECTION: 
+        stringToReturn = "DIRECTION"; 
     default:
         break;
     }

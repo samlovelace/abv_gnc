@@ -35,7 +35,12 @@ ThrusterCommander::~ThrusterCommander()
 
 }
 
-void ThrusterCommander::commandThrusters(Eigen::Vector3d aControlInput)
+void ThrusterCommander::commandThrusters(const std::string& aThrustersCmd)
+{
+    mThrusterDriver->send(aThrustersCmd); 
+}
+
+void ThrusterCommander::command(Eigen::Vector3d aControlInput)
 {
     // convert control input to thruster dir vector
     Eigen::Vector3i thrustDirVector = convertToThrustVector(aControlInput); 

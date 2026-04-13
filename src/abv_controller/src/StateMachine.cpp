@@ -51,7 +51,10 @@ void StateMachine::run()
             // do nothing 
             break;
 
-        case States::THRUSTER_CONTROL:
+        case States::THRUSTER_CONTROL: 
+            mVehicle->doThrusterControl(); 
+            break; 
+        case States::DIRECTION_CONTROL:
 
             if(mVehicle->isControlInputStale())
             {
@@ -61,7 +64,7 @@ void StateMachine::run()
             }    
 
             // if here, control input not stale, apply it 
-            mVehicle->doThrusterControl(); 
+            mVehicle->doDirectionControl(); 
             break;
 
         case States::POSE_CONTROL: 
@@ -110,6 +113,9 @@ std::string StateMachine::toString(StateMachine::States aState)
         break;
     case StateMachine::States::VELOCITY_CONTROL: 
         stringToReturn = "VELOCITY_CONTROL"; 
+        break; 
+    case StateMachine::States::DIRECTION_CONTROL:
+        stringToReturn = "DIRECTION_CONTROL"; 
         break; 
     default:
         stringToReturn = "UNKNOWN"; 

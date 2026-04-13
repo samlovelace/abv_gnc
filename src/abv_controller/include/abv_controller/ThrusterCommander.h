@@ -15,7 +15,8 @@ public:
     ThrusterCommander(/* args */);
     ~ThrusterCommander();
 
-    void commandThrusters(Eigen::Vector3d aControlInput); 
+    void command(Eigen::Vector3d aControlInput); 
+    void commandThrusters(const std::string& aThrustersCmd); 
 
     Eigen::Vector3d getAppliedThrustVector(); 
 

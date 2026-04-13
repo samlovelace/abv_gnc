@@ -39,6 +39,7 @@ public:
         VELOCITY,
         IDLE,
         STOP, 
+        DIRECTION,
         NUM_TYPES
     };
 
