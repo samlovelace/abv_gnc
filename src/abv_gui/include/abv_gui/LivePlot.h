@@ -21,7 +21,7 @@ public:
     explicit LivePlot(const QString& title,
                       double yMin, double yMax,
                       QStringList seriesNames,
-                      double windowSecs = 10.0,
+                      double windowSecs = 180.0,
                       QWidget* parent = nullptr);
 
     void connectTo(TopicAdapterBase* adapter);
@@ -46,7 +46,7 @@ private:
     QMap<QString, QLabel*>      mReadoutLabels;
     bool                        mShowReadout{false};
 
-    double mWindowSecs{10.0};
+    double mWindowSecsMax{180.0};
     QStringList mSeriesNames;
 
     // autoscale state

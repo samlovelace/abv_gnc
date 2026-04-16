@@ -41,9 +41,9 @@ int main(int argc, char *argv[])
     app.setStyle("Fusion"); 
 
     // --- Create plots ---
-    auto *posPlot  = new LivePlot("Position",       0.0,  2.0,  {"x", "y", "yaw"});
-    auto *velPlot  = new LivePlot("Velocity",      -2.0,  2.0,  {"vx", "vy", "w"});
-    auto *ctrlPlot = new LivePlot("Control Input", -10.0, 10.0, {"fx", "fy", "tz"});
+    auto *posPlot  = new LivePlot("Position",       0.0,  2.0, {"x", "y", "yaw"});
+    auto *velPlot  = new LivePlot("Velocity",      -2.0,  2.0, {"vx", "vy", "w"});
+    auto *ctrlPlot = new LivePlot("Control Input", -0.5,  0.5, {"fx", "fy", "tz"});
 
     posPlot->setReadoutVisible(true); 
     velPlot->setReadoutVisible(true); 

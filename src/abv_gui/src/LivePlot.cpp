@@ -10,7 +10,7 @@
 static const QList<QColor> kColors = {
     QColor("#e71111"),
     QColor("#14da14"),
-    QColor("#1a1ad1"),
+    QColor("#0000ff"),
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -23,12 +23,12 @@ LivePlot::LivePlot(const QString& title,
                    double windowSecs,
                    QWidget* parent)
     : QWidget(parent)
-    , mWindowSecs(windowSecs)
+    , mWindowSecsMax(windowSecs)
     , mSeriesNames(seriesNames)
 {
     // ── Axes ──────────────────────────────────────────────────────────────────
     mXAxis = new QValueAxis();
-    mXAxis->setRange(0, mWindowSecs);
+    mXAxis->setRange(0, 0);
     mXAxis->setLabelFormat("%.1f");
 
     mYAxis = new QValueAxis();
@@ -158,9 +158,20 @@ void LivePlot::onNewData(double aTime, QVector<double> aValues)
         auto* s = mSeries[mSeriesOrder[i]];
         s->append(aTime, aValues[i]);
 
+        // remove all points that have scrolled off the left edge
+        while (s->count() > 0 && (aTime - s->at(0).x()) > mWindowSecsMax)
+            s->removePoints(0, 1);
+
         batchMin = std::min(batchMin, aValues[i]);
         batchMax = std::max(batchMax, aValues[i]);
     }
+
+    double windowSecs = aTime > mWindowSecsMax ? mWindowSecsMax : aTime; 
+
+    // sliding window: move the x axis forward with time
+    double xMin = aTime > windowSecs ? aTime - windowSecs : 0.0;
+    double xMax = aTime > windowSecs ? aTime : windowSecs;
+    mXAxis->setRange(xMin, xMax);
 
     // ── Autoscale Y ───────────────────────────────────────────────────────────
     if (mAutoScaleY) {
@@ -174,8 +185,6 @@ void LivePlot::onNewData(double aTime, QVector<double> aValues)
             mYAxis->setRange(mYMinSeen - pad, mYMaxSeen + pad);
         }
     }
-
-    mXAxis->setRange(0, aTime);
 
     // ── Update readouts ───────────────────────────────────────────────────────
     if (mShowReadout) {
