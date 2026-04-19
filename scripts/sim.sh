@@ -10,25 +10,20 @@
 
 SESSION=abv-sim
 WS=~/dev/cpp/robot_ws/src/abv_gnc
-WS2=~/dev/python/robot_gui
 
 tmux new-session -d -s $SESSION
 
-# Pane 1
 tmux send-keys -t $SESSION \
   "cd $WS && source install/setup.bash && ros2 run abv_controller abv_controller" C-m
 
-# Pane 2
 tmux split-window -h -t $SESSION
 tmux send-keys -t $SESSION \
   "cd $WS && source install/setup.bash && ros2 run abv_navigation abv_navigation" C-m
 
-# Pane 3
 tmux split-window -v -t $SESSION
 tmux send-keys -t $SESSION \
   "cd $WS && source install/setup.bash && ros2 run abv_simulator abv_simulator" C-m
 
-# Pane 4
 tmux split-window -v -t $SESSION
 tmux send-keys -t $SESSION \
   "cd $WS && source install/setup.bash && ros2 run abv_guidance abv_guidance" C-m
@@ -40,10 +35,6 @@ tmux send-keys -t $SESSION \
 tmux split-window -h -t $SESSION
 tmux send-keys -t $SESSION \
   "cd $WS && source install/setup.bash && ros2 run abv_gui abv_gui" C-m
-
-tmux split-window -h -t $SESSION
-tmux send-keys -t $SESSION \
-  "cd $WS2 && source $WS/install/setup.bash && export DISPLAY=:1 && python3 main.py" C-m
 
 tmux split-window -h -t $SESSION 
 tmux send-keys -t $SESSION \
