@@ -51,6 +51,10 @@ The software suite is comprised of multiple ROS 2 packages, each implementing a 
         <td>feedback control via PID, thruster actuation</td>
     </tr>
     <tr>
+      <td><code>abv_gui</code></td>
+      <td>GUI for live telemetry and sending commands </td>
+    </tr>
+    <tr>
       <td><code>abv_guidance</code></td>
       <td>waypoint sequencing and path following</td>
     </tr>
