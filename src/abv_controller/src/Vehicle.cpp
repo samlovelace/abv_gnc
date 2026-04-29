@@ -43,7 +43,13 @@ void Vehicle::doPoseControl()
 { 
     Eigen::Vector3d currentPose = mNavManager->getCurrentPose();
 
-    mPoseError.set(getGoalPose() - currentPose); 
+    Eigen::Vector3d goalPose = getGoalPose(); 
+    Eigen::Vector3d error = goalPose - currentPose; 
+    
+    // wrap yaw error to [-pi, pi]
+    error[2] = std::atan2(std::sin(error[2]), std::cos(error[2]));
+
+    mPoseError.set(error); 
     Eigen::Vector3d controlInput = mController->computeControlInput(mPoseError.get()); 
 
     setControlInput(controlInput);
