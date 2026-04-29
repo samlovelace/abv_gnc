@@ -36,6 +36,10 @@ void RosCommandSource::commandCallback(abv_msgs::msg::AbvGuidanceCommand::Shared
     cmd.mDuration = aCmd->duration;
     cmd.mGoal = wp; 
 
+    // TODO: when adding support for vel commands, update this too
+    auto tol = aCmd->arrival_tolerance.position; 
+    cmd.mArrivalTol << tol.x, tol.y, tol.yaw; 
+
     mCommandSink.onCommand(cmd); 
 }
 

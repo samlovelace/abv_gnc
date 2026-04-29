@@ -151,6 +151,14 @@ void StateMachine::sendWaypoint()
 
     cmd.set__data(vec); 
 
+    // set waypoint tolerance 
+    abv_msgs::msg::AbvVec3 tol; 
+    tol.set__x(mCommand.mArrivalTol.x());
+    tol.set__y(mCommand.mArrivalTol.y());
+    tol.set__yaw(mCommand.mArrivalTol.z());
+
+    cmd.set__tolerance(tol); 
+
     LOGV << "Sending next waypoint..."; 
     RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvControllerCommand>("abv/controller/command", cmd); 
     setActiveState(States::WAITING_FOR_EXECUTION); 

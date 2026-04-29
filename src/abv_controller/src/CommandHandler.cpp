@@ -29,38 +29,50 @@ void CommandHandler::commandCallback(abv_msgs::msg::AbvControllerCommand::Shared
     auto command = toEnum(aCmdMsg->type); 
     if(CommandType::NUM_TYPES == command)
     {
-        LOGW << "Cannot execute command"; 
+        LOGW << "Cannot execute unknown command"; 
         return; 
     }
 
-    if(CommandType::STOP == command)
+    switch (command)
     {
-        mVehicle->stop(); 
-        setNewActiveState(StateMachine::States::IDLE); 
-    }
-    else if(CommandType::THRUSTER == command)
-    {
-        mVehicle->setThrusterCmdSequence(aCmdMsg->thrusters); 
-        setNewActiveState(StateMachine::States::THRUSTER_CONTROL); 
-    }
-    else if(CommandType::DIRECTION == command)
-    {
-        mVehicle->setControlInput(convertToEigen(aCmdMsg->data)); 
-        setNewActiveState(StateMachine::States::DIRECTION_CONTROL); 
-    }
-    else if (CommandType::POSE == command)
-    {
-        mVehicle->setGoalPose(convertToEigen(aCmdMsg->data)); 
-        setNewActiveState(StateMachine::States::POSE_CONTROL);   
-    }
-    else if (CommandType::VELOCITY == command)
-    {
-        mVehicle->setGoalVelocity(convertToEigen(aCmdMsg->data));
-        setNewActiveState(StateMachine::States::VELOCITY_CONTROL); 
-    }
-    else if (CommandType::IDLE == command)
-    {
-        setNewActiveState(StateMachine::States::IDLE); 
+        case CommandType::STOP:
+        {
+            mVehicle->stop(); 
+            setNewActiveState(StateMachine::States::IDLE); 
+        
+            break;
+        }
+        case CommandType::THRUSTER:
+        {
+            mVehicle->setThrusterCmdSequence(aCmdMsg->thrusters); 
+            setNewActiveState(StateMachine::States::THRUSTER_CONTROL); 
+            break; 
+        }
+        case CommandType::DIRECTION:
+        {
+            mVehicle->setControlInput(convertToEigen(aCmdMsg->data)); 
+            setNewActiveState(StateMachine::States::DIRECTION_CONTROL); 
+            break; 
+        }
+        case CommandType::POSE:
+        {
+            mVehicle->setGoalPose(convertToEigen(aCmdMsg->data));
+            mVehicle->setArrivalTolerance(convertToEigen(aCmdMsg->tolerance)); 
+            setNewActiveState(StateMachine::States::POSE_CONTROL);   
+            break; 
+        }
+        case CommandType::VELOCITY: 
+        {
+            mVehicle->setGoalVelocity(convertToEigen(aCmdMsg->data));
+            mVehicle->setArrivalTolerance(convertToEigen(aCmdMsg->tolerance)); 
+            setNewActiveState(StateMachine::States::VELOCITY_CONTROL); 
+            break; 
+        }
+        default: 
+        {
+            LOGW << "Cannot execute unknown command"; 
+            return; 
+        }
     }
 }
 
@@ -104,10 +116,6 @@ CommandHandler::CommandType CommandHandler::toEnum(const std::string& aType)
     {
         enumToReturn = CommandType::VELOCITY; 
     }
-    else if ("Idle" == aType || "idle" == aType)
-    {
-        enumToReturn = CommandType::IDLE; 
-    }
     else if ("STOP" == aType || "stop" == aType || "Stop" == aType)
     {
         enumToReturn = CommandType::STOP; 
@@ -126,9 +134,6 @@ std::string CommandHandler::toString(CommandType aCmdType)
     std::string stringToReturn = ""; 
     switch (aCmdType)
     {
-    case CommandType::IDLE:
-        stringToReturn = "IDLE"; 
-        break;
     case CommandType::THRUSTER: 
         stringToReturn = "THRUSTER_CONTROL";
         break; 

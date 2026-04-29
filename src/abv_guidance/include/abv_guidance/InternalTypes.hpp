@@ -21,7 +21,8 @@ struct Command
 {
     std::string mType; 
     double mDuration; 
-    Waypoint mGoal; 
+    Waypoint mGoal;
+    Eigen::Vector3d mArrivalTol;  
 };
 
 #endif 

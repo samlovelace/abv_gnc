@@ -9,8 +9,10 @@
 Vehicle::Vehicle() : 
     mNavManager(std::make_shared<RosNavigationListener>()), mController(std::make_unique<Controller>()),
     mLastInputRecvdAt(std::chrono::steady_clock::now()), mStaleInputThreshold(std::chrono::duration<double>(std::chrono::milliseconds(250))), 
-    mPoseError(), mVelError(), mPoseThresh(0.01, 0.01, 0.05), mVelThresh(0.1, 0.1, 0.1), 
-    mArrivalTimerActive(false), mConfig(ConfigurationManager::getInstance()->getControlConfig()), 
+    mPoseError(), mVelError(),
+    mArrivalTimerActive(false), 
+    mConfig(ConfigurationManager::getInstance()->getControlConfig()), 
+    mArrivalTol(mConfig.mPoseArrivalTol),
     mGoalType(GoalType::NUM_TYPES)
 { 
 
@@ -90,6 +92,27 @@ void Vehicle::setGoalVelocity(Eigen::Vector3d aGoalVel)
     mGoalVelocity = aGoalVel; 
     mGoalType = GoalType::VELOCITY;
     mJustRecvdNewGoal.set(true); 
+}
+
+void Vehicle::setArrivalTolerance(const Eigen::Vector3d& aTolerance)
+{
+    std::lock_guard<std::mutex> lock(mGoalToleranceMutex);
+    
+    for(int i = 0; i < 3; i++)
+    {
+        // if any field is 0 or negative, use the default configured tolerances,
+        // otherwise use the value that was commanded 
+        if(0 >= aTolerance[i])
+        {
+            mArrivalTol[i] = mConfig.mPoseArrivalTol[i];
+        }
+        else
+        {
+            mArrivalTol[i] = aTolerance[i]; 
+        }
+    }
+
+    LOGV << "Using waypoint tolerance of " << mArrivalTol; 
 }
 
 void Vehicle::setThrusterCmdSequence(const std::string& aCmd)
@@ -177,13 +200,13 @@ Arrival::Status Vehicle::determineArrivalStatus()
     case GoalType::POSE:
         {
             auto error = mPoseError.get();
-            within_threshold = (abs(error.array()) < mConfig.mPoseArrivalTol.array()).all();
+            within_threshold = (abs(error.array()) < mArrivalTol.array()).all();
             break;
         }
     case GoalType::VELOCITY:
         {
             auto error = mVelError.get();
-            within_threshold = (abs(error.array()) < mVelThresh.array()).all();
+            within_threshold = (abs(error.array()) < mArrivalTol.array()).all();
             break;
         }
     case GoalType::THRUSTER:

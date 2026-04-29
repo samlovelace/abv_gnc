@@ -30,6 +30,8 @@ public:
     void setControlInput(Eigen::Vector3d aControlInput); 
     void setThrusterCmdSequence(const std::string& aCmd);
 
+    void setArrivalTolerance(const Eigen::Vector3d& aTolerance);  
+
     void stop(); 
 
     Eigen::Vector3d getGoalPose();
@@ -66,8 +68,7 @@ private:
     ThreadSafe<Eigen::Vector3d> mVelError; 
     ThreadSafe<bool> mJustRecvdNewGoal; 
 
-    Eigen::Vector3d mPoseThresh; 
-    Eigen::Vector3d mVelThresh; 
+    Eigen::Vector3d mArrivalTol; 
     std::chrono::steady_clock::time_point mArrivalStart;
     bool mArrivalTimerActive;
 
@@ -80,6 +81,7 @@ private:
     std::mutex mGoalPoseMutex; 
     std::mutex mControlInputMutex; 
     std::mutex mGoalVelocityMutex;
+    std::mutex mGoalToleranceMutex; 
 
     std::unique_ptr<ThrusterCommander> mThrusterCommander;
     std::shared_ptr<RosNavigationListener> mNavManager;

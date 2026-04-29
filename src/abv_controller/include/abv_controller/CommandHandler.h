@@ -37,7 +37,6 @@ public:
         THRUSTER, 
         POSE, 
         VELOCITY,
-        IDLE,
         STOP, 
         DIRECTION,
         NUM_TYPES
