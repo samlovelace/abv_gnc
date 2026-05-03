@@ -40,5 +40,8 @@ abv_msgs::msg::AbvState RosStatePublisher::convertToIdlMsg(const AbvState& aStat
     state.set__position(position); 
     state.set__velocity(velocity); 
 
+    rclcpp::Time now = RosTopicManager::getInstance()->get_clock()->now();
+    state.set__timestamp(now);
+
     return state; 
 }

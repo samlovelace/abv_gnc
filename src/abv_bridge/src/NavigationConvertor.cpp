@@ -59,5 +59,7 @@ void NavigationConvertor::convert(const abv_msgs::msg::AbvState::SharedPtr& anAb
     state.set__quat(qm); 
     state.set__angular_velocity(angVel); 
 
+    state.set__timestamp(anAbvState->timestamp); 
+
     RosTopicManager::getInstance()->publishMessage(mOutgoingTopic, state);  
 }
