@@ -176,7 +176,7 @@ install_from_source libmotioncapture samlovelace/libmotioncapture main "$LIBS_DI
 # custom steps for JETGPIO 
 clone_and_checkout JETGPIO Rubberazer/JETGPIO v1.2 "$LIBS_DIR"
 echo "orinagx" > hardware
-#make && sudo make install
+make && sudo make install
 # end JETGPIO custom  
 
 # robot_ws setup
