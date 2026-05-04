@@ -156,7 +156,7 @@ install_ros() {
 ###########################################################################
 
 # get current dir so we can come back at the end to build the packages 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # make sure things are updated 
 sudo apt update
@@ -179,6 +179,14 @@ echo "orinagx" > hardware
 make && sudo make install
 # end JETGPIO custom  
 
-# build the packages 
-cd $SCRIPT_DIR
-source /opt/ros/humble/setup.bash && colcon build
+# robot_ws setup
+ROBOT_WS=~/robot_ws
+mkdir -p "$ROBOT_WS"/src
+clone_and_checkout robot_idl samlovelace/robot_idl main "$ROBOT_WS"/src
+cd "$ROBOT_WS" && colcon build
+
+# build the main workspace
+cd "$REPO_ROOT"
+source /opt/ros/humble/setup.bash
+source "$ROBOT_WS"/install/setup.bash
+colcon build
