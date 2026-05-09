@@ -51,6 +51,10 @@ The software suite is comprised of multiple ROS 2 packages, each implementing a 
         <td>feedback control via PID, thruster actuation</td>
     </tr>
     <tr>
+        <td><code>abv_description</code></td>
+        <td> urdf description with rviz launch files </td>
+    </tr>
+    <tr>
       <td><code>abv_gui</code></td>
       <td>GUI for live telemetry and sending commands </td>
     </tr>
