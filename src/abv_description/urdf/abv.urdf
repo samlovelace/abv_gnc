@@ -33,7 +33,9 @@
     <link name="vehicle_link">
         <visual>
             <geometry>
-                <mesh filename="package://abv_description/meshes/abv_v2.dae" />
+                <mesh
+                    filename="package://abv_description/meshes/abv_chassis/abv_v2.dae"
+                />
             </geometry>
         </visual>
     </link>

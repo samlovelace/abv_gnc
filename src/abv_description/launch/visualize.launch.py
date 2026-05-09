@@ -28,7 +28,7 @@ def generate_launch_description():
                 parameters=[
                     {
                         "robot_description": open(
-                            os.path.join(pkg_share, "urdf", "abv.urdf")
+                            os.path.join(pkg_share, "urdf", "widow-xl.urdf")
                         ).read()
                     }
                 ],
