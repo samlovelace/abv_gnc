@@ -1,0 +1,139 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="widow_xl">
+
+    <xacro:macro name="widow_xl" params="prefix parent *origin">
+
+        <joint name="${prefix}mount_joint" type="fixed">
+            <parent link="${parent}" />
+            <child link="${prefix}shoulder_mount" />
+            <xacro:insert_block name="origin" />
+        </joint>
+
+        <link name="${prefix}shoulder_mount">
+            <visual>
+                <geometry>
+                    <mesh
+                        filename="package://abv_description/meshes/widow-xl/shoulder_mount.dae"
+                    />
+                </geometry>
+            </visual>
+        </link>
+
+        <joint name="${prefix}shoulder_joint" type="revolute">
+            <parent link="${prefix}shoulder_mount" />
+            <child link="${prefix}shoulder_link" />
+            <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+            <axis xyz="1 0 0" />
+            <limit lower="-1.57" upper="1.57" effort="0" velocity="1.0" />
+        </joint>
+
+        <link name="${prefix}shoulder_link">
+            <visual>
+                <geometry>
+                    <mesh
+                        filename="package://abv_description/meshes/widow-xl/shoulder.dae"
+                    />
+                </geometry>
+            </visual>
+        </link>
+
+        <joint name="${prefix}forearm_joint" type="revolute">
+            <parent link="${prefix}shoulder_link" />
+            <child link="${prefix}forearm_link" />
+            <origin xyz="0.0 -0.0525 0.145" rpy="0 0 0" />
+            <axis xyz="1 0 0" />
+            <limit lower="-1.57" upper="1.57" effort="0" velocity="1.0" />
+        </joint>
+
+        <link name="${prefix}forearm_link">
+            <visual>
+                <geometry>
+                    <mesh
+                        filename="package://abv_description/meshes/widow-xl/forearm.dae"
+                    />
+                </geometry>
+            </visual>
+        </link>
+
+        <joint name="${prefix}wrist_joint" type="revolute">
+            <parent link="${prefix}forearm_link" />
+            <child link="${prefix}wrist_link" />
+            <origin xyz="0 -0.15 0" rpy="0 0 0" />
+            <axis xyz="1 0 0" />
+            <limit lower="-1.57" upper="1.57" effort="0" velocity="1.0" />
+        </joint>
+
+        <link name="${prefix}wrist_link">
+            <visual>
+                <geometry>
+                    <mesh
+                        filename="package://abv_description/meshes/widow-xl/wrist.dae"
+                    />
+                </geometry>
+            </visual>
+        </link>
+
+        <joint name="${prefix}wrist_rotate_joint" type="revolute">
+            <parent link="${prefix}wrist_link" />
+            <child link="${prefix}wrist_rotate_link" />
+            <origin xyz="0 -0.075 0" rpy="0 0 -1.57" />
+            <axis xyz="1 0 0" />
+            <limit lower="-1.57" upper="1.57" effort="0" velocity="1.0" />
+        </joint>
+
+        <link name="${prefix}wrist_rotate_link">
+            <visual>
+                <geometry>
+                    <mesh
+                        filename="package://abv_description/meshes/widow-xl/wrist_rotate.dae"
+                    />
+                </geometry>
+            </visual>
+        </link>
+
+        <joint name="${prefix}gripper_joint" type="fixed">
+            <parent link="${prefix}wrist_rotate_link" />
+            <child link="${prefix}gripper_link" />
+            <origin xyz="0.0575 0 0" rpy="0 0 0" />
+        </joint>
+        <link name="${prefix}gripper_link" />
+
+        <joint name="${prefix}left_finger_joint" type="prismatic">
+            <parent link="${prefix}gripper_link" />
+            <child link="${prefix}left_finger_link" />
+            <origin xyz="0 0.035 0" rpy="0 0 0" />
+            <axis xyz="0 -1 0" />
+            <limit lower="0.0" upper="0.0325" effort="10" velocity="1.0" />
+        </joint>
+        <link name="${prefix}left_finger_link">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 1.57" />
+                <geometry>
+                    <mesh
+                        filename="package://abv_description/meshes/widow-xl/finger.dae"
+                    />
+                </geometry>
+            </visual>
+        </link>
+
+        <joint name="${prefix}right_finger_joint" type="prismatic">
+            <parent link="${prefix}gripper_link" />
+            <child link="${prefix}right_finger_link" />
+            <origin xyz="0 -0.035 0" rpy="0 0 0" />
+            <axis xyz="0 1 0" />
+            <limit lower="0.0" upper="0.0325" effort="10" velocity="1.0" />
+        </joint>
+        <link name="${prefix}right_finger_link">
+            <visual>
+                <origin xyz="0 0 0" rpy="3.14159 0 -1.57" />
+                <geometry>
+                    <mesh
+                        filename="package://abv_description/meshes/widow-xl/finger.dae"
+                    />
+                </geometry>
+            </visual>
+        </link>
+
+    </xacro:macro>
+
+</robot>

@@ -1,0 +1,51 @@
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="abv_chassis">
+
+    <xacro:macro name="abv_chassis" params="parent *origin">
+        <joint name="abv_mount_joint" type="fixed">
+            <parent link="${parent}" />
+            <child link="base_link" />
+            <xacro:insert_block name="origin" />
+        </joint>
+        <link name="base_link" />
+
+        <!-- X translation -->
+        <joint name="x_joint" type="prismatic">
+            <parent link="base_link" />
+            <child link="x_link" />
+            <axis xyz="1 0 0" />
+            <limit lower="0.0" upper="0.0" effort="0" velocity="10.0" />
+        </joint>
+        <link name="x_link" />
+
+        <!-- Y translation -->
+        <joint name="y_joint" type="prismatic">
+            <parent link="x_link" />
+            <child link="y_link" />
+            <axis xyz="0 1 0" />
+            <limit lower="0.0" upper="0.0" effort="0" velocity="10.0" />
+        </joint>
+        <link name="y_link" />
+
+        <!-- Yaw rotation -->
+        <joint name="yaw_joint" type="revolute">
+            <parent link="y_link" />
+            <child link="vehicle_link" />
+            <axis xyz="0 0 1" />
+            <limit lower="0" upper="0" effort="0" velocity="10.0" />
+            <!--limit lower="-3.14" upper="3.14" effort="0" velocity="10.0" /-->
+        </joint>
+
+        <!-- Actual vehicle link with mesh -->
+        <link name="vehicle_link">
+            <visual>
+            <origin xyz="-0.0175 -0.065 0.03" rpy="0 0 0" />
+                <geometry>
+                    <mesh
+                        filename="package://abv_description/meshes/abv_chassis/abv_v2.dae"
+                    />
+                </geometry>
+            </visual>
+        </link>
+
+    </xacro:macro>
+</robot>

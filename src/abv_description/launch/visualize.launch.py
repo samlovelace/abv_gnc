@@ -1,5 +1,6 @@
 import os
 
+import xacro
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
@@ -14,7 +15,7 @@ def generate_launch_description():
             Node(
                 package="tf2_ros",
                 executable="static_transform_publisher",
-                arguments=["0", "0", "0", "0", "0", "0", "map", "base_link"],
+                arguments=["0", "0", "0", "0", "0", "0", "world", "base_link"],
             ),
             Node(
                 package="joint_state_publisher_gui",
@@ -27,9 +28,9 @@ def generate_launch_description():
                 name="robot_state_publisher",
                 parameters=[
                     {
-                        "robot_description": open(
-                            os.path.join(pkg_share, "urdf", "widow-xl.urdf")
-                        ).read()
+                        "robot_description": xacro.process_file(
+                            os.path.join(pkg_share, "urdf", "abv.urdf.xacro")
+                        ).toxml()
                     }
                 ],
             ),
