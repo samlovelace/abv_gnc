@@ -27,17 +27,17 @@ set(SOURCES
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_include_directories(${PROJECT_NAME} PRIVATE 
+target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/include
     ${COMMON_INCLUDE_DIR}
     ${EIGEN3_INCLUDE_DIRS}
 )
 
 # Dependencies
-target_link_libraries(${PROJECT_NAME} 
+target_link_libraries(${PROJECT_NAME}
 	abv_common::abv_common
-	yaml-cpp 
-	plog::plog 
+	yaml-cpp
+	plog::plog
 	libmotioncapture::libmotioncapture
 )
 ament_target_dependencies(${PROJECT_NAME}

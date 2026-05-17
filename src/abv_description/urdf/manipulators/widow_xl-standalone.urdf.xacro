@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="widow_xl">
+
+  <xacro:include
+        filename="$(find abv_description)/urdf/manipulators/widow_xl.urdf.xacro"
+    />
+
+  <!-- Dummy root link — RobotModel grafts this onto the vehicle tree -->
+  <link name="widow_xl_base" />
+
+  <xacro:widow_xl prefix="" parent="widow_xl_base">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:widow_xl>
+
+</robot>

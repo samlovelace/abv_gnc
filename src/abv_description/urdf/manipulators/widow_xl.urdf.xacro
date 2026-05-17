@@ -10,13 +10,21 @@
         </joint>
 
         <link name="${prefix}shoulder_mount">
+            <inertial>
+                <mass value="0.2"/>
+                <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+                         iyy="0.0001" iyz="0.0" izz="0.0001"/>
+            </inertial>
             <visual>
                 <geometry>
-                    <mesh
-                        filename="package://abv_description/meshes/widow-xl/shoulder_mount.dae"
-                    />
+                    <mesh filename="package://abv_description/meshes/widow-xl/shoulder_mount.dae"/>
                 </geometry>
             </visual>
+            <collision>
+                <geometry>
+                    <box size="0.07 0.07 0.05"/>
+                </geometry>
+            </collision>
         </link>
 
         <joint name="${prefix}shoulder_joint" type="revolute">
@@ -24,17 +32,28 @@
             <child link="${prefix}shoulder_link" />
             <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
             <axis xyz="1 0 0" />
-            <limit lower="-1.57" upper="1.57" effort="0" velocity="1.0" />
+            <limit lower="-1.57" upper="1.57" effort="10" velocity="1.0" />
+            <dynamics damping="5.0" friction="0.5"/>
         </joint>
 
         <link name="${prefix}shoulder_link">
+            <inertial>
+                <mass value="0.3"/>
+                <origin xyz="0.0 -0.025 0.07" rpy="0 0 0"/>
+                <inertia ixx="0.0005" ixy="0.0" ixz="0.0"
+                         iyy="0.0005" iyz="0.0" izz="0.0001"/>
+            </inertial>
             <visual>
                 <geometry>
-                    <mesh
-                        filename="package://abv_description/meshes/widow-xl/shoulder.dae"
-                    />
+                    <mesh filename="package://abv_description/meshes/widow-xl/shoulder.dae"/>
                 </geometry>
             </visual>
+            <collision>
+                <origin xyz="0.0 -0.025 0.07" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder radius="0.03" length="0.145"/>
+                </geometry>
+            </collision>
         </link>
 
         <joint name="${prefix}forearm_joint" type="revolute">
@@ -42,17 +61,28 @@
             <child link="${prefix}forearm_link" />
             <origin xyz="0.0 -0.0525 0.145" rpy="0 0 0" />
             <axis xyz="1 0 0" />
-            <limit lower="-1.57" upper="1.57" effort="0" velocity="1.0" />
+            <limit lower="-1.57" upper="1.57" effort="10" velocity="1.0" />
+            <dynamics damping="5.0" friction="0.5"/>
         </joint>
 
         <link name="${prefix}forearm_link">
+            <inertial>
+                <mass value="0.25"/>
+                <origin xyz="0.0 -0.075 0.0" rpy="0 0 0"/>
+                <inertia ixx="0.0005" ixy="0.0" ixz="0.0"
+                         iyy="0.0001" iyz="0.0" izz="0.0005"/>
+            </inertial>
             <visual>
                 <geometry>
-                    <mesh
-                        filename="package://abv_description/meshes/widow-xl/forearm.dae"
-                    />
+                    <mesh filename="package://abv_description/meshes/widow-xl/forearm.dae"/>
                 </geometry>
             </visual>
+            <collision>
+                <origin xyz="0.0 -0.075 0.0" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder radius="0.025" length="0.15"/>
+                </geometry>
+            </collision>
         </link>
 
         <joint name="${prefix}wrist_joint" type="revolute">
@@ -60,17 +90,28 @@
             <child link="${prefix}wrist_link" />
             <origin xyz="0 -0.15 0" rpy="0 0 0" />
             <axis xyz="1 0 0" />
-            <limit lower="-1.57" upper="1.57" effort="0" velocity="1.0" />
+            <limit lower="-1.57" upper="1.57" effort="10" velocity="1.0" />
+            <dynamics damping="5.0" friction="0.5"/>
         </joint>
 
         <link name="${prefix}wrist_link">
+            <inertial>
+                <mass value="0.15"/>
+                <origin xyz="0.0 -0.0375 0.0" rpy="0 0 0"/>
+                <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+                         iyy="0.00005" iyz="0.0" izz="0.0001"/>
+            </inertial>
             <visual>
                 <geometry>
-                    <mesh
-                        filename="package://abv_description/meshes/widow-xl/wrist.dae"
-                    />
+                    <mesh filename="package://abv_description/meshes/widow-xl/wrist.dae"/>
                 </geometry>
             </visual>
+            <collision>
+                <origin xyz="0.0 -0.0375 0.0" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder radius="0.02" length="0.075"/>
+                </geometry>
+            </collision>
         </link>
 
         <joint name="${prefix}wrist_rotate_joint" type="revolute">
@@ -78,17 +119,28 @@
             <child link="${prefix}wrist_rotate_link" />
             <origin xyz="0 -0.075 0" rpy="0 0 -1.57" />
             <axis xyz="1 0 0" />
-            <limit lower="-1.57" upper="1.57" effort="0" velocity="1.0" />
+            <limit lower="-1.57" upper="1.57" effort="10" velocity="1.0" />
+            <dynamics damping="5.0" friction="0.5"/>
         </joint>
 
         <link name="${prefix}wrist_rotate_link">
+            <inertial>
+                <mass value="0.1"/>
+                <origin xyz="0.02 0.0 0.0" rpy="0 0 0"/>
+                <inertia ixx="0.00005" ixy="0.0" ixz="0.0"
+                         iyy="0.00005" iyz="0.0" izz="0.00005"/>
+            </inertial>
             <visual>
                 <geometry>
-                    <mesh
-                        filename="package://abv_description/meshes/widow-xl/wrist_rotate.dae"
-                    />
+                    <mesh filename="package://abv_description/meshes/widow-xl/wrist_rotate.dae"/>
                 </geometry>
             </visual>
+            <collision>
+                <origin xyz="0.02 0.0 0.0" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder radius="0.02" length="0.04"/>
+                </geometry>
+            </collision>
         </link>
 
         <joint name="${prefix}gripper_joint" type="fixed">
@@ -96,7 +148,9 @@
             <child link="${prefix}gripper_link" />
             <origin xyz="0.0575 0 0" rpy="0 0 0" />
         </joint>
-        <link name="${prefix}gripper_link" />
+
+        <!-- gripper_link is massless — mass accounted for in fingers -->
+        <link name="${prefix}gripper_link"/>
 
         <joint name="${prefix}left_finger_joint" type="prismatic">
             <parent link="${prefix}gripper_link" />
@@ -104,16 +158,26 @@
             <origin xyz="0 0.035 0" rpy="0 0 0" />
             <axis xyz="0 -1 0" />
             <limit lower="0.0" upper="0.0325" effort="10" velocity="1.0" />
+            <dynamics damping="5.0" friction="0.5"/>
         </joint>
+
         <link name="${prefix}left_finger_link">
+            <inertial>
+                <mass value="0.05"/>
+                <inertia ixx="0.00001" ixy="0.0" ixz="0.0"
+                         iyy="0.00001" iyz="0.0" izz="0.00001"/>
+            </inertial>
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 1.57" />
                 <geometry>
-                    <mesh
-                        filename="package://abv_description/meshes/widow-xl/finger.dae"
-                    />
+                    <mesh filename="package://abv_description/meshes/widow-xl/finger.dae"/>
                 </geometry>
             </visual>
+            <collision>
+                <geometry>
+                    <box size="0.015 0.03 0.04"/>
+                </geometry>
+            </collision>
         </link>
 
         <joint name="${prefix}right_finger_joint" type="prismatic">
@@ -122,16 +186,26 @@
             <origin xyz="0 -0.035 0" rpy="0 0 0" />
             <axis xyz="0 1 0" />
             <limit lower="0.0" upper="0.0325" effort="10" velocity="1.0" />
+            <dynamics damping="5.0" friction="0.5"/>
         </joint>
+
         <link name="${prefix}right_finger_link">
+            <inertial>
+                <mass value="0.05"/>
+                <inertia ixx="0.00001" ixy="0.0" ixz="0.0"
+                         iyy="0.00001" iyz="0.0" izz="0.00001"/>
+            </inertial>
             <visual>
                 <origin xyz="0 0 0" rpy="3.14159 0 -1.57" />
                 <geometry>
-                    <mesh
-                        filename="package://abv_description/meshes/widow-xl/finger.dae"
-                    />
+                    <mesh filename="package://abv_description/meshes/widow-xl/finger.dae"/>
                 </geometry>
             </visual>
+            <collision>
+                <geometry>
+                    <box size="0.015 0.03 0.04"/>
+                </geometry>
+            </collision>
         </link>
 
     </xacro:macro>

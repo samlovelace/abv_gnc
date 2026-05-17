@@ -2,7 +2,7 @@
 #define NAVIGATIONCONVERTOR_H
  
 #include "abv_msgs/msg/abv_state.hpp"
-#include "robot_idl/msg/robot_state.hpp"
+#include "ptera_msgs/msg/robot_state.hpp"
  
 class NavigationConvertor 
 { 

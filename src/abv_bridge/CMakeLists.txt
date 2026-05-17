@@ -10,7 +10,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(abv_msgs REQUIRED)
 find_package(abv_common REQUIRED)
-find_package(robot_idl REQUIRED)
+find_package(ptera_msgs REQUIRED)
 
 set(SOURCES 
   ${CMAKE_CURRENT_LIST_DIR}/src/ControllerStatusConvertor.cpp
@@ -31,7 +31,7 @@ target_link_libraries(${PROJECT_NAME} abv_common::abv_common yaml-cpp)
 ament_target_dependencies(${PROJECT_NAME}
   rclcpp
   abv_msgs
-  robot_idl
+  ptera_msgs
 )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})

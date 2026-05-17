@@ -25,13 +25,13 @@ int main()
 {
     std::signal(SIGINT, signalHandler);
 
-    rclcpp::init(0, nullptr); 
-    RosTopicManager::getInstance("abv_teleop")->createPublisher<abv_msgs::msg::AbvControllerCommand>("abv/controller/command"); 
-    RosTopicManager::getInstance()->spinNode(); 
-    
-    auto controlDevice = ControlDeviceFactory::create("sfml"); 
-    TeleopController tc(controlDevice); 
-    tc.run(); 
-    
-    rclcpp::shutdown(); 
+    rclcpp::init(0, nullptr);
+    RosTopicManager::getInstance("abv_teleop")->createPublisher<abv_msgs::msg::AbvControllerCommand>("abv/controller/command");
+    RosTopicManager::getInstance()->spinNode();
+
+    auto controlDevice = ControlDeviceFactory::create("sfml");
+    TeleopController tc(controlDevice);
+    tc.run();
+
+    rclcpp::shutdown();
 }

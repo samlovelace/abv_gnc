@@ -23,7 +23,7 @@
 # Third-party libs are cloned to ~/libs by default (see LIBS_DIR)
 ##########################################################################
 
-# where to clone libs that need built from source 
+# where to clone libs that need built from source
 LIBS_DIR=~/libs
 
 # List of required system packages
@@ -36,13 +36,13 @@ DEPENDENCIES=(
     libeigen3-dev
     libyaml-cpp-dev
     libsfml-dev
-    libboost-system-dev 
+    libboost-system-dev
     libboost-thread-dev
     qt6-base-dev
     libqt6charts6-dev
 )
 
-# Function to check and install a package 
+# Function to check and install a package
 check_and_install() {
     PKG="$1"
     CUSTOM_INSTALL_FUNC="$2"
@@ -152,37 +152,38 @@ install_ros() {
 }
 
 ###########################################################################
-## Script run logic 
+## Script run logic
 ###########################################################################
 
-# get current dir so we can come back at the end to build the packages 
+# get current dir so we can come back at the end to build the packages
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# make sure things are updated 
+# make sure things are updated
 sudo apt update
 
-# treat ros2 install special 
+# treat ros2 install special
 check_and_install "ros-humble-desktop" "install_ros"
 
-# install system deps 
+# install system deps
 for pkg in "${DEPENDENCIES[@]}"; do
     check_and_install "$pkg"
 done
 
 # install deps from source
 install_from_source plog SergiusTheBest/plog 1.1.10 $LIBS_DIR
-install_from_source libmotioncapture samlovelace/libmotioncapture main "$LIBS_DIR" 
+install_from_source libmotioncapture samlovelace/libmotioncapture main "$LIBS_DIR" \
+    "-DCMAKE_INSTALL_PREFIX=/usr/local"
 
-# custom steps for JETGPIO 
+# custom steps for JETGPIO
 clone_and_checkout JETGPIO Rubberazer/JETGPIO v1.2 "$LIBS_DIR"
 echo "orinagx" > hardware
 make && sudo make install
-# end JETGPIO custom  
+# end JETGPIO custom
 
 # robot_ws setup
 ROBOT_WS=~/robot_ws
 mkdir -p "$ROBOT_WS"/src
-clone_and_checkout robot_idl samlovelace/robot_idl main "$ROBOT_WS"/src
+clone_and_checkout ptera samlovelace/ptera main "$ROBOT_WS"/src
 cd "$ROBOT_WS" && colcon build
 
 # build the main workspace

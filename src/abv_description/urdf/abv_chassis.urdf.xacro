@@ -1,12 +1,24 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="abv_chassis">
-
     <xacro:macro name="abv_chassis" params="parent *origin">
         <joint name="abv_mount_joint" type="fixed">
             <parent link="${parent}" />
             <child link="base_link" />
             <xacro:insert_block name="origin" />
         </joint>
-        <link name="base_link" />
+
+        <link name="base_link">
+            <inertial>
+                <mass value="0.001" />
+                <inertia
+                    ixx="0.001"
+                    ixy="0"
+                    ixz="0"
+                    iyy="0.001"
+                    iyz="0"
+                    izz="0.001"
+                />
+            </inertial>
+        </link>
 
         <!-- X translation -->
         <joint name="x_joint" type="prismatic">
@@ -15,16 +27,42 @@
             <axis xyz="1 0 0" />
             <limit lower="-1.0" upper="1.0" effort="0" velocity="0.1" />
         </joint>
-        <link name="x_link" />
 
-        <!-- Y translation -->s
+        <link name="x_link">
+            <inertial>
+                <mass value="0.001" />
+                <inertia
+                    ixx="0.001"
+                    ixy="0"
+                    ixz="0"
+                    iyy="0.001"
+                    iyz="0"
+                    izz="0.001"
+                />
+            </inertial>
+        </link>
+
+        <!-- Y translation -->
         <joint name="y_joint" type="prismatic">
             <parent link="x_link" />
             <child link="y_link" />
             <axis xyz="0 1 0" />
             <limit lower="-1.0" upper="1.0" effort="0" velocity="0.1" />
         </joint>
-        <link name="y_link" />
+
+        <link name="y_link">
+            <inertial>
+                <mass value="0.001" />
+                <inertia
+                    ixx="0.001"
+                    ixy="0"
+                    ixz="0"
+                    iyy="0.001"
+                    iyz="0"
+                    izz="0.001"
+                />
+            </inertial>
+        </link>
 
         <!-- Yaw rotation -->
         <joint name="yaw_joint" type="revolute">
@@ -36,8 +74,19 @@
 
         <!-- Actual vehicle link with mesh -->
         <link name="vehicle_link">
+            <inertial>
+                <mass value="10.0" />
+                <inertia
+                    ixx="0.1"
+                    ixy="0"
+                    ixz="0"
+                    iyy="0.1"
+                    iyz="0"
+                    izz="0.1"
+                />
+            </inertial>
             <visual>
-            <origin xyz="-0.0175 -0.065 0.03" rpy="0 0 0" />
+                <origin xyz="-0.0175 -0.065 0.03" rpy="0 0 0" />
                 <geometry>
                     <mesh
                         filename="package://abv_description/meshes/abv_chassis/abv_v2.dae"

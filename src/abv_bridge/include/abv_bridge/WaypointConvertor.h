@@ -1,7 +1,7 @@
 #ifndef WAYPOINTCONVERTOR_H
 #define WAYPOINTCONVERTOR_H
  
-#include "robot_idl/msg/vehicle_waypoint.hpp"
+#include "ptera_msgs/msg/vehicle_waypoint.hpp"
 
  
 class WaypointConvertor 
@@ -11,7 +11,7 @@ public:
     ~WaypointConvertor();
 
 private:
-    void convert(robot_idl::msg::VehicleWaypoint::SharedPtr aWaypoint); 
+    void convert(ptera_msgs::msg::VehicleWaypoint::SharedPtr aWaypoint); 
 
 private: 
     std::string mIncomingTopic; 

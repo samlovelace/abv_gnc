@@ -14,7 +14,7 @@
 
   <depend>abv_msgs</depend>
   <depend>abv_common</depend>
-  <depend>robot_idl</depend>
+  <depend>ptera_msgs</depend>
 
   <export>
     <build_type>ament_cmake</build_type>
