@@ -10,7 +10,8 @@
 #include "abv_common/RosNavigationListener.h"
 
 #include "abv_controller/ThrusterCommander.h"
-#include "abv_controller/Controller.h"
+#include "abv_controller/GoalType.hpp"
+#include "abv_controller/IControlPolicy.hpp"
 
 class Vehicle
 {
@@ -39,16 +40,7 @@ public:
     Eigen::Vector3d getControlInput(); 
 
     bool isControlInputStale(); 
-    bool hasAcquiredStateData(); 
-
-    enum class GoalType
-    {
-        THRUSTER, 
-        POSE, 
-        VELOCITY,
-        NUM_TYPES
-    };
-    
+    bool hasAcquiredStateData();
     struct ControlStatus
     {
         Eigen::Vector3d mAppliedThrust; 
@@ -85,7 +77,7 @@ private:
 
     std::unique_ptr<ThrusterCommander> mThrusterCommander;
     std::shared_ptr<RosNavigationListener> mNavManager;
-    std::unique_ptr<Controller> mController; 
+    std::unique_ptr<IControlPolicy> mController; 
 
     ThreadSafe<std::string> mThrusterCmdSequence; 
 

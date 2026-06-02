@@ -5,9 +5,10 @@
 #include "plog/Log.h"
 #include "abv_common/RateController.hpp"
 
+#include "abv_controller/PidControlPolicy.h"
 
 Vehicle::Vehicle() : 
-    mNavManager(std::make_shared<RosNavigationListener>()), mController(std::make_unique<Controller>()),
+    mNavManager(std::make_shared<RosNavigationListener>()),
     mLastInputRecvdAt(std::chrono::steady_clock::now()), mStaleInputThreshold(std::chrono::duration<double>(std::chrono::milliseconds(250))), 
     mPoseError(), mVelError(),
     mArrivalTimerActive(false), 
@@ -15,7 +16,7 @@ Vehicle::Vehicle() :
     mArrivalTol(mConfig.mPoseArrivalTol),
     mGoalType(GoalType::NUM_TYPES)
 { 
-
+    mController = std::make_unique<PidControlPolicy>();
 }
 
 Vehicle::~Vehicle()
@@ -43,16 +44,18 @@ void Vehicle::doDirectionControl()
 
 void Vehicle::doPoseControl()
 { 
-    Eigen::Vector3d currentPose = mNavManager->getCurrentPose();
+    ControlContext ctx;
+    ctx.currentPose = mNavManager->getCurrentPose();
+    ctx.currentVelocity = mNavManager->getCurrentVel();
 
-    Eigen::Vector3d goalPose = getGoalPose(); 
-    Eigen::Vector3d error = goalPose - currentPose; 
+    ctx.goal = getGoalPose(); 
+    ctx.error = ctx.goal - ctx.currentPose; 
     
     // wrap yaw error to [-pi, pi]
-    error[2] = std::atan2(std::sin(error[2]), std::cos(error[2]));
+    ctx.error[2] = std::atan2(std::sin(ctx.error[2]), std::cos(ctx.error[2]));
 
-    mPoseError.set(error); 
-    Eigen::Vector3d controlInput = mController->computeControlInput(mPoseError.get()); 
+    mPoseError.set(ctx.error); 
+    Eigen::Vector3d controlInput = mController->computeAction(ctx);
 
     setControlInput(controlInput);
     doDirectionControl(); 
@@ -60,10 +63,13 @@ void Vehicle::doPoseControl()
 
 void Vehicle::doVelocityControl()
 {
-    Eigen::Vector3d currentVel = mNavManager->getCurrentVel();
+    ControlContext ctx;
+    ctx.currentPose = mNavManager->getCurrentPose();
+    ctx.currentVelocity = mNavManager->getCurrentVel();
+    ctx.goal = getGoalVelocity();
 
-    mVelError.set(getGoalVelocity() - currentVel); 
-    Eigen::Vector3d controlInput = mController->computeControlInput(mVelError.get()); 
+    mVelError.set(ctx.goal - ctx.currentVelocity); 
+    Eigen::Vector3d controlInput = mController->computeAction(ctx);
 
     setControlInput(controlInput); 
     doDirectionControl(); 

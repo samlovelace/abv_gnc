@@ -1,25 +1,25 @@
 
-#include "abv_controller/Controller.h"
+#include "abv_controller/PidControlPolicy.h"
 #include "abv_common/ConfigurationManager.h"
 
-Controller::Controller() : mConfig(ConfigurationManager::getInstance()->getControlConfig())
+PidControlPolicy::PidControlPolicy() : mConfig(ConfigurationManager::getInstance()->getControlConfig())
 {
     mPrevTime = std::chrono::steady_clock::now(); 
     mPrevPoseError = Eigen::Vector3d::Zero(); 
     mPoseErrorIntegral = Eigen::Vector3d::Zero(); 
 }
 
-Controller::~Controller()
+PidControlPolicy::~PidControlPolicy()
 {
     
 }
 
-Eigen::Vector3d Controller::computeControlInput(Eigen::Vector3d aPoseError)
+Eigen::Vector3d PidControlPolicy::computeAction(const ControlContext& ctx)
 {
-    return PID(aPoseError);
+    return PID(ctx.error);
 }
 
-Eigen::Vector3d Controller::PID(Eigen::Vector3d aPoseError)
+Eigen::Vector3d PidControlPolicy::PID(Eigen::Vector3d aPoseError)
 {
     using namespace std::chrono; 
     

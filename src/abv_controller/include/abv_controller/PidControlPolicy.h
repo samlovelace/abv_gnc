@@ -1,18 +1,19 @@
-#ifndef CONTROLLER_H
-#define CONTROLLER_H
+#ifndef PIDCONTROLPOLICY_H
+#define PIDCONTROLPOLICY_H
  
 #include <eigen3/Eigen/Dense> 
 #include "abv_common/Configurations.h"
+#include "abv_controller/IControlPolicy.hpp"
 #include <chrono> 
 
 
-class Controller 
+class PidControlPolicy : public IControlPolicy
 { 
 public:
-    Controller();
-    ~Controller();
+    PidControlPolicy();
+    ~PidControlPolicy();
 
-    Eigen::Vector3d computeControlInput(Eigen::Vector3d aPoseError); 
+    Eigen::Vector3d computeAction(const ControlContext& ctx) override;
 
 private:
     ControlConfig mConfig; 
