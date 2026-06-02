@@ -28,9 +28,9 @@ Control:
     Duration: 3 # seconds
 
   Gains:
-    Kp: [5.0, 5.0, 5.0]
+    Kp: [25.0, 25.0, 5.0]
     Ki: [0, 0, 0]
-    Kd: [15.0, 15.0, 15.0]
+    Kd: [55.0, 55.0, 15.0]
 
   Thrusters:
     InputDiscretization:
