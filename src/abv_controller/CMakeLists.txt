@@ -30,8 +30,9 @@ endif()
 # Source files (common)
 set(ABV_CONTROLLER_SOURCES 
   src/CommandHandler.cpp
-  src/PidControlPolicy.cpp
+  src/ExternalControlPolicy.cpp
   src/main.cpp 
+  src/PidControlPolicy.cpp
   src/StateMachine.cpp
   src/ThrusterCommander.cpp
   src/UdpThrusterDriver.cpp

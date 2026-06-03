@@ -41,6 +41,13 @@ def generate_launch_description():
             output='screen', 
             emulate_tty=True,
         ), 
+        Node(
+            package='abv_rl',
+            executable='abv_rl',
+            name='abv_rl',
+            output='screen',
+            emulate_tty=True,
+        ),  
         
         # Sim only nodes 
         GroupAction(

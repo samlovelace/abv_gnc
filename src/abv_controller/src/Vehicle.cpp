@@ -6,6 +6,7 @@
 #include "abv_common/RateController.hpp"
 
 #include "abv_controller/PidControlPolicy.h"
+#include "abv_controller/ExternalControlPolicy.h"
 
 Vehicle::Vehicle() : 
     mNavManager(std::make_shared<RosNavigationListener>()),
@@ -16,7 +17,7 @@ Vehicle::Vehicle() :
     mArrivalTol(mConfig.mPoseArrivalTol),
     mGoalType(GoalType::NUM_TYPES)
 { 
-    mController = std::make_unique<PidControlPolicy>();
+    mController = std::make_unique<ExternalControlPolicy>();
 }
 
 Vehicle::~Vehicle()
