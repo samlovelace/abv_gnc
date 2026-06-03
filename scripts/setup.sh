@@ -141,6 +141,7 @@ install_ros() {
     echo "[ROS] Installing ROS 2 Humble and tools..."
     sudo apt update
     DEBIAN_FRONTEND=noninteractive sudo apt install -y ros-humble-desktop \
+        ros-humble-xacro
         python3-colcon-common-extensions \
         python3-rosdep \
         python3-vcstool
@@ -184,7 +185,7 @@ make && sudo make install
 ROBOT_WS=~/robot_ws
 mkdir -p "$ROBOT_WS"/src
 clone_and_checkout ptera samlovelace/ptera main "$ROBOT_WS"/src
-cd "$ROBOT_WS" && colcon build
+cd "$ROBOT_WS" && colcon build --packages-skip ptera_sim
 
 # build the main workspace
 cd "$REPO_ROOT"
