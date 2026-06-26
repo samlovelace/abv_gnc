@@ -50,7 +50,7 @@ void CommandHandler::commandCallback(abv_msgs::msg::AbvControllerCommand::Shared
         }
         case CommandType::DIRECTION:
         {
-            mVehicle->setControlInput(convertToEigen(aCmdMsg->data)); 
+            mVehicle->setControlInput(convertToEigen(aCmdMsg->data), aCmdMsg->is_global); 
             setNewActiveState(StateMachine::States::DIRECTION_CONTROL); 
             break; 
         }
@@ -63,7 +63,7 @@ void CommandHandler::commandCallback(abv_msgs::msg::AbvControllerCommand::Shared
         }
         case CommandType::VELOCITY: 
         {
-            mVehicle->setGoalVelocity(convertToEigen(aCmdMsg->data));
+            mVehicle->setGoalVelocity(convertToEigen(aCmdMsg->data), aCmdMsg->is_global);
             mVehicle->setArrivalTolerance(convertToEigen(aCmdMsg->tolerance)); 
             setNewActiveState(StateMachine::States::VELOCITY_CONTROL); 
             break; 

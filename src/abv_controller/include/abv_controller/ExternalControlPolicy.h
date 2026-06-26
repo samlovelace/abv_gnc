@@ -12,7 +12,7 @@ public:
     explicit ExternalControlPolicy();
     ~ExternalControlPolicy() override = default;
 
-    Eigen::Vector3d computeAction(const ControlContext& ctx) override;
+    bool computeAction(const ControlContext& ctx, ActionContext& actionCtx) override;
 
 private:
     rclcpp::Node::SharedPtr mNode;

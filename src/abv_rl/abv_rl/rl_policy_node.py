@@ -10,10 +10,11 @@ from abv_msgs.msg import AbvVec3
 class ControlContext:
     """Context for control policy computation. Includes current state, goal, and error.
         ROS2 message is converted to this internal type on reciept"""
-    pose: list[float]
+    
+    pose:     list[float]
     velocity: list[float]
-    goal: list[float]
-    error: list[float]
+    goal:     list[float]
+    error:    list[float]
     
 class PIDController:
     """Simple PID controller for testing interface to abv_controller software 
@@ -47,6 +48,7 @@ class PIDController:
             action[i]           = (self._kp[i] * ctx.error[i] +
                                    self._ki[i] * self._integral[i] +
                                    self._kd[i] * derivative)
+            
             self._prev_error[i] = ctx.error[i]
 
         return action
@@ -94,6 +96,8 @@ class RLPolicyNode(Node):
         response.action.x   = action[0]
         response.action.y   = action[1]
         response.action.yaw = action[2]
+        
+        response.is_global = True
 
         return response
 
