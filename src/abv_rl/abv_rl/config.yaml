@@ -46,7 +46,7 @@ training:
 network:
   annealing: true
   criticArchitecture: [512, 512]
-  actorArchitecture: [512, 512]
+  actorArchitecture: [256, 256]
   learningRate: 0.001
   learningRateActor: 0.001
   learningRateDecay: 0.8
