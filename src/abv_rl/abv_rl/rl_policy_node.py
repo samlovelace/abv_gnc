@@ -75,7 +75,7 @@ class RLController:
 
     def __init__(self):
         
-        with open("config.yaml", "r") as f:
+        with open("/abv_gnc/src/abv_rl/abv_rl/config.yaml", "r") as f:
             config_dict = yaml.safe_load(f)
         
         args = SimpleNamespace(**{k: v for section in config_dict.values() for k, v in section.items()})
@@ -150,7 +150,7 @@ class RLController:
         a_dimList     = [self.stateDim] + CONFIG.A_ARCHITECTURE + [self.actionNum]
         self.sacAgent = SAC(CONFIG, c_dimList=c_dimList, a_dimList=a_dimList, action_space=action_space, disturbance_space=disturbance_space)
 
-        best_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "best_models")
+        best_dir = os.path.join("/abv_gnc/src/abv_rl/abv_rl", "best_models")
         self.sacAgent.load_best_models(best_dir, evaluate=True)
 
         # self.force_scale
@@ -164,8 +164,8 @@ class RLController:
             center_y = random.random() * (y_lim[1] - y_lim[0]) + y_lim[0]
             radius = 0.1
             self.obstacles.append((np.array([center_x, center_y]), radius))
-
-    def calculate_margin_circle(s, c_r, negativeInside=True):
+        
+    def calculate_margin_circle(self, s, c_r, negativeInside=True):
         """Calculates the margin to a circle in the x-y state space.
 
             Args:
@@ -189,7 +189,7 @@ class RLController:
         else:
             return dir_x, dir_y, -margin
 
-    def load_obj(filename):
+    def load_obj(self, filename):
         """Loads the object and return the object.
 
         Args:
@@ -206,10 +206,11 @@ class RLController:
         vx = ctx.velocity[0]
         vy = ctx.velocity[1]
         omega = ctx.velocity[2]
+        pose = np.array(ctx.pose)
 
         observations_np = np.column_stack([rel_x, rel_y, theta, vx, vy, omega]) # relative position + theta + vx, vy, omega
         for constraint_set in self.obstacles:
-            dir_x, dir_y, g_x_i = self.calculate_margin_circle(ctx.pose[None, :2], constraint_set, negativeInside=False)
+            dir_x, dir_y, g_x_i = self.calculate_margin_circle(pose[None, :2], constraint_set, negativeInside=False)
             observations_np = np.column_stack([observations_np, dir_x, dir_y, g_x_i])
 
         observations = torch.FloatTensor(observations_np).to(self.device)
@@ -219,11 +220,12 @@ class RLController:
 
         q_val = self.sacAgent.Q_network(observations, action, disturb)
 
-        l_x = self.target_margin(ctx.pose[:2])
-        g_x = self.safety_margin(ctx.pose[:2])
-        value = max(l_x, g_x)
+        x, y, yaw = action.squeeze(0).tolist()
+        # l_x = self.target_margin(ctx.pose[:2])
+        # g_x = self.safety_margin(ctx.pose[:2])
+        # value = max(l_x, g_x)
 
-        return [action[0], action[1], action[2]]
+        return [x, y, yaw]
 
 class RLPolicyNode(Node):
     def __init__(self):
@@ -260,7 +262,11 @@ class RLPolicyNode(Node):
 
 
 def main():
+    print("starting")
     rclpy.init()
     node = RLPolicyNode()
     rclpy.spin(node)
     rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
