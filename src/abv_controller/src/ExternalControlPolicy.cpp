@@ -14,7 +14,7 @@ ExternalControlPolicy::ExternalControlPolicy()
     LOGD << "External control service ready";
 }
 
-Eigen::Vector3d ExternalControlPolicy::computeAction(const ControlContext& ctx)
+bool ExternalControlPolicy::computeAction(const ControlContext& ctx, ActionContext& actionCtx)
 {
     auto request = std::make_shared<abv_msgs::srv::AbvControlAction::Request>();
     
@@ -28,7 +28,7 @@ Eigen::Vector3d ExternalControlPolicy::computeAction(const ControlContext& ctx)
         if (!rclcpp::ok()) 
         {
             RCLCPP_ERROR(mNode->get_logger(), "Interrupted while waiting for the service. Exiting.");
-            return Eigen::Vector3d(0, 0, 0);
+            return false;
         }
 
         RCLCPP_INFO(mNode->get_logger(), "Service not available, waiting again...");
@@ -38,11 +38,13 @@ Eigen::Vector3d ExternalControlPolicy::computeAction(const ControlContext& ctx)
     if (rclcpp::spin_until_future_complete(mNode, result_future) == rclcpp::FutureReturnCode::SUCCESS)
     {
         auto response = result_future.get();
-        return utils::convertToEigenVec3(response->action);
+        actionCtx.controlInput = utils::convertToEigenVec3(response->action);
+        actionCtx.isGlobal = response->is_global;
+        return true;
     } 
     else 
     {
         RCLCPP_ERROR(mNode->get_logger(), "Failed to call service abv/control_action");
-        return Eigen::Vector3d(0, 0, 0);
+        return false;
     }
 }

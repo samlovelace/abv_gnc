@@ -14,9 +14,11 @@ PidControlPolicy::~PidControlPolicy()
     
 }
 
-Eigen::Vector3d PidControlPolicy::computeAction(const ControlContext& ctx)
+bool PidControlPolicy::computeAction(const ControlContext& ctx, ActionContext& actionCtx)
 {
-    return PID(ctx.error);
+    actionCtx.controlInput = PID(ctx.error);
+    actionCtx.isGlobal = false;
+    return true;
 }
 
 Eigen::Vector3d PidControlPolicy::PID(Eigen::Vector3d aPoseError)

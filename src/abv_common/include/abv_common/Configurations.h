@@ -44,8 +44,8 @@ struct ControlConfig
     // ThrusterCommander & ThrusterDriver configs
     std::string mThrusterDriverType; 
     std::vector<int> mGpioPins;
-    double mSchmittTriggerOn;
-    double mSchmittTriggerOff;
+    Eigen::Vector3d mSchmittTriggerOn;
+    Eigen::Vector3d mSchmittTriggerOff;
     double mForce; 
     double mMomentArm; 
 };

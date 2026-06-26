@@ -76,8 +76,8 @@ void ConfigurationManager::parseControlConfig(const YAML::Node& aNode)
     mControlConfig.mKi = ConfigUtils::parseVector3d(aNode["Gains"]["Ki"]);
     mControlConfig.mKd = ConfigUtils::parseVector3d(aNode["Gains"]["Kd"]);
 
-    mControlConfig.mSchmittTriggerOn = aNode["Thrusters"]["InputDiscretization"]["On"].as<double>(); 
-    mControlConfig.mSchmittTriggerOff = aNode["Thrusters"]["InputDiscretization"]["Off"].as<double>();
+    mControlConfig.mSchmittTriggerOn = ConfigUtils::parseVector3d(aNode["Thrusters"]["InputDiscretization"]["On"]);
+    mControlConfig.mSchmittTriggerOff = ConfigUtils::parseVector3d(aNode["Thrusters"]["InputDiscretization"]["Off"]);
 
     mControlConfig.mThrusterDriverType = aNode["Thrusters"]["ThrusterDriver"]["Type"].as<std::string>(); 
     if("JETGPIO" == mControlConfig.mThrusterDriverType)

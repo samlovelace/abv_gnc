@@ -27,8 +27,8 @@ public:
     void doVelocityControl(); 
 
     void setGoalPose(Eigen::Vector3d aGoalPose);
-    void setGoalVelocity(Eigen::Vector3d aGoalVel); 
-    void setControlInput(Eigen::Vector3d aControlInput); 
+    void setGoalVelocity(Eigen::Vector3d aGoalVel, bool anIsGlobal = true); 
+    void setControlInput(Eigen::Vector3d aControlInput, bool anIsGlobal = true);
     void setThrusterCmdSequence(const std::string& aCmd);
 
     void setArrivalTolerance(const Eigen::Vector3d& aTolerance);  
@@ -59,6 +59,7 @@ private:
     ThreadSafe<Eigen::Vector3d> mPoseError; 
     ThreadSafe<Eigen::Vector3d> mVelError; 
     ThreadSafe<bool> mJustRecvdNewGoal; 
+    ThreadSafe<bool> mIsGoalGlobal;
 
     Eigen::Vector3d mArrivalTol; 
     std::chrono::steady_clock::time_point mArrivalStart;

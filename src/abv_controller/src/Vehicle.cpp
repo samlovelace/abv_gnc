@@ -38,9 +38,15 @@ void Vehicle::doThrusterControl()
 
 void Vehicle::doDirectionControl()
 {
-    Eigen::Vector3d controlInput = getControlInput(); 
-    Eigen::Vector3d controlInputBodyFrame = convertToBodyFrame(controlInput); 
-    mThrusterCommander->command(controlInputBodyFrame);
+    Eigen::Vector3d controlInput = getControlInput();
+     
+    if(mIsGoalGlobal.get())
+    {
+        // if goal is in global frame, convert to body frame before commanding thrusters
+        controlInput = convertToBodyFrame(controlInput); 
+    }
+
+    mThrusterCommander->command(controlInput);
 }
 
 void Vehicle::doPoseControl()
@@ -54,11 +60,16 @@ void Vehicle::doPoseControl()
     
     // wrap yaw error to [-pi, pi]
     ctx.error[2] = std::atan2(std::sin(ctx.error[2]), std::cos(ctx.error[2]));
-
     mPoseError.set(ctx.error); 
-    Eigen::Vector3d controlInput = mController->computeAction(ctx);
+    
+    ActionContext actionCtx;
+    if(!mController->computeAction(ctx, actionCtx))
+    {
+        LOGE << "Failed to compute pose control action";
+        return;
+    }
 
-    setControlInput(controlInput);
+    setControlInput(actionCtx.controlInput, actionCtx.isGlobal);
     doDirectionControl(); 
 }
 
@@ -66,22 +77,41 @@ void Vehicle::doVelocityControl()
 {
     ControlContext ctx;
     ctx.currentPose = mNavManager->getCurrentPose();
-    ctx.currentVelocity = mNavManager->getCurrentVel();
     ctx.goal = getGoalVelocity();
 
-    mVelError.set(ctx.goal - ctx.currentVelocity); 
-    Eigen::Vector3d controlInput = mController->computeAction(ctx);
+    if(!mIsGoalGlobal.get())
+    {
+        // if goal is in body frame, convert current velocity to body frame before computing error
+        ctx.currentVelocity = convertToBodyFrame(mNavManager->getCurrentVel()); 
+    }
+    else
+    {
+        ctx.currentVelocity = mNavManager->getCurrentVel(); 
+    }
 
-    setControlInput(controlInput); 
+    ctx.error = ctx.goal - ctx.currentVelocity;
+    mVelError.set(ctx.error); 
+    
+    ActionContext actionCtx;
+    if(!mController->computeAction(ctx, actionCtx))
+    {
+        LOGE << "Failed to compute velocity control action";
+        return;
+    }
+
+    // TODO: need to think through how to best handle body frame vel commands and whether a 
+    // velocity controller should be able to command body frame or global frame control inputs
+    setControlInput(actionCtx.controlInput, mIsGoalGlobal.get());
     doDirectionControl(); 
 }
 
-void Vehicle::setControlInput(Eigen::Vector3d aControlInput)
+void Vehicle::setControlInput(Eigen::Vector3d aControlInput, bool anIsGlobal)
 {
     // pls dont banish me for using a single mutex on two resources 
     std::lock_guard<std::mutex> lock(mControlInputMutex); 
     mControlInput = aControlInput;
     mLastInputRecvdAt = std::chrono::steady_clock::now(); 
+    mIsGoalGlobal.set(anIsGlobal); 
 }
 
 void Vehicle::setGoalPose(Eigen::Vector3d aGoalPose) 
@@ -91,14 +121,17 @@ void Vehicle::setGoalPose(Eigen::Vector3d aGoalPose)
     mGoalPose = aGoalPose;
     mGoalType = GoalType::POSE;
     mJustRecvdNewGoal.set(true); 
+    mIsGoalGlobal.set(false); // pose goals are always in global frame
 }
-void Vehicle::setGoalVelocity(Eigen::Vector3d aGoalVel)
+
+void Vehicle::setGoalVelocity(Eigen::Vector3d aGoalVel, bool anIsGlobal)
 {
     LOGV << "Received goal vel: " << aGoalVel; 
     std::lock_guard<std::mutex> lock(mGoalVelocityMutex); 
     mGoalVelocity = aGoalVel; 
     mGoalType = GoalType::VELOCITY;
-    mJustRecvdNewGoal.set(true); 
+    mJustRecvdNewGoal.set(true);
+    mIsGoalGlobal.set(anIsGlobal); 
 }
 
 void Vehicle::setArrivalTolerance(const Eigen::Vector3d& aTolerance)
@@ -151,7 +184,7 @@ bool Vehicle::isControlInputStale()
     return std::chrono::steady_clock::now() - mLastInputRecvdAt > mStaleInputThreshold ? true : false;
 }
 
-Eigen::Vector3d Vehicle::convertToBodyFrame(Eigen::Vector3d aControlInputGlobal)
+Eigen::Vector3d Vehicle::convertToBodyFrame(Eigen::Vector3d aVectorGlobal)
 {   
     auto state = mNavManager->getCurrentState();
 
@@ -165,7 +198,7 @@ Eigen::Vector3d Vehicle::convertToBodyFrame(Eigen::Vector3d aControlInputGlobal)
              0,        0,     1;
 
     // Transform the vector into the new frame
-    return Rz * aControlInputGlobal;
+    return Rz * aVectorGlobal;
 }
 
 bool Vehicle::hasAcquiredStateData()
