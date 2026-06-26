@@ -44,7 +44,7 @@ def generate_launch_description():
         ),
         Node(
             package='abv_rl-cpp',
-            executable='rl_policy_node',
+            executable='abv_rl-cpp',
             name='rl_policy_node', 
             output='screen', 
             emulate_tty=True,
