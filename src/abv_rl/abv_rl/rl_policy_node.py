@@ -164,6 +164,10 @@ class RLController:
             center_y = random.random() * (y_lim[1] - y_lim[0]) + y_lim[0]
             radius = 0.1
             self.obstacles.append((np.array([center_x, center_y]), radius))
+
+        print("Obstacle positions:")
+        for i, (center, radius) in enumerate(self.obstacles):
+            print(f"  - {{cx: {center[0]:.6f}, cy: {center[1]:.6f}, radius: {radius}}}")
         
     def calculate_margin_circle(self, s, c_r, negativeInside=True):
         """Calculates the margin to a circle in the x-y state space.

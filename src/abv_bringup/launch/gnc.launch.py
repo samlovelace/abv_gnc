@@ -42,10 +42,11 @@ def generate_launch_description():
             output='screen',
             emulate_tty=True,
         ),
-
-        ExecuteProcess(
-            cmd=[abv_rl_script],
-            output='screen',
+        Node(
+            package='abv_rl-cpp',
+            executable='rl_policy_node',
+            name='rl_policy_node', 
+            output='screen', 
             emulate_tty=True,
         ),
 

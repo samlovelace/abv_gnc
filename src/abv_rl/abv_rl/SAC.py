@@ -24,7 +24,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 # from torch.optim import Adam
 import torch.optim as optim
-from .model import GaussianPolicy, QNetwork, StepLRMargin
+from model import GaussianPolicy, QNetwork, StepLRMargin
 from concurrent.futures import ThreadPoolExecutor, as_completed
 # from .rl_policy_node import calculate_margin_circle
 
