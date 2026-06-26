@@ -6,8 +6,8 @@ from rclpy.node import Node
 from abv_msgs.srv import AbvControlAction
 from abv_msgs.msg import AbvVec3
 
-from SAC import SAC
-from config import ceConfig
+from .SAC import SAC
+from .config import ceConfig
 import pickle
 import numpy as np
 import torch
@@ -229,7 +229,7 @@ class RLPolicyNode(Node):
     def __init__(self):
         super().__init__('abv_rl')
 
-        self._controller = PIDController()
+        self._controller = RLController()
 
         self.create_service(
             AbvControlAction,
