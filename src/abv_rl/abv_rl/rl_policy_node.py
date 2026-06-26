@@ -254,7 +254,7 @@ class RLPolicyNode(Node):
         response.action.y   = action[1]
         response.action.yaw = action[2]
         
-        response.is_global = True
+        response.is_global = False
 
         return response
 
