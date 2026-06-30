@@ -3,14 +3,8 @@ from launch import LaunchDescription
 from launch.actions import ExecuteProcess
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
-from launch.substitutions import PathJoinSubstitution
-from launch_ros.substitutions import FindPackagePrefix
 
 def generate_launch_description():
-
-    abv_rl_script = PathJoinSubstitution([
-        FindPackagePrefix('abv_rl'), 'lib', 'abv_rl', 'abv_rl_venv.sh'
-    ])
 
     guidance = ExecuteProcess(
         name='abv_guidance',
@@ -31,9 +25,29 @@ def generate_launch_description():
         output='screen')
 
     rl = ExecuteProcess(
-        name='abv_rl',
-        cmd=[abv_rl_script],
-        additional_env={'ROS_DOMAIN_ID': os.environ.get('ROS_DOMAIN_ID', '0')},
-        output='screen')
+        name='abv_rl-cpp',
+        cmd=[
+            'sudo',
+            '--preserve-env=ROS_DOMAIN_ID',
+            'bash',
+            '-c',
+            'export LD_LIBRARY_PATH="/home/optimus/abv_gnc/install/abv_common/lib:'
+            '/home/optimus/abv_gnc/install/abv_msgs/lib:'
+            '/home/optimus/robot_ws/install/robot_idl/lib:'
+            '/home/optimus/robot_ws/install/ptera_msgs/lib:'
+            '/opt/ros/humble/opt/rviz_ogre_vendor/lib:'
+            '/opt/ros/humble/lib/aarch64-linux-gnu:'
+            '/opt/ros/humble/lib:'
+            '/home/optimus/JetsonGPIO/build:'
+            '/usr/local/lib:'
+            '/usr/local/cuda-12.6/lib64:'
+            '/home/optimus/onnxruntime/lib" && '
+            './scripts/run.sh abv_rl-cpp'
+        ],
+        additional_env={
+            'ROS_DOMAIN_ID': os.environ.get('ROS_DOMAIN_ID', '0')
+        },
+        output='screen'
+    )
 
     return LaunchDescription([guidance, navigation, controller, rl])
