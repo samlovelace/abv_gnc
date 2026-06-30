@@ -46,26 +46,26 @@ message(STATUS "ORT include : ${ORT_INCLUDE_DIR}")
 message(STATUS "ORT lib     : ${ORT_LIB}")
 
 # ── Target ────────────────────────────────────────────────────────────────────
-add_executable(rl_policy_node
+add_executable(${PROJECT_NAME}
     src/rl_policy_node.cpp
 )
 
-target_include_directories(rl_policy_node PRIVATE
+target_include_directories(${PROJECT_NAME} PRIVATE
 	${CMAKE_CURRENT_LIST_DIR}/include
        	${ORT_INCLUDE_DIR}
 )
 
-target_link_libraries(rl_policy_node
+target_link_libraries(${PROJECT_NAME}
     ${ORT_LIB}
 )
 
-ament_target_dependencies(rl_policy_node
+ament_target_dependencies(${PROJECT_NAME}
     rclcpp
     abv_msgs
 )
 
 # ── Install ───────────────────────────────────────────────────────────────────
-install(TARGETS rl_policy_node
+install(TARGETS ${PROJECT_NAME}
     DESTINATION lib/${PROJECT_NAME}
 )
 

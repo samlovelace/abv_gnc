@@ -155,7 +155,7 @@ std::array<float, 3> RLController::compute(
 RLPolicyNode::RLPolicyNode() : Node("abv_rl")
 {
     // Declare & read parameters
-    this->declare_parameter<std::string>("model_dir",     "/abv_gnc/src/abv_rl-cpp/abv_rl_onnx/");
+    this->declare_parameter<std::string>("model_dir",     "/home/optimus/abv_gnc/src/abv_rl-cpp/abv_rl_onnx/");
     this->declare_parameter<int>        ("num_obstacles", 3);
     this->declare_parameter<int>        ("num_critics",   3);
 
@@ -191,9 +191,9 @@ RLPolicyNode::RLPolicyNode() : Node("abv_rl")
         //    obstacles.push_back({cx, cy, static_cast<float>(r)});
         // }
         //
-	obstacles.push_back({0.957247, -0.122877, 0.1}); 
-	obstacles.push_back({2.429205, -0.318909, 0.1}); 
-	obstacles.push_back({1.911469, 0.414222, 0.1}); 
+        obstacles.push_back({0.957247, -0.122877, 0.1}); 
+        obstacles.push_back({2.429205, -0.318909, 0.1}); 
+        obstacles.push_back({1.911469, 0.414222, 0.1}); 
 
         controller_->set_obstacles(std::move(obstacles));
     }
