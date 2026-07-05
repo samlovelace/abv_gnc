@@ -86,8 +86,10 @@ void ConfigurationManager::parseControlConfig(const YAML::Node& aNode)
         mControlConfig.mGpioPins = ConfigUtils::parseIntVector(aNode["Thrusters"]["ThrusterDriver"]["GPIO"]["pins"]); 
     }
 
-    mControlConfig.mForce = aNode["Dynamics"]["ThrusterForce"].as<double>(); 
-    mControlConfig.mMomentArm = aNode["Dynamics"]["MomentArm"].as<double>(); 
+    mControlConfig.mForce = aNode["Dynamics"]["ThrusterForce"].as<double>();
+    mControlConfig.mMomentArm = aNode["Dynamics"]["MomentArm"].as<double>();
+    mControlConfig.mMass = aNode["Dynamics"]["Mass"].as<double>();
+    mControlConfig.mInertia = aNode["Dynamics"]["Inertia"].as<double>();
 }
 
 

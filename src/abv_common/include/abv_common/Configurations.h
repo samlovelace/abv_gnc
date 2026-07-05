@@ -46,8 +46,12 @@ struct ControlConfig
     std::vector<int> mGpioPins;
     double mSchmittTriggerOn;
     double mSchmittTriggerOff;
-    double mForce; 
-    double mMomentArm; 
+    double mForce;
+    double mMomentArm;
+
+    // Vehicle dynamics (used by the simulator)
+    double mMass;
+    double mInertia;
 };
 
 namespace ConfigUtils
