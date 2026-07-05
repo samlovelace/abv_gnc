@@ -53,7 +53,9 @@ void ConfigurationManager::loadConfiguration()
 
 void ConfigurationManager::parseGuidanceConfig(const YAML::Node& aNode)
 {
-    mGuidanceConfig.mStateMachineRate = aNode["StateMachine"]["Rate"].as<int>(); 
+    mGuidanceConfig.mStateMachineRate = aNode["StateMachine"]["Rate"].as<int>();
+    mGuidanceConfig.mWaypointTimeout = aNode["StateMachine"]["WaypointTimeout"].as<double>();
+    mGuidanceConfig.mWaypointTimeoutToleranceScale = aNode["StateMachine"]["WaypointTimeoutToleranceScale"].as<double>();
 }
 
 void ConfigurationManager::parseNavigationConfig(const YAML::Node& aNode)

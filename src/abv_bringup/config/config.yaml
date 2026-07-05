@@ -6,6 +6,8 @@
 Guidance:
   StateMachine:
     Rate: 10 # Hz
+    WaypointTimeout: 30 # seconds - default max time to wait for arrival at a single waypoint
+    WaypointTimeoutToleranceScale: 2.0 # multiplier on arrival tolerance checked when a waypoint timeout fires
 
 Navigation:
   Interface: optitrack
