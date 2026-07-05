@@ -265,10 +265,8 @@ void StateMachine::onWaypointTimeout()
         }
         else
         {
-            // final waypoint accepted via relaxed tolerance - the controller is still
-            // actively chasing this goal, so it needs an explicit STOP or it will keep
-            // running in POSE_CONTROL indefinitely even though guidance has moved on.
-            sendStopCommand();
+            // final waypoint accepted via relaxed tolerance - hold station here,
+            // same as a normal verified arrival (see waitForArrival()).
             setActiveState(States::IDLE);
         }
     }
