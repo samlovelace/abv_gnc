@@ -37,16 +37,6 @@ void StateMachine::run()
 
         switch (getActiveState())
         {
-        case States::STARTUP: 
-            
-            setActiveState(States::IDLE); 
-            
-            // if(mVehicle->hasAcquiredStateData())
-            // {
-            //     setActiveState(States::IDLE); 
-            //     break; 
-            // }
-
         case States::IDLE:
             // do nothing 
             break;
