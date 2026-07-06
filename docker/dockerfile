@@ -1,0 +1,6 @@
+FROM osrf/ros:humble-desktop
+
+RUN apt-get update && apt-get install -y \
+    git \
+    python3-colcon-common-extensions \
+    && rm -rf /var/lib/apt/lists/*

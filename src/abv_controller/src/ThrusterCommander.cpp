@@ -54,21 +54,21 @@ void ThrusterCommander::command(Eigen::Vector3d aControlInput)
 Eigen::Vector3i ThrusterCommander::convertToThrustVector(Eigen::Vector3d aControlInput)
 {
     Eigen::Vector3i thrustDir;
-    double uOn = mConfig.mSchmittTriggerOn;
-    double uOff = mConfig.mSchmittTriggerOff;
+    Eigen::Vector3d uOn = mConfig.mSchmittTriggerOn;
+    Eigen::Vector3d uOff = mConfig.mSchmittTriggerOff;
         
     for(int i = 0; i < 3; i++)
     {
         // determine the thrust direction based on the control input
-        if (aControlInput[i] >= uOn)
+        if (aControlInput[i] >= uOn[i])
 		{
 			thrustDir[i] = 1;
 		}
-		else if (aControlInput[i] < -uOn)
+		else if (aControlInput[i] < -uOn[i])
 		{
 			thrustDir[i] = -1;
 		}
-		else if (aControlInput[i] <= uOff && aControlInput[i] >= -uOff)
+		else if (aControlInput[i] <= uOff[i] && aControlInput[i] >= -uOff[i])
 		{
 			thrustDir[i] = 0;
 		}

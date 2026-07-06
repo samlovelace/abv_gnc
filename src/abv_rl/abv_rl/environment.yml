@@ -1,0 +1,43 @@
+name: safetyrl-env
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.10
+  - pip
+
+  # core numerics
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - networkx
+
+  # RL / robotics
+  - gymnasium
+  - shapely
+  - box2d-py
+
+  # jupyter / dev
+  - ipython
+  - ipykernel
+  - jupyterlab
+
+  # system libs (keep minimal)
+  - libstdcxx-ng
+  - libgcc-ng
+  - openssl
+
+  - pip:
+      # ML stack (CUDA 11.8 build)
+      - --extra-index-url https://download.pytorch.org/whl/cu118
+      - torch==2.7.1+cu118
+      - torchvision==0.22.1+cu118
+      - torchaudio==2.7.1+cu118
+
+      # utilities
+      - tensorboard
+      - pyyaml
+      - cloudpickle
+      - psutil

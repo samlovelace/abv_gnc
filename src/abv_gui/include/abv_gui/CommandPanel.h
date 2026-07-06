@@ -1,8 +1,11 @@
 #pragma once
+
 #include <QWidget>
 #include <QDoubleSpinBox>
 #include <QComboBox>
 #include <QStackedWidget>
+#include <QCheckBox>
+
 #include <rclcpp/rclcpp.hpp>
 
 #include "abv_msgs/msg/abv_controller_command.hpp"
@@ -24,7 +27,6 @@ private:
     abv_msgs::msg::AbvControllerCommand makeCommand(int axis);
     abv_msgs::msg::AbvControllerCommand makeThruster(int thruster);
 
-
     void onSendPose();
     void onSendVelocity();
     void onSendPath();
@@ -39,6 +41,8 @@ private:
 
     QComboBox*      mPathType{nullptr};
     QDoubleSpinBox* mPathDuration{nullptr};
+
+    QCheckBox*      mBodyFrameCheckbox{nullptr};
 
     rclcpp::TimerBase::SharedPtr mFireTimer{nullptr};
 };

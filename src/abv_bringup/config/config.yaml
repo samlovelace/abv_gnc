@@ -36,8 +36,8 @@ Control:
 
   Thrusters:
     InputDiscretization:
-      On: 0.2
-      Off: 0.09
+      On: [0.2, 0.2, 0.2]
+      Off: [0.09, 0.09, 0.09]
 
     ThrusterDriver:
       Type: JETGPIO

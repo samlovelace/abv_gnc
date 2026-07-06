@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<robot
+    xmlns:xacro="http://www.ros.org/wiki/xacro"
+    name="abv_chassis_standalone"
+>
+
+  <xacro:include
+        filename="$(find abv_description)/urdf/abv_chassis.urdf.xacro"
+    />
+
+  <!-- Dummy root link — acts as the tree root for RobotModel -->
+  <link name="world" />
+
+  <xacro:abv_chassis parent="world">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:abv_chassis>
+
+</robot>
