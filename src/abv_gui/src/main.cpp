@@ -85,13 +85,21 @@ int main(int argc, char *argv[])
      
     rightLayout->addWidget(stopBtn); 
 
-    CommandPanel* panel = new CommandPanel(); 
-    rightLayout->addWidget(panel); 
+    CommandPanel* panel = new CommandPanel();
+    rightLayout->addWidget(panel);
 
-    StatusPanel* status = new StatusPanel(); 
-    rightLayout->addWidget(status); 
+    StatusPanel* status = new StatusPanel();
+    rightLayout->addWidget(status);
 
-    auto* gdnceStatus = 
+    auto* poseSync =
+        new TopicAdapter<abv_msgs::msg::AbvState, QString>("abv/state",
+            [panel](const abv_msgs::msg::AbvState& msg) {
+
+                panel->setCurrentPose(msg.position.x, msg.position.y, msg.position.yaw);
+                return "";
+            });
+
+    auto* gdnceStatus =
         new TopicAdapter<abv_msgs::msg::AbvGuidanceStatus, QString>("abv/guidance/status", 
             [status](const abv_msgs::msg::AbvGuidanceStatus& msg){
 

@@ -13,6 +13,11 @@ class CommandPanel : public QWidget
 public:
     explicit CommandPanel(QWidget* parent = nullptr);
 
+    // Mirrors the live vehicle pose into the Pose panel's X/Y/Yaw fields, so
+    // they start from the current pose instead of 0. Skips any field the
+    // user currently has focused, so it doesn't clobber an in-progress edit.
+    void setCurrentPose(double aX, double aY, double aYaw);
+
 private:
     QWidget* makePosePanel();
     QWidget* makeVelocityPanel();

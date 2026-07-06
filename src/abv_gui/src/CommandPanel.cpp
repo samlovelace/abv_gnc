@@ -289,6 +289,22 @@ QWidget* CommandPanel::makeAxisButton(const std::string& name, int axis)
     return btn;
 }
 
+void CommandPanel::setCurrentPose(double aX, double aY, double aYaw)
+{
+    if (mPoseX && !mPoseX->hasFocus())
+    {
+        mPoseX->setValue(aX);
+    }
+    if (mPoseY && !mPoseY->hasFocus())
+    {
+        mPoseY->setValue(aY);
+    }
+    if (mPoseYaw && !mPoseYaw->hasFocus())
+    {
+        mPoseYaw->setValue(aYaw);
+    }
+}
+
 void CommandPanel::onSendPose()
 {
     abv_msgs::msg::AbvVec3 pose; 
