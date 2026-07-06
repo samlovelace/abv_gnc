@@ -16,10 +16,10 @@ Navigation:
 
   Network:
     Local:
-      Ip: 192.168.1.15
+      Ip: 192.168.1.242
 
     Server:
-      Ip: 192.168.1.152
+      Ip: 127.0.0.1
 
 Control:
   StateMachine:
