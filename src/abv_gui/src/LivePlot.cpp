@@ -13,10 +13,6 @@ static const QList<QColor> kColors = {
     QColor("#0000ff"),
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Construction
-// ─────────────────────────────────────────────────────────────────────────────
-
 LivePlot::LivePlot(const QString& title,
                    double yMin, double yMax,
                    QStringList seriesNames,
@@ -196,10 +192,6 @@ void LivePlot::onNewData(double aTime, QVector<double> aValues)
         }
     }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Private helpers
-// ─────────────────────────────────────────────────────────────────────────────
 
 QString LivePlot::makeReadoutText(const QString& name, const QString& value)
 {
