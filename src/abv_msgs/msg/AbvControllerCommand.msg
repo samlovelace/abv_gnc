@@ -1,4 +1,5 @@
 string type
+bool is_global
 
 # for pose, velocity, direction commands
 AbvVec3 data

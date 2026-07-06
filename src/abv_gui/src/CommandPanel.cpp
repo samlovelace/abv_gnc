@@ -38,10 +38,18 @@ CommandPanel::CommandPanel(QWidget* parent)
     
     // Command type selector
     auto* typeLabel = new QLabel("Command");
+    layout->addWidget(typeLabel);
+
+    auto* commandLayout = new QHBoxLayout();
+
     auto* selector  = new QComboBox();
     selector->addItems({"Pose", "Velocity", "Path", "Thruster"});
-    layout->addWidget(typeLabel);
-    layout->addWidget(selector);
+    commandLayout->addWidget(selector);
+
+    // Global/Body Frame Checkbox
+    mBodyFrameCheckbox = new QCheckBox("Body Frame");
+    commandLayout->addWidget(mBodyFrameCheckbox);
+    layout->addLayout(commandLayout);
 
     // Stacked panels
     auto* stack = new QStackedWidget();
@@ -221,6 +229,7 @@ abv_msgs::msg::AbvControllerCommand CommandPanel::makeCommand(int axis)
     }
     
     cmd.set__data(msg); 
+    cmd.is_global = !mBodyFrameCheckbox->isChecked();
     return cmd; 
 }
 
@@ -329,6 +338,8 @@ void CommandPanel::onSendVelocity()
     abv_msgs::msg::AbvControllerCommand cmd; 
     cmd.set__type("vel");
     cmd.set__data(vel); 
+
+    cmd.is_global = !mBodyFrameCheckbox->isChecked();
     
     RosTopicManager::getInstance()->publishMessage("abv/controller/command", cmd);
 }

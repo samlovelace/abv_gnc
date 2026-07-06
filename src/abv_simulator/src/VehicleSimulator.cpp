@@ -96,7 +96,7 @@ void VehicleSimulator::update(const double dt)
     
     VehicleState mNoisyState = mVehicleState;
     mSimTime += dt;
-    bool addNoise = false; 
+    bool addNoise = true; 
     if(addNoise)
     {
         makeMeasurement(mNoisyState);
