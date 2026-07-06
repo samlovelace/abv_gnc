@@ -201,7 +201,8 @@ void StateMachine::waitForArrival()
         }
         else
         {
-            // arrived at final waypoint, go back to IDLE
+            // arrived at final waypoint, clear path timeout watchdog and go back to IDLE
+            mWatchdog.cancel();
             setActiveState(States::IDLE); 
         }
     }
@@ -266,7 +267,9 @@ void StateMachine::onWaypointTimeout()
         else
         {
             // final waypoint accepted via relaxed tolerance - hold station here,
-            // same as a normal verified arrival (see waitForArrival()).
+            // same as a normal verified arrival (see waitForArrival()), and
+            // clear the path timeout watchdog so it can't fire a stray STOP later.
+            mWatchdog.cancel();
             setActiveState(States::IDLE);
         }
     }
@@ -274,6 +277,7 @@ void StateMachine::onWaypointTimeout()
     {
         LOGW << "Not within relaxed arrival bounds, aborting path...";
 
+        mWatchdog.cancel();
         sendStopCommand();
         setActiveState(States::IDLE);
     }
