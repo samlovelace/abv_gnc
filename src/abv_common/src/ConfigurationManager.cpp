@@ -53,7 +53,9 @@ void ConfigurationManager::loadConfiguration()
 
 void ConfigurationManager::parseGuidanceConfig(const YAML::Node& aNode)
 {
-    mGuidanceConfig.mStateMachineRate = aNode["StateMachine"]["Rate"].as<int>(); 
+    mGuidanceConfig.mStateMachineRate = aNode["StateMachine"]["Rate"].as<int>();
+    mGuidanceConfig.mWaypointTimeout = aNode["StateMachine"]["WaypointTimeout"].as<double>();
+    mGuidanceConfig.mWaypointTimeoutToleranceScale = aNode["StateMachine"]["WaypointTimeoutToleranceScale"].as<double>();
 }
 
 void ConfigurationManager::parseNavigationConfig(const YAML::Node& aNode)
@@ -86,8 +88,10 @@ void ConfigurationManager::parseControlConfig(const YAML::Node& aNode)
         mControlConfig.mGpioPins = ConfigUtils::parseIntVector(aNode["Thrusters"]["ThrusterDriver"]["GPIO"]["pins"]); 
     }
 
-    mControlConfig.mForce = aNode["Dynamics"]["ThrusterForce"].as<double>(); 
-    mControlConfig.mMomentArm = aNode["Dynamics"]["MomentArm"].as<double>(); 
+    mControlConfig.mForce = aNode["Dynamics"]["ThrusterForce"].as<double>();
+    mControlConfig.mMomentArm = aNode["Dynamics"]["MomentArm"].as<double>();
+    mControlConfig.mMass = aNode["Dynamics"]["Mass"].as<double>();
+    mControlConfig.mInertia = aNode["Dynamics"]["Inertia"].as<double>();
 }
 
 

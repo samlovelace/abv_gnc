@@ -18,8 +18,8 @@
         <origin xyz="0.155 -0.205 0.3" rpy="0 -1.57 1.57" />
     </xacro:widow_xl>
 
-    <xacro:widow_xl prefix="wxl_" parent="vehicle_link">
+    <!-- <xacro:widow_xl prefix="wxl_" parent="vehicle_link">
         <origin xyz="0.155 0.205 0.3" rpy="0 1.57 1.57" />
-    </xacro:widow_xl>
+    </xacro:widow_xl> -->
 
 </robot>

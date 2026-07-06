@@ -16,7 +16,17 @@ struct VehicleConfig
 
 struct GuidanceConfig
 {
-    int mStateMachineRate;  
+    int mStateMachineRate;
+
+    // Default max time (seconds) to wait for arrival at a single waypoint
+    // before falling back to the relaxed-tolerance check. Path generators
+    // may override this per-waypoint (see Waypoint::mTimeout).
+    double mWaypointTimeout;
+
+    // Multiplier applied to the commanded arrival tolerance when a waypoint
+    // timeout fires, to decide whether the current pose is "close enough"
+    // to move on rather than getting stuck.
+    double mWaypointTimeoutToleranceScale;
 };
 
 struct NavigationConfig
@@ -46,8 +56,12 @@ struct ControlConfig
     std::vector<int> mGpioPins;
     Eigen::Vector3d mSchmittTriggerOn;
     Eigen::Vector3d mSchmittTriggerOff;
-    double mForce; 
-    double mMomentArm; 
+  
+    double mForce;
+    double mMomentArm;
+    // Vehicle dynamics (used by the simulator)
+    double mMass;
+    double mInertia;
 };
 
 namespace ConfigUtils
