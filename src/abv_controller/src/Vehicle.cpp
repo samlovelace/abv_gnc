@@ -16,8 +16,19 @@ Vehicle::Vehicle() :
     mConfig(ConfigurationManager::getInstance()->getControlConfig()), 
     mArrivalTol(mConfig.mPoseArrivalTol),
     mGoalType(GoalType::NUM_TYPES)
-{ 
-    mController = std::make_unique<ExternalControlPolicy>();
+{
+    if("External" == mConfig.mControlPolicyType || "external" == mConfig.mControlPolicyType)
+    {
+        mController = std::make_unique<ExternalControlPolicy>();
+    }
+    else
+    {
+        if("PID" != mConfig.mControlPolicyType && "pid" != mConfig.mControlPolicyType)
+        {
+            LOGW << "Unknown ControlPolicy '" << mConfig.mControlPolicyType << "', defaulting to PID";
+        }
+        mController = std::make_unique<PidControlPolicy>();
+    }
 }
 
 Vehicle::~Vehicle()

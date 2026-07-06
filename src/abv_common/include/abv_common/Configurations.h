@@ -40,9 +40,12 @@ struct NavigationConfig
 
 struct ControlConfig
 {
-    int mStateMachineRate; 
+    int mStateMachineRate;
 
-    // PID controller gains 
+    // which IControlPolicy implementation Vehicle should instantiate: "PID" or "External"
+    std::string mControlPolicyType;
+
+    // PID controller gains
     Eigen::Vector3d mKp;
     Eigen::Vector3d mKi;
     Eigen::Vector3d mKd;

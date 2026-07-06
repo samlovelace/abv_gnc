@@ -70,7 +70,8 @@ void ConfigurationManager::parseNavigationConfig(const YAML::Node& aNode)
 
 void ConfigurationManager::parseControlConfig(const YAML::Node& aNode)
 {
-    mControlConfig.mStateMachineRate = aNode["StateMachine"]["Rate"].as<int>(); 
+    mControlConfig.mStateMachineRate = aNode["StateMachine"]["Rate"].as<int>();
+    mControlConfig.mControlPolicyType = aNode["ControlPolicy"].as<std::string>("PID");
     mControlConfig.mPoseArrivalTol = ConfigUtils::parseVector3d(aNode["Arrival"]["Tolerance"]);
     mControlConfig.mArrivalDuration = aNode["Arrival"]["Duration"].as<double>(); 
 

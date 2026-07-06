@@ -22,6 +22,8 @@ Navigation:
       Ip: 127.0.0.1
 
 Control:
+  ControlPolicy: PID # which IControlPolicy Vehicle uses: PID | External
+
   StateMachine:
     Rate: 10 # hz
 
