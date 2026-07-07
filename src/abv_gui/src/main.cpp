@@ -92,12 +92,15 @@ int main(int argc, char *argv[])
     rightLayout->addWidget(status);
 
     auto* poseSync =
-        new TopicAdapter<abv_msgs::msg::AbvState, QString>("abv/state",
-            [panel](const abv_msgs::msg::AbvState& msg) {
+        new TopicAdapter<abv_msgs::msg::AbvState, QVector<double>>(
+            "abv/state", &conversions::navigationPositionConvertor);
 
-                panel->setCurrentPose(msg.position.x, msg.position.y, msg.position.yaw);
-                return "";
-            });
+    // Connect (rather than mutating the panel's widgets inside the
+    // converter above) so the update is delivered on the GUI thread instead
+    // of racing the ROS subscription thread against the user editing the
+    // same spin boxes.
+    QObject::connect(poseSync, &TopicAdapterBase::newDataVariant,
+                      panel, &CommandPanel::onPoseSync);
 
     auto* gdnceStatus =
         new TopicAdapter<abv_msgs::msg::AbvGuidanceStatus, QString>("abv/guidance/status", 

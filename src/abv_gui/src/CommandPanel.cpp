@@ -6,6 +6,7 @@
 #include <QComboBox>
 #include <QStackedWidget>
 #include <QFrame>
+#include <QSignalBlocker>
 
 #include "abv_common/RosTopicManager.h"
 #include "abv_msgs/msg/abv_controller_command.hpp"
@@ -72,6 +73,16 @@ QWidget* CommandPanel::makePosePanel()
     mPoseX = makeSpinBox(-100.0, 100.0);
     mPoseY = makeSpinBox(-100.0, 100.0);
     mPoseYaw = makeSpinBox(-100.0, 100.0);
+
+    // only real user edits should mark a field dirty; setCurrentPose()
+    // blocks signals around its own setValue() calls so those don't loop
+    // back and immediately mark the field dirty again
+    connect(mPoseX, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+            this, [this](double) { mPoseXDirty = true; });
+    connect(mPoseY, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+            this, [this](double) { mPoseYDirty = true; });
+    connect(mPoseYaw, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+            this, [this](double) { mPoseYawDirty = true; });
 
     form->addRow("X:", mPoseX);
     form->addRow("Y:", mPoseY);
@@ -298,18 +309,32 @@ QWidget* CommandPanel::makeAxisButton(const std::string& name, int axis)
     return btn;
 }
 
+void CommandPanel::onPoseSync(const QVariant& aData)
+{
+    QVector<double> pose = aData.value<QVector<double>>();
+    if (pose.size() != 3)
+    {
+        return;
+    }
+
+    setCurrentPose(pose[0], pose[1], pose[2]);
+}
+
 void CommandPanel::setCurrentPose(double aX, double aY, double aYaw)
 {
-    if (mPoseX && !mPoseX->hasFocus())
+    if (mPoseX && !mPoseX->hasFocus() && !mPoseXDirty)
     {
+        QSignalBlocker blocker(mPoseX);
         mPoseX->setValue(aX);
     }
-    if (mPoseY && !mPoseY->hasFocus())
+    if (mPoseY && !mPoseY->hasFocus() && !mPoseYDirty)
     {
+        QSignalBlocker blocker(mPoseY);
         mPoseY->setValue(aY);
     }
-    if (mPoseYaw && !mPoseYaw->hasFocus())
+    if (mPoseYaw && !mPoseYaw->hasFocus() && !mPoseYawDirty)
     {
+        QSignalBlocker blocker(mPoseYaw);
         mPoseYaw->setValue(aYaw);
     }
 }
@@ -325,7 +350,12 @@ void CommandPanel::onSendPose()
     cmd.set__type("pose");
     cmd.set__data(pose); 
     
-    RosTopicManager::getInstance()->publishMessage("abv/controller/command", cmd); 
+    RosTopicManager::getInstance()->publishMessage("abv/controller/command", cmd);
+
+    // sent - resume tracking live pose until the user edits a field again
+    mPoseXDirty = false;
+    mPoseYDirty = false;
+    mPoseYawDirty = false;
 }
 
 void CommandPanel::onSendVelocity()
