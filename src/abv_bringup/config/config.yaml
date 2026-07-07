@@ -13,6 +13,8 @@ Navigation:
   Interface: optitrack
   Rate: 25 # Hz
   RigidBodyName: ABV1
+  MaxDeadReckonDuration: 0.5 # seconds - EKF free-run bound before output is frozen and marked invalid
+  SimulateDropout: false # abv_simulator only - enables synthetic burst nav dropouts for testing
 
   Network:
     Local:
@@ -30,6 +32,8 @@ Control:
   Arrival:
     Tolerance: [0.05, 0.05, 0.05] # [m, m, rad]
     Duration: 3 # seconds
+
+  NavDataTimeout: 1.0 # seconds - max time since last abv/state message before nav is considered stale
 
   Gains:
     Kp: [25.0, 25.0, 5.0]

@@ -53,9 +53,9 @@ void CommandHandler::commandCallback(abv_msgs::msg::AbvControllerCommand::Shared
             // body-frame direction commands never touch nav data (see
             // Vehicle::doDirectionControl); global-frame ones need current
             // yaw to rotate into body frame, so they require nav data.
-            if(aCmdMsg->is_global && !mVehicle->hasAcquiredStateData())
+            if(aCmdMsg->is_global && !mVehicle->isNavOk())
             {
-                LOGW << "Cannot execute global-frame direction command, navigation data not yet acquired...";
+                LOGW << "Cannot execute global-frame direction command, navigation data not fresh/valid...";
                 return;
             }
 
@@ -65,9 +65,9 @@ void CommandHandler::commandCallback(abv_msgs::msg::AbvControllerCommand::Shared
         }
         case CommandType::POSE:
         {
-            if(!mVehicle->hasAcquiredStateData())
+            if(!mVehicle->isNavOk())
             {
-                LOGW << "Cannot execute pose command, navigation data not yet acquired...";
+                LOGW << "Cannot execute pose command, navigation data not fresh/valid...";
                 return;
             }
 
@@ -82,9 +82,9 @@ void CommandHandler::commandCallback(abv_msgs::msg::AbvControllerCommand::Shared
             // path in Vehicle::doVelocityControl still reads current pose and
             // rotates current velocity by nav-derived yaw, so there's no
             // legitimate nav-free velocity control path today.
-            if(!mVehicle->hasAcquiredStateData())
+            if(!mVehicle->isNavOk())
             {
-                LOGW << "Cannot execute velocity command, navigation data not yet acquired...";
+                LOGW << "Cannot execute velocity command, navigation data not fresh/valid...";
                 return;
             }
 

@@ -65,7 +65,10 @@ void ConfigurationManager::parseNavigationConfig(const YAML::Node& aNode)
     mNavigationConfig.mRigidBodyName = aNode["RigidBodyName"].as<std::string>(); 
 
     mNavigationConfig.mLocalIp = aNode["Network"]["Local"]["Ip"].as<std::string>();
-    mNavigationConfig.mServerIp = aNode["Network"]["Server"]["Ip"].as<std::string>(); 
+    mNavigationConfig.mServerIp = aNode["Network"]["Server"]["Ip"].as<std::string>();
+
+    mNavigationConfig.mMaxDeadReckonDuration = aNode["MaxDeadReckonDuration"].as<double>(0.5);
+    mNavigationConfig.mSimulateDropout = aNode["SimulateDropout"].as<bool>(false);
 }
 
 void ConfigurationManager::parseControlConfig(const YAML::Node& aNode)
@@ -73,7 +76,8 @@ void ConfigurationManager::parseControlConfig(const YAML::Node& aNode)
     mControlConfig.mStateMachineRate = aNode["StateMachine"]["Rate"].as<int>();
     mControlConfig.mControlPolicyType = aNode["ControlPolicy"].as<std::string>("PID");
     mControlConfig.mPoseArrivalTol = ConfigUtils::parseVector3d(aNode["Arrival"]["Tolerance"]);
-    mControlConfig.mArrivalDuration = aNode["Arrival"]["Duration"].as<double>(); 
+    mControlConfig.mArrivalDuration = aNode["Arrival"]["Duration"].as<double>();
+    mControlConfig.mNavDataTimeout = aNode["NavDataTimeout"].as<double>(1.0);
 
     mControlConfig.mKp = ConfigUtils::parseVector3d(aNode["Gains"]["Kp"]);
     mControlConfig.mKi = ConfigUtils::parseVector3d(aNode["Gains"]["Ki"]);
