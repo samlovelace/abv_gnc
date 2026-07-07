@@ -55,9 +55,11 @@ void StateMachine::run()
 
             if(mVehicle->needsFreshNavData() && !mVehicle->isNavOk())
             {
-                // global-frame direction command lost nav data; fault without
-                // recording mPreFaultState so recovery falls back to IDLE
-                // rather than replaying a possibly stale teleop input
+                // global-frame direction command lost nav data; explicitly
+                // reset mPreFaultState to IDLE (rather than leaving it
+                // untouched) so recovery can't replay a stale POSE_CONTROL/
+                // VELOCITY_CONTROL goal left over from an earlier fault
+                mPreFaultState = States::IDLE;
                 mVehicle->safeStop();
                 setActiveState(States::NAV_FAULT);
                 break;
