@@ -31,7 +31,8 @@ VehicleSimulator::VehicleSimulator(/* args */) :
     mThrusterForce(ConfigurationManager::getInstance()->getControlConfig().mForce),
     mMomentArm(ConfigurationManager::getInstance()->getControlConfig().mMomentArm),
     mTimestep(0.01), mDamping(0.0005),
-    mVelocity(Eigen::Vector2d::Zero()), mThrustForce(Eigen::Vector3d::Zero())
+    mVelocity(Eigen::Vector2d::Zero()), mThrustForce(Eigen::Vector3d::Zero()),
+    mSimulateDropoutEnabled(ConfigurationManager::getInstance()->getNavigationConfig().mSimulateDropout)
 {
 
 }
@@ -129,8 +130,11 @@ void VehicleSimulator::update(const double dt)
         }
     }
 
-    // override
-    mDropoutActive = false; 
+    if (!mSimulateDropoutEnabled)
+    {
+        // dropout simulation disabled via config (default)
+        mDropoutActive = false;
+    }
 
     // Publish only if not in dropout
     if (!mDropoutActive)
@@ -188,11 +192,13 @@ abv_msgs::msg::AbvState VehicleSimulator::convertToIdl(VehicleState aState)
     velocity.y = aState.vy; 
     velocity.yaw = aState.omega; 
 
-    abv_msgs::msg::AbvState state; 
-    state.set__position(position); 
-    state.set__velocity(velocity); 
+    abv_msgs::msg::AbvState state;
+    state.set__position(position);
+    state.set__velocity(velocity);
+    state.set__valid(true);
+    state.set__timestamp(RosTopicManager::getInstance()->get_clock()->now());
 
-    return state;  
+    return state;
 }
 
 Eigen::Vector3d VehicleSimulator::convertBodyForceToGlobal(const Eigen::Vector3d& aThrustForce)

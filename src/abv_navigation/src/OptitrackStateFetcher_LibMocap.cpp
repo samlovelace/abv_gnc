@@ -3,10 +3,10 @@
 #include "plog/Log.h"
 #include <iostream> 
 
-OptitrackStateFetcher_LibMocap::OptitrackStateFetcher_LibMocap(ConsumableBuffer<AbvState>& aBuffer,
-                                                               const std::string& aServerIp, 
-                                                               const std::string& aLocalIp, 
-                                                               const std::string& aRigidBodyName) : 
+OptitrackStateFetcher_LibMocap::OptitrackStateFetcher_LibMocap(ConsumableBuffer<StampedAbvState>& aBuffer,
+                                                               const std::string& aServerIp,
+                                                               const std::string& aLocalIp,
+                                                               const std::string& aRigidBodyName) :
     IStateFetcher(aBuffer), 
     mRigidBodyName(aRigidBodyName), 
     mServerIp(aServerIp), 
@@ -110,8 +110,8 @@ void OptitrackStateFetcher_LibMocap::listen()
                     state.omega = angularVelocity.z(); 
 
                     // set latest state and update previous values
-                    mBuffer.put(state); 
-                    mPrevState = state; 
+                    mBuffer.put(StampedAbvState{state, std::chrono::system_clock::now()});
+                    mPrevState = state;
                     mPrevQuat = q; 
                     mPrevRecvdTime = std::chrono::steady_clock::now();  
                     
