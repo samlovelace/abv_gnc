@@ -2,7 +2,6 @@
 #include "abv_navigation/VehicleStateTracker.h"
 #include "abv_navigation/OptitrackStateFetcher_LibMocap.h"
 #include "abv_navigation/SimulatedStateFetcher.h"
-#include "abv_navigation/NavFreshness.h"
 #include "abv_common/RateController.hpp"
 #include "abv_common/DataLogger.h"
 #include "abv_common/RosTopicManager.h"
@@ -152,4 +151,11 @@ void VehicleStateTracker::controllerStatusCallback(abv_msgs::msg::AbvControllerS
     Eigen::Vector3d appliedThrust; 
     appliedThrust << aMsg->fx, aMsg->fy, aMsg->tz; 
     mEKF.setLatestInput(appliedThrust); 
+}
+
+inline bool VehicleStateTracker::isWithinDeadReckonBound(std::chrono::system_clock::time_point aNow,
+                                     std::chrono::system_clock::time_point aLastMeasurementTime,
+                                     double aBoundDuration_s)
+{
+    return std::chrono::duration<double>(aNow - aLastMeasurementTime).count() <= aBoundDuration_s;
 }
