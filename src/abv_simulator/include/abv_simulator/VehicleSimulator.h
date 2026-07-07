@@ -62,6 +62,7 @@ private:
     // Dropout state
     bool mDropoutActive{false};
     int mDropoutRemainingSteps{0};
+    bool mSimulateDropoutEnabled;
 
     // Random generators
     std::mt19937 mRng{std::random_device{}()};

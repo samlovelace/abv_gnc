@@ -17,6 +17,7 @@ add_library(${PROJECT_NAME} SHARED
   src/RosTopicManager.cpp
   src/UdpClient.cpp
   src/RosNavigationListener.cpp
+  src/Watchdog.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

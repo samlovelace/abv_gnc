@@ -5,6 +5,7 @@
 #include <thread> 
 
 #include "abv_navigation/IStateFetcher.h"
+#include "abv_navigation/StampedAbvState.h"
 #include "abv_common/Configurations.h"
 #include "abv_common/ConfigurationManager.h"
 #include "abv_common/ConsumableBuffer.hpp"
@@ -34,8 +35,13 @@ public:
 
 private:
 
-    // construct buffer first 
-    ConsumableBuffer<AbvState> mStateBuffer; 
+    // construct buffer first
+    ConsumableBuffer<StampedAbvState> mStateBuffer;
+
+    // time of the last real measurement update, and whether the estimate is
+    // still within the configured dead-reckoning bound of that measurement
+    std::chrono::system_clock::time_point mLastMeasurementTime;
+    bool mIsNavValid;
 
     // polymorphic state fetcher interface so we arent tied to optiTrack
     std::shared_ptr<IStateFetcher> mStateFetcher; // state fetcher interface class 

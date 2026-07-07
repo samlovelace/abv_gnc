@@ -33,14 +33,26 @@ public:
 
     void setArrivalTolerance(const Eigen::Vector3d& aTolerance);  
 
-    void stop(); 
+    void stop();
+
+    // zeroes thrusters via the real control path without touching the
+    // current goal, so the goal can be auto-resumed once nav data recovers
+    void safeStop();
 
     Eigen::Vector3d getGoalPose();
-    Eigen::Vector3d getGoalVelocity(); 
-    Eigen::Vector3d getControlInput(); 
+    Eigen::Vector3d getGoalVelocity();
+    Eigen::Vector3d getControlInput();
 
-    bool isControlInputStale(); 
+    bool isControlInputStale();
     bool hasAcquiredStateData();
+
+    // true iff nav data is currently arriving and valid (fresh && valid)
+    bool isNavOk();
+
+    // true iff the currently active goal actually depends on nav data.
+    // POSE_CONTROL/VELOCITY_CONTROL always need it; DIRECTION_CONTROL only
+    // needs it for global-frame commands (body-frame never touches nav data).
+    bool needsFreshNavData();
     struct ControlStatus
     {
         Eigen::Vector3d mAppliedThrust; 

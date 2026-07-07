@@ -33,9 +33,17 @@ struct NavigationConfig
 {
     std::string mInterface;
     int mRate;
-    std::string mServerIp; 
-    std::string mLocalIp; 
+    std::string mServerIp;
+    std::string mLocalIp;
     std::string mRigidBodyName;
+
+    // Max duration (seconds) the EKF may free-run (predict-only, no real
+    // measurement) before its output is frozen and marked invalid.
+    double mMaxDeadReckonDuration;
+
+    // abv_simulator only: enables its synthetic burst-dropout mechanism
+    // (used to exercise disconnection handling end-to-end). Off by default.
+    bool mSimulateDropout;
 };
 
 struct ControlConfig
@@ -52,7 +60,11 @@ struct ControlConfig
 
     // Controller arrival
     Eigen::Vector3d mPoseArrivalTol;
-    double mArrivalDuration; 
+    double mArrivalDuration;
+
+    // Max time (seconds) since the last abv/state message was received
+    // before nav data is considered stale (catches full topic/node dropout).
+    double mNavDataTimeout;
 
     // ThrusterCommander & ThrusterDriver configs
     std::string mThrusterDriverType; 

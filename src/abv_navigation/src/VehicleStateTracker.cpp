@@ -2,6 +2,7 @@
 #include "abv_navigation/VehicleStateTracker.h"
 #include "abv_navigation/OptitrackStateFetcher_LibMocap.h"
 #include "abv_navigation/SimulatedStateFetcher.h"
+#include "abv_navigation/NavFreshness.h"
 #include "abv_common/RateController.hpp"
 #include "abv_common/DataLogger.h"
 #include "abv_common/RosTopicManager.h"
@@ -96,31 +97,50 @@ void VehicleStateTracker::stateTrackerLoop()
     }
 
     // init stuff
-    auto logId = DataLogger::get().createLog("abv_state_data"); 
+    auto logId = DataLogger::get().createLog("abv_state_data");
     LOGD << "Starting state tracking thread";
-    setStateTracking(true); 
+    setStateTracking(true);
     AbvState stateEstimate;
+    mLastMeasurementTime = std::chrono::system_clock::now();
+    mIsNavValid = true;
 
     while (doStateTracking())
     {
         rate.start();
 
-        double dt = rate.getDeltaTime(); 
+        double dt = rate.getDeltaTime();
         auto stateMeasurement = mStateBuffer.consume();
 
         if (stateMeasurement.has_value())
         {
             // Predict exactly to this measurement time
             mEKF.predict(dt, stateEstimate);
-            mEKF.update(stateMeasurement.value(), stateEstimate);
+            mEKF.update(stateMeasurement->state, stateEstimate);
+            mLastMeasurementTime = stateMeasurement->measurementTime;
+            mIsNavValid = true;
+        }
+        else if (isWithinDeadReckonBound(std::chrono::system_clock::now(), mLastMeasurementTime, mConfig.mMaxDeadReckonDuration))
+        {
+            // Still within the trusted dead-reckoning window: propagate forward
+            mEKF.predict(dt, stateEstimate);
         }
         else
         {
-            // Just propagate forward
-            mEKF.predict(dt, stateEstimate);
+            // Free-running past the bound: stop extrapolating and mark invalid,
+            // rather than letting position/velocity diverge indefinitely
+            mIsNavValid = false;
         }
 
-        mStatePublisher.publish(stateEstimate);
+        AbvState stateToPublish = stateEstimate;
+        if (!mIsNavValid)
+        {
+            // no basis to trust extrapolated velocity once we've stopped predicting
+            stateToPublish.vx = 0.0;
+            stateToPublish.vy = 0.0;
+            stateToPublish.omega = 0.0;
+        }
+
+        mStatePublisher.publish(stateToPublish, mLastMeasurementTime, mIsNavValid);
         DataLogger::get().write(logId, toVector(stateEstimate));
 
         rate.block();
