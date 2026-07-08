@@ -86,7 +86,14 @@ void ConfigurationManager::parseControlConfig(const YAML::Node& aNode)
     mControlConfig.mSchmittTriggerOn = ConfigUtils::parseVector3d(aNode["Thrusters"]["InputDiscretization"]["On"]);
     mControlConfig.mSchmittTriggerOff = ConfigUtils::parseVector3d(aNode["Thrusters"]["InputDiscretization"]["Off"]);
 
-    mControlConfig.mThrusterDriverType = aNode["Thrusters"]["ThrusterDriver"]["Type"].as<std::string>(); 
+    mControlConfig.mThrusterAllocationStrategy = aNode["Thrusters"]["AllocationStrategy"].as<std::string>("LookupTable");
+
+    mControlConfig.mAllocationX   = ConfigUtils::parseIntVector(aNode["Thrusters"]["Allocation"]["x"]);
+    mControlConfig.mAllocationY   = ConfigUtils::parseIntVector(aNode["Thrusters"]["Allocation"]["y"]);
+    mControlConfig.mAllocationYaw = ConfigUtils::parseIntVector(aNode["Thrusters"]["Allocation"]["yaw"]);
+    mControlConfig.mAllocationThreshold = aNode["Thrusters"]["Allocation"]["Threshold"].as<double>(0.1);
+
+    mControlConfig.mThrusterDriverType = aNode["Thrusters"]["ThrusterDriver"]["Type"].as<std::string>();
     if("JETGPIO" == mControlConfig.mThrusterDriverType)
     {
         // parse GPIO pins 
