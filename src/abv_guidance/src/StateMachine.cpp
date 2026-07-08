@@ -156,11 +156,13 @@ void StateMachine::sendWaypoint()
 
     cmd.set__data(vec);
 
-    // set waypoint tolerance
+    // set waypoint tolerance: per-waypoint override if this waypoint
+    // specified one, else the command-level default
+    Eigen::Vector3d resolvedTol = resolveArrivalTolerance(wp);
     abv_msgs::msg::AbvVec3 tol;
-    tol.set__x(mCommand.mArrivalTol.x());
-    tol.set__y(mCommand.mArrivalTol.y());
-    tol.set__yaw(mCommand.mArrivalTol.z());
+    tol.set__x(resolvedTol.x());
+    tol.set__y(resolvedTol.y());
+    tol.set__yaw(resolvedTol.z());
 
     cmd.set__tolerance(tol);
 
@@ -239,6 +241,30 @@ void StateMachine::sendStopCommand()
     RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvControllerCommand>("abv/controller/command", cmd);
 }
 
+Eigen::Vector3d StateMachine::resolveArrivalTolerance(const Waypoint& aWaypoint) const
+{
+    Eigen::Vector3d resolved;
+    Eigen::Vector3d configDefault = ConfigurationManager::getInstance()->getControlConfig().mPoseArrivalTol;
+
+    for(int i = 0; i < 3; i++)
+    {
+        if(aWaypoint.mArrivalTol[i] > 0)
+        {
+            resolved[i] = aWaypoint.mArrivalTol[i];
+        }
+        else if(mCommand.mArrivalTol[i] > 0)
+        {
+            resolved[i] = mCommand.mArrivalTol[i];
+        }
+        else
+        {
+            resolved[i] = configDefault[i];
+        }
+    }
+
+    return resolved;
+}
+
 void StateMachine::onWaypointTimeout()
 {
     // stale timeout firing after we've already moved on (e.g. the overall
@@ -253,7 +279,10 @@ void StateMachine::onWaypointTimeout()
     Eigen::Vector3d error = mCurrentWaypoint.mPose - mNavSource.getCurrentPose();
     error.z() = std::atan2(std::sin(error.z()), std::cos(error.z())); // wrap yaw to [-pi, pi]
 
-    Eigen::Vector3d relaxedTol = mCommand.mArrivalTol * ConfigurationManager::getInstance()->getGuidanceConfig().mWaypointTimeoutToleranceScale;
+    // use the tolerance actually resolved (and sent to the controller) for
+    // this waypoint, not the raw (possibly unset/sentinel) command tolerance
+    Eigen::Vector3d relaxedTol = resolveArrivalTolerance(mCurrentWaypoint) *
+        ConfigurationManager::getInstance()->getGuidanceConfig().mWaypointTimeoutToleranceScale;
     bool withinRelaxedTol = (error.array().abs() < relaxedTol.array()).all();
 
     if(withinRelaxedTol)
