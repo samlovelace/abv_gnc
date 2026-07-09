@@ -67,11 +67,22 @@ struct ControlConfig
     double mNavDataTimeout;
 
     // ThrusterCommander & ThrusterDriver configs
-    std::string mThrusterDriverType; 
+    std::string mThrusterDriverType;
     std::vector<int> mGpioPins;
     Eigen::Vector3d mSchmittTriggerOn;
     Eigen::Vector3d mSchmittTriggerOff;
-  
+
+    // which IThrusterMapper implementation ThrusterCommander uses: "LookupTable" (default, current behavior) | "Matrix"
+    std::string mThrusterAllocationStrategy;
+
+    // Control allocation matrix rows: contribution of each of the 8 thrusters
+    // to (fx, fy, tz) when that thruster fires alone (unitless; mForce/mMomentArm
+    // scale these afterward). Matrix strategy only.
+    std::vector<int> mAllocationX;    // size 8
+    std::vector<int> mAllocationY;    // size 8
+    std::vector<int> mAllocationYaw;  // size 8
+    double mAllocationThreshold;      // firing cutoff on the pseudo-inverse solution. Matrix strategy only.
+
     double mForce;
     double mMomentArm;
     // Vehicle dynamics (used by the simulator)

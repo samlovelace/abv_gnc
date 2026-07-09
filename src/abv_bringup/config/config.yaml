@@ -45,6 +45,19 @@ Control:
       On: [0.2, 0.2, 0.2]
       Off: [0.09, 0.09, 0.09]
 
+    AllocationStrategy: LookupTable # LookupTable (current behavior) | Matrix
+
+    Allocation:
+      x:   [0, 0, -1, -1, 0, 0, 1, 1]
+      y:   [1, 1, 0, 0, -1, -1, 0, 0]
+      yaw: [-1, 1, -1, 1, -1, 1, -1, 1]
+      # firing cutoff on the pseudo-inverse solution; Matrix strategy only.
+      # Must stay below 0.125 (yaw-only commands solve to +-0.125 per thruster
+      # since all 8 thrusters carry a yaw term, vs +-0.25 for pure x/y) or
+      # pure-yaw commands silently produce zero thrust. Verified in sim;
+      # still needs a real hardware bench tuning pass before trusting it.
+      Threshold: 0.1
+
     ThrusterDriver:
       Type: JETGPIO
       GPIO:
