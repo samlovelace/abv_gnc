@@ -38,6 +38,13 @@ struct NavigationConfig
     std::string mRigidBodyName;
 };
 
+struct HeartbeatConfig
+{
+    double mRate;         // Hz - how often each node publishes its heartbeat
+    double mStaleAfter;   // seconds - GUI-side threshold before a node is considered disconnected
+    int mPingIntervalMs;  // GUI-side: how often to ping the robot host for the Comms indicator
+};
+
 struct ControlConfig
 {
     int mStateMachineRate; 

@@ -1,22 +1,28 @@
 
-#include <cstdio> 
+#include <cstdio>
 #include "abv_common/RosTopicManager.h"
+#include "abv_common/ConfigurationManager.h"
+#include "abv_common/HeartbeatPublisher.h"
 #include "abv_bridge/NavigationConvertor.h"
 #include "abv_bridge/ControllerStatusConvertor.h"
 #include "abv_bridge/WaypointConvertor.h"
 
 int main()
 {
-    rclcpp::init(0, nullptr); 
-    RosTopicManager::getInstance("abv_bridge");
-    RosTopicManager::getInstance()->spinNode();  
+    ConfigurationManager::getInstance()->loadConfiguration();
 
-    // ABV -> Autonomy 
+    rclcpp::init(0, nullptr);
+    RosTopicManager::getInstance("abv_bridge");
+    RosTopicManager::getInstance()->spinNode();
+
+    // ABV -> Autonomy
     NavigationConvertor nav("abv/state", "robot/state");
-    ControllerStatusConvertor status("abv/controller/status", "robot/vehicle/controller_status"); 
+    ControllerStatusConvertor status("abv/controller/status", "robot/vehicle/controller_status");
 
     // Autonomy -> ABV
     WaypointConvertor waypoint("robot/vehicle/waypoint", "abv/guidance/command");
+
+    HeartbeatPublisher heartbeat("bridge");
 
     while(true)
     {

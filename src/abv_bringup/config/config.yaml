@@ -49,3 +49,8 @@ Control:
     Inertia: 0.3 # kg-m^2
     ThrusterForce: 0.08 # N
     MomentArm: 0.125 # m
+
+Heartbeat:
+  Rate: 2 # Hz - per-node heartbeat publish rate
+  StaleAfter: 2.0 # seconds - GUI marks a node disconnected if no heartbeat arrives within this window
+  PingIntervalMs: 1000 # GUI-side: how often to ping the robot host for the Comms indicator
