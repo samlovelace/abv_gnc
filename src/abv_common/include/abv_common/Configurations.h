@@ -33,9 +33,17 @@ struct NavigationConfig
 {
     std::string mInterface;
     int mRate;
-    std::string mServerIp; 
-    std::string mLocalIp; 
+    std::string mServerIp;
+    std::string mLocalIp;
     std::string mRigidBodyName;
+
+    // Max duration (seconds) the EKF may free-run (predict-only, no real
+    // measurement) before its output is frozen and marked invalid.
+    double mMaxDeadReckonDuration;
+
+    // abv_simulator only: enables its synthetic burst-dropout mechanism
+    // (used to exercise disconnection handling end-to-end). Off by default.
+    bool mSimulateDropout;
 };
 
 struct HeartbeatConfig
@@ -47,23 +55,41 @@ struct HeartbeatConfig
 
 struct ControlConfig
 {
-    int mStateMachineRate; 
+    int mStateMachineRate;
 
-    // PID controller gains 
+    // which IControlPolicy implementation Vehicle should instantiate: "PID" or "External"
+    std::string mControlPolicyType;
+
+    // PID controller gains
     Eigen::Vector3d mKp;
     Eigen::Vector3d mKi;
     Eigen::Vector3d mKd;
 
     // Controller arrival
     Eigen::Vector3d mPoseArrivalTol;
-    double mArrivalDuration; 
+    double mArrivalDuration;
+
+    // Max time (seconds) since the last abv/state message was received
+    // before nav data is considered stale (catches full topic/node dropout).
+    double mNavDataTimeout;
 
     // ThrusterCommander & ThrusterDriver configs
-    std::string mThrusterDriverType; 
+    std::string mThrusterDriverType;
     std::vector<int> mGpioPins;
     Eigen::Vector3d mSchmittTriggerOn;
     Eigen::Vector3d mSchmittTriggerOff;
-  
+
+    // which IThrusterMapper implementation ThrusterCommander uses: "LookupTable" (default, current behavior) | "Matrix"
+    std::string mThrusterAllocationStrategy;
+
+    // Control allocation matrix rows: contribution of each of the 8 thrusters
+    // to (fx, fy, tz) when that thruster fires alone (unitless; mForce/mMomentArm
+    // scale these afterward). Matrix strategy only.
+    std::vector<int> mAllocationX;    // size 8
+    std::vector<int> mAllocationY;    // size 8
+    std::vector<int> mAllocationYaw;  // size 8
+    double mAllocationThreshold;      // firing cutoff on the pseudo-inverse solution. Matrix strategy only.
+
     double mForce;
     double mMomentArm;
     // Vehicle dynamics (used by the simulator)

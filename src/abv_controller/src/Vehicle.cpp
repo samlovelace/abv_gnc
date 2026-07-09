@@ -16,8 +16,19 @@ Vehicle::Vehicle() :
     mConfig(ConfigurationManager::getInstance()->getControlConfig()), 
     mArrivalTol(mConfig.mPoseArrivalTol),
     mGoalType(GoalType::NUM_TYPES)
-{ 
-    mController = std::make_unique<ExternalControlPolicy>();
+{
+    if("External" == mConfig.mControlPolicyType || "external" == mConfig.mControlPolicyType)
+    {
+        mController = std::make_unique<ExternalControlPolicy>();
+    }
+    else
+    {
+        if("PID" != mConfig.mControlPolicyType && "pid" != mConfig.mControlPolicyType)
+        {
+            LOGW << "Unknown ControlPolicy '" << mConfig.mControlPolicyType << "', defaulting to PID";
+        }
+        mController = std::make_unique<PidControlPolicy>();
+    }
 }
 
 Vehicle::~Vehicle()
@@ -203,16 +214,38 @@ Eigen::Vector3d Vehicle::convertToBodyFrame(Eigen::Vector3d aVectorGlobal)
 
 bool Vehicle::hasAcquiredStateData()
 {
-    return mNavManager->hasAcquiredStateData(); 
+    return mNavManager->hasAcquiredStateData();
+}
+
+bool Vehicle::isNavOk()
+{
+    return mNavManager->isNavOk();
+}
+
+bool Vehicle::needsFreshNavData()
+{
+    // Only DIRECTION_CONTROL's need is conditional on frame (body-frame
+    // direction commands never touch nav data, see doDirectionControl()).
+    // POSE_CONTROL/VELOCITY_CONTROL always need nav and are checked via
+    // isNavOk() directly, without going through this.
+    return mIsGoalGlobal.get();
 }
 
 void Vehicle::stop()
 {
-    LOGV << "Received STOP command!"; 
-    Eigen::Vector3d zeros = Eigen::Vector3d::Zero();  
-    setControlInput(zeros); 
-    doThrusterControl();
-    mGoalType = GoalType::NUM_TYPES; // so arrival state goes to IDLE 
+    LOGV << "Received STOP command!";
+    Eigen::Vector3d zeros = Eigen::Vector3d::Zero();
+    setControlInput(zeros);
+    mThrusterCommander->command(zeros);
+    mGoalType = GoalType::NUM_TYPES; // so arrival state goes to IDLE
+}
+
+void Vehicle::safeStop()
+{
+    LOGW << "Nav data lost - safe stopping thrusters";
+    mThrusterCommander->command(Eigen::Vector3d::Zero());
+    // deliberately leaves mGoalPose/mGoalVelocity/mGoalType untouched so the
+    // active goal can be auto-resumed once nav data is fresh again
 }
 
 Vehicle::ControlStatus Vehicle::getControlStatus()

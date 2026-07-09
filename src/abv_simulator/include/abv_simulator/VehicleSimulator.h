@@ -34,12 +34,29 @@ private:
     std::string mThrusterCommand;
     std::mutex mThrusterCommandMutex;
 
-    double mMass; 
-    double mIzz; // moment of inertia of vehicle around vertical axis 
-    double mThrusterForce; 
-    double mMomentArm; 
+    double mMass;
+    double mIzz; // moment of inertia of vehicle around vertical axis
+    double mThrusterForce;
+    double mMomentArm;
     double mTimestep;
     double mDamping;
+
+    // control allocation matrix: row = contribution of each of the 8
+    // thrusters to (fx, fy, tz) when that thruster fires alone. Sourced from
+    // the same ControlConfig.mAllocationX/Y/Yaw fields ThrusterCommander's
+    // MatrixThrusterMapper uses, so sim and hardware can't drift apart.
+    // Only used when mUseMatrixAllocation is true - see convertThrusterCommandToForce.
+    Eigen::Matrix<double, 3, 8> mB;
+
+    // mirrors ThrusterCommander's strategy selection: true iff
+    // Control.Thrusters.AllocationStrategy is "Matrix". The lookup-table
+    // path's hand-tuned applied-thrust values for combined translation+yaw
+    // commands are NOT pure single-thruster superposition (e.g. two
+    // same-sign-yaw thrusters firing together is declared as 1x yaw torque,
+    // not the 2x that summing their individual contributions would give) -
+    // so the sim must mirror whichever mapper is actually choosing thruster
+    // commands, not always use the matrix multiply.
+    bool mUseMatrixAllocation;
 
     Eigen::Vector3d mThrustForceCmd;   // instantaneous from convertThrusterCommandToForce()
     Eigen::Vector3d mThrustForceReal;  // actually applied (with lag)
@@ -62,6 +79,7 @@ private:
     // Dropout state
     bool mDropoutActive{false};
     int mDropoutRemainingSteps{0};
+    bool mSimulateDropoutEnabled;
 
     // Random generators
     std::mt19937 mRng{std::random_device{}()};

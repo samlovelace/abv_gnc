@@ -13,6 +13,8 @@ Navigation:
   Interface: optitrack
   Rate: 25 # Hz
   RigidBodyName: ABV1
+  MaxDeadReckonDuration: 0.5 # seconds - EKF free-run bound before output is frozen and marked invalid
+  SimulateDropout: false # abv_simulator only - enables synthetic burst nav dropouts for testing
 
   Network:
     Local:
@@ -22,12 +24,16 @@ Navigation:
       Ip: 127.0.0.1
 
 Control:
+  ControlPolicy: PID # which IControlPolicy Vehicle uses: PID | External
+
   StateMachine:
     Rate: 10 # hz
 
   Arrival:
     Tolerance: [0.05, 0.05, 0.05] # [m, m, rad]
     Duration: 3 # seconds
+
+  NavDataTimeout: 1.0 # seconds - max time since last abv/state message before nav is considered stale
 
   Gains:
     Kp: [25.0, 25.0, 5.0]
@@ -38,6 +44,19 @@ Control:
     InputDiscretization:
       On: [0.2, 0.2, 0.2]
       Off: [0.09, 0.09, 0.09]
+
+    AllocationStrategy: LookupTable # LookupTable (current behavior) | Matrix
+
+    Allocation:
+      x:   [0, 0, -1, -1, 0, 0, 1, 1]
+      y:   [1, 1, 0, 0, -1, -1, 0, 0]
+      yaw: [-1, 1, -1, 1, -1, 1, -1, 1]
+      # firing cutoff on the pseudo-inverse solution; Matrix strategy only.
+      # Must stay below 0.125 (yaw-only commands solve to +-0.125 per thruster
+      # since all 8 thrusters carry a yaw term, vs +-0.25 for pure x/y) or
+      # pure-yaw commands silently produce zero thrust. Verified in sim;
+      # still needs a real hardware bench tuning pass before trusting it.
+      Threshold: 0.1
 
     ThrusterDriver:
       Type: JETGPIO

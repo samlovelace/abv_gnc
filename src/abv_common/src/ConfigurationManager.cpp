@@ -68,14 +68,19 @@ void ConfigurationManager::parseNavigationConfig(const YAML::Node& aNode)
     mNavigationConfig.mRigidBodyName = aNode["RigidBodyName"].as<std::string>(); 
 
     mNavigationConfig.mLocalIp = aNode["Network"]["Local"]["Ip"].as<std::string>();
-    mNavigationConfig.mServerIp = aNode["Network"]["Server"]["Ip"].as<std::string>(); 
+    mNavigationConfig.mServerIp = aNode["Network"]["Server"]["Ip"].as<std::string>();
+
+    mNavigationConfig.mMaxDeadReckonDuration = aNode["MaxDeadReckonDuration"].as<double>(0.5);
+    mNavigationConfig.mSimulateDropout = aNode["SimulateDropout"].as<bool>(false);
 }
 
 void ConfigurationManager::parseControlConfig(const YAML::Node& aNode)
 {
-    mControlConfig.mStateMachineRate = aNode["StateMachine"]["Rate"].as<int>(); 
+    mControlConfig.mStateMachineRate = aNode["StateMachine"]["Rate"].as<int>();
+    mControlConfig.mControlPolicyType = aNode["ControlPolicy"].as<std::string>("PID");
     mControlConfig.mPoseArrivalTol = ConfigUtils::parseVector3d(aNode["Arrival"]["Tolerance"]);
-    mControlConfig.mArrivalDuration = aNode["Arrival"]["Duration"].as<double>(); 
+    mControlConfig.mArrivalDuration = aNode["Arrival"]["Duration"].as<double>();
+    mControlConfig.mNavDataTimeout = aNode["NavDataTimeout"].as<double>(1.0);
 
     mControlConfig.mKp = ConfigUtils::parseVector3d(aNode["Gains"]["Kp"]);
     mControlConfig.mKi = ConfigUtils::parseVector3d(aNode["Gains"]["Ki"]);
@@ -84,7 +89,14 @@ void ConfigurationManager::parseControlConfig(const YAML::Node& aNode)
     mControlConfig.mSchmittTriggerOn = ConfigUtils::parseVector3d(aNode["Thrusters"]["InputDiscretization"]["On"]);
     mControlConfig.mSchmittTriggerOff = ConfigUtils::parseVector3d(aNode["Thrusters"]["InputDiscretization"]["Off"]);
 
-    mControlConfig.mThrusterDriverType = aNode["Thrusters"]["ThrusterDriver"]["Type"].as<std::string>(); 
+    mControlConfig.mThrusterAllocationStrategy = aNode["Thrusters"]["AllocationStrategy"].as<std::string>("LookupTable");
+
+    mControlConfig.mAllocationX   = ConfigUtils::parseIntVector(aNode["Thrusters"]["Allocation"]["x"]);
+    mControlConfig.mAllocationY   = ConfigUtils::parseIntVector(aNode["Thrusters"]["Allocation"]["y"]);
+    mControlConfig.mAllocationYaw = ConfigUtils::parseIntVector(aNode["Thrusters"]["Allocation"]["yaw"]);
+    mControlConfig.mAllocationThreshold = aNode["Thrusters"]["Allocation"]["Threshold"].as<double>(0.1);
+
+    mControlConfig.mThrusterDriverType = aNode["Thrusters"]["ThrusterDriver"]["Type"].as<std::string>();
     if("JETGPIO" == mControlConfig.mThrusterDriverType)
     {
         // parse GPIO pins 

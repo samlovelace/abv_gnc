@@ -50,23 +50,48 @@ void CommandHandler::commandCallback(abv_msgs::msg::AbvControllerCommand::Shared
         }
         case CommandType::DIRECTION:
         {
-            mVehicle->setControlInput(convertToEigen(aCmdMsg->data), aCmdMsg->is_global); 
-            setNewActiveState(StateMachine::States::DIRECTION_CONTROL); 
-            break; 
+            // body-frame direction commands never touch nav data (see
+            // Vehicle::doDirectionControl); global-frame ones need current
+            // yaw to rotate into body frame, so they require nav data.
+            if(aCmdMsg->is_global && !mVehicle->isNavOk())
+            {
+                LOGW << "Cannot execute global-frame direction command, navigation data not fresh/valid...";
+                return;
+            }
+
+            mVehicle->setControlInput(convertToEigen(aCmdMsg->data), aCmdMsg->is_global);
+            setNewActiveState(StateMachine::States::DIRECTION_CONTROL);
+            break;
         }
         case CommandType::POSE:
         {
+            if(!mVehicle->isNavOk())
+            {
+                LOGW << "Cannot execute pose command, navigation data not fresh/valid...";
+                return;
+            }
+
             mVehicle->setGoalPose(convertToEigen(aCmdMsg->data));
-            mVehicle->setArrivalTolerance(convertToEigen(aCmdMsg->tolerance)); 
-            setNewActiveState(StateMachine::States::POSE_CONTROL);   
-            break; 
+            mVehicle->setArrivalTolerance(convertToEigen(aCmdMsg->tolerance));
+            setNewActiveState(StateMachine::States::POSE_CONTROL);
+            break;
         }
-        case CommandType::VELOCITY: 
+        case CommandType::VELOCITY:
         {
+            // gated unconditionally regardless of frame: even the body-frame
+            // path in Vehicle::doVelocityControl still reads current pose and
+            // rotates current velocity by nav-derived yaw, so there's no
+            // legitimate nav-free velocity control path today.
+            if(!mVehicle->isNavOk())
+            {
+                LOGW << "Cannot execute velocity command, navigation data not fresh/valid...";
+                return;
+            }
+
             mVehicle->setGoalVelocity(convertToEigen(aCmdMsg->data), aCmdMsg->is_global);
-            mVehicle->setArrivalTolerance(convertToEigen(aCmdMsg->tolerance)); 
-            setNewActiveState(StateMachine::States::VELOCITY_CONTROL); 
-            break; 
+            mVehicle->setArrivalTolerance(convertToEigen(aCmdMsg->tolerance));
+            setNewActiveState(StateMachine::States::VELOCITY_CONTROL);
+            break;
         }
         default: 
         {

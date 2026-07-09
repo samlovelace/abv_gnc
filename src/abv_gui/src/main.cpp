@@ -91,8 +91,8 @@ int main(int argc, char *argv[])
      
     rightLayout->addWidget(stopBtn); 
 
-    CommandPanel* panel = new CommandPanel(); 
-    rightLayout->addWidget(panel); 
+    CommandPanel* panel = new CommandPanel();
+    rightLayout->addWidget(panel);
 
     StatusPanel* status = new StatusPanel();
     rightLayout->addWidget(status);
@@ -110,6 +110,16 @@ int main(int argc, char *argv[])
             });
     QObject::connect(heartbeatAdapter, &TopicAdapterBase::newDataVariant,
                       healthPanel, &NodeHealthPanel::onHeartbeat);
+    auto* poseSync =
+        new TopicAdapter<abv_msgs::msg::AbvState, QVector<double>>(
+            "abv/state", &conversions::navigationPositionConvertor);
+
+    // Connect (rather than mutating the panel's widgets inside the
+    // converter above) so the update is delivered on the GUI thread instead
+    // of racing the ROS subscription thread against the user editing the
+    // same spin boxes.
+    QObject::connect(poseSync, &TopicAdapterBase::newDataVariant,
+                      panel, &CommandPanel::onPoseSync);
 
     auto* gdnceStatus =
         new TopicAdapter<abv_msgs::msg::AbvGuidanceStatus, QString>("abv/guidance/status", 

@@ -72,6 +72,11 @@ private:
     void onTimeout();
     void onWaypointTimeout();
     void sendStopCommand();
+
+    // per-axis: aWaypoint's override if > 0, else mCommand.mArrivalTol
+    // (which itself falls back to the configured default in
+    // Vehicle::setArrivalTolerance)
+    Eigen::Vector3d resolveArrivalTolerance(const Waypoint& aWaypoint) const;
     void controllerStatusCallback(abv_msgs::msg::AbvControllerStatus::SharedPtr aStatus);
 
     void statusPublishLoop();
