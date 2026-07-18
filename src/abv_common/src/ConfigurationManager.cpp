@@ -47,8 +47,11 @@ void ConfigurationManager::loadConfiguration()
     YAML::Node navigationNode = config["Navigation"]; 
     parseNavigationConfig(navigationNode); 
 
-    YAML::Node controlNode = config["Control"]; 
-    parseControlConfig(controlNode); 
+    YAML::Node controlNode = config["Control"];
+    parseControlConfig(controlNode);
+
+    YAML::Node heartbeatNode = config["Heartbeat"];
+    parseHeartbeatConfig(heartbeatNode);
 }
 
 void ConfigurationManager::parseGuidanceConfig(const YAML::Node& aNode)
@@ -104,6 +107,13 @@ void ConfigurationManager::parseControlConfig(const YAML::Node& aNode)
     mControlConfig.mMomentArm = aNode["Dynamics"]["MomentArm"].as<double>();
     mControlConfig.mMass = aNode["Dynamics"]["Mass"].as<double>();
     mControlConfig.mInertia = aNode["Dynamics"]["Inertia"].as<double>();
+}
+
+void ConfigurationManager::parseHeartbeatConfig(const YAML::Node& aNode)
+{
+    mHeartbeatConfig.mRate = aNode["Rate"].as<double>();
+    mHeartbeatConfig.mStaleAfter = aNode["StaleAfter"].as<double>();
+    mHeartbeatConfig.mPingIntervalMs = aNode["PingIntervalMs"].as<int>();
 }
 
 

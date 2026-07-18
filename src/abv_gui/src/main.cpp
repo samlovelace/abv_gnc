@@ -19,6 +19,9 @@
 #include "abv_msgs/msg/abv_controller_command.hpp"
 #include "abv_msgs/msg/abv_guidance_command.hpp"
 #include "abv_msgs/msg/abv_guidance_status.hpp"
+#include "abv_msgs/msg/abv_heartbeat.hpp"
+
+#include "abv_common/ConfigurationManager.h"
 
 #include "abv_gui/LivePlot.h"
 #include "abv_gui/TopicAdapter.hpp"
@@ -29,10 +32,13 @@
 
 #include "abv_gui/CommandPanel.h"
 #include "abv_gui/StatusPanel.h"
+#include "abv_gui/NodeHealthPanel.h"
 
 int main(int argc, char *argv[])
 {
-    rclcpp::init(0, nullptr); 
+    ConfigurationManager::getInstance()->loadConfiguration();
+
+    rclcpp::init(0, nullptr);
     RosTopicManager::getInstance("abv_gui")->spinNode();
     RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvControllerCommand>("abv/controller/command"); 
     RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvGuidanceCommand>("abv/guidance/command"); 
@@ -91,6 +97,19 @@ int main(int argc, char *argv[])
     StatusPanel* status = new StatusPanel();
     rightLayout->addWidget(status);
 
+    QString robotIp = QString::fromStdString(
+        ConfigurationManager::getInstance()->getNavigationConfig().mLocalIp);
+
+    auto* healthPanel = new NodeHealthPanel({"controller", "navigation", "guidance", "bridge"}, robotIp);
+    rightLayout->addWidget(healthPanel);
+
+    auto* heartbeatAdapter =
+        new TopicAdapter<abv_msgs::msg::AbvHeartbeat, QString>("abv/heartbeat",
+            [](const abv_msgs::msg::AbvHeartbeat& msg) {
+                return QString::fromStdString(msg.node_name);
+            });
+    QObject::connect(heartbeatAdapter, &TopicAdapterBase::newDataVariant,
+                      healthPanel, &NodeHealthPanel::onHeartbeat);
     auto* poseSync =
         new TopicAdapter<abv_msgs::msg::AbvState, QVector<double>>(
             "abv/state", &conversions::navigationPositionConvertor);

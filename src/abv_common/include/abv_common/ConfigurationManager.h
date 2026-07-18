@@ -35,6 +35,7 @@ public:
     GuidanceConfig& getGuidanceConfig() { return mGuidanceConfig; }
     NavigationConfig& getNavigationConfig() { return mNavigationConfig; }
     ControlConfig& getControlConfig() { return mControlConfig; }
+    HeartbeatConfig& getHeartbeatConfig() { return mHeartbeatConfig; }
 
 private: 
     /**
@@ -46,15 +47,17 @@ private:
      */
     ~ConfigurationManager();
 
-    void parseGuidanceConfig(const YAML::Node& aNode); 
-    void parseNavigationConfig(const YAML::Node& aNode); 
-    void parseControlConfig(const YAML::Node& aNode); 
+    void parseGuidanceConfig(const YAML::Node& aNode);
+    void parseNavigationConfig(const YAML::Node& aNode);
+    void parseControlConfig(const YAML::Node& aNode);
+    void parseHeartbeatConfig(const YAML::Node& aNode);
 
-private: 
+private:
 
-    GuidanceConfig mGuidanceConfig; 
-    NavigationConfig mNavigationConfig; 
-    ControlConfig mControlConfig; 
+    GuidanceConfig mGuidanceConfig;
+    NavigationConfig mNavigationConfig;
+    ControlConfig mControlConfig;
+    HeartbeatConfig mHeartbeatConfig;
 };
 
 #endif

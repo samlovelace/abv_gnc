@@ -3,6 +3,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <vector>
+#include <atomic>
 
 class RosTopicManager : public rclcpp::Node
 {
@@ -85,6 +86,7 @@ private:
 
     std::map<std::string, rclcpp::PublisherBase::SharedPtr> mPublishers;
     std::map<std::string, std::vector<rclcpp::SubscriptionBase::SharedPtr>> mSubscribers;
+    std::atomic<bool> mSpinning{false};
 };
 
 #endif
