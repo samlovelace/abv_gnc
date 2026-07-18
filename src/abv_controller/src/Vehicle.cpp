@@ -252,11 +252,12 @@ Vehicle::ControlStatus Vehicle::getControlStatus()
 {
     // TODO: expand this to include more controller status related stuff
 
-    ControlStatus cs; 
-    cs.mStatus = determineArrivalStatus(); 
-    cs.mAppliedThrust = mThrusterCommander->getAppliedThrustVector();     
-    
-    return cs;  
+    ControlStatus cs;
+    cs.mStatus = determineArrivalStatus();
+    cs.mAppliedThrust = mThrusterCommander->getAppliedThrustVector();
+    cs.mThrusterCommand = mThrusterCommander->getThrusterCommand();
+
+    return cs;
 }
 
 Arrival::Status Vehicle::determineArrivalStatus()

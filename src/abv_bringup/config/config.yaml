@@ -45,12 +45,13 @@ Control:
       On: [0.2, 0.2, 0.2]
       Off: [0.09, 0.09, 0.09]
 
-    AllocationStrategy: LookupTable # LookupTable (current behavior) | Matrix
+    AllocationStrategy: LookupTable # LookupTable | Matrix
 
     Allocation:
-      x:   [0, 0, -1, -1, 0, 0, 1, 1]
-      y:   [1, 1, 0, 0, -1, -1, 0, 0]
+      x: [0, 0, -1, -1, 0, 0, 1, 1]
+      y: [1, 1, 0, 0, -1, -1, 0, 0]
       yaw: [-1, 1, -1, 1, -1, 1, -1, 1]
+
       # firing cutoff on the pseudo-inverse solution; Matrix strategy only.
       # Must stay below 0.125 (yaw-only commands solve to +-0.125 per thruster
       # since all 8 thrusters carry a yaw term, vs +-0.25 for pure x/y) or
@@ -73,3 +74,9 @@ Heartbeat:
   Rate: 2 # Hz - per-node heartbeat publish rate
   StaleAfter: 2.0 # seconds - GUI marks a node disconnected if no heartbeat arrives within this window
   PingIntervalMs: 1000 # GUI-side: how often to ping the robot host for the Comms indicator
+
+TableView:
+  Width: 3.6 # meters - table X extent, GUI-side top-down view
+  Height: 1.8 # meters - table Y extent
+  RobotWidth: 0.35 # meters - footprint used to draw the robot glyph, tune to the real chassis
+  RobotLength: 0.35

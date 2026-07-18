@@ -20,6 +20,7 @@
 #include "abv_msgs/msg/abv_guidance_command.hpp"
 #include "abv_msgs/msg/abv_guidance_status.hpp"
 #include "abv_msgs/msg/abv_heartbeat.hpp"
+#include "abv_msgs/msg/abv_thruster_status.hpp"
 
 #include "abv_common/ConfigurationManager.h"
 
@@ -33,6 +34,7 @@
 #include "abv_gui/CommandPanel.h"
 #include "abv_gui/StatusPanel.h"
 #include "abv_gui/NodeHealthPanel.h"
+#include "abv_gui/TableTopView.h"
 
 int main(int argc, char *argv[])
 {
@@ -78,14 +80,14 @@ int main(int argc, char *argv[])
     auto* leftLayout = new QVBoxLayout();
     auto* rightLayout = new QVBoxLayout();
 
-    mainLayout->addLayout(leftLayout, 4);   // plots
+    mainLayout->addLayout(leftLayout, 3);   // plots
     mainLayout->addLayout(rightLayout, 1);  // values panel
 
     leftLayout->addWidget(posPlot);
     leftLayout->addWidget(velPlot);
     leftLayout->addWidget(ctrlPlot);
 
-    // STOP BUTTON 
+    // STOP BUTTON
     auto stopBtn = new ButtonAdapter("Stop", std::bind(&btn::action::stop), ButtonStyle::danger());
     stopBtn->resize(50, 50); 
      
@@ -120,6 +122,24 @@ int main(int argc, char *argv[])
     // same spin boxes.
     QObject::connect(poseSync, &TopicAdapterBase::newDataVariant,
                       panel, &CommandPanel::onPoseSync);
+
+    auto* tableView = new TableTopView(ConfigurationManager::getInstance()->getTableViewConfig());
+
+    auto* tableStateAdapter =
+        new TopicAdapter<abv_msgs::msg::AbvState, QVector<double>>(
+            "abv/state", &conversions::navigationStateConvertor);
+    QObject::connect(tableStateAdapter, &TopicAdapterBase::newDataVariant,
+                      tableView, &TableTopView::onPoseUpdate);
+
+    auto* thrusterStateAdapter =
+        new TopicAdapter<abv_msgs::msg::AbvThrusterStatus, QString>("abv/controller/thrusters",
+            [](const abv_msgs::msg::AbvThrusterStatus& msg) {
+                return QString::fromStdString(msg.thrusters);
+            });
+    QObject::connect(thrusterStateAdapter, &TopicAdapterBase::newDataVariant,
+                      tableView, &TableTopView::onThrusterState);
+
+    mainLayout->insertWidget(0, tableView, 1);  // always-visible table view, left of the plots
 
     auto* gdnceStatus =
         new TopicAdapter<abv_msgs::msg::AbvGuidanceStatus, QString>("abv/guidance/status", 
@@ -161,10 +181,10 @@ int main(int argc, char *argv[])
                 return ""; 
         });
 
-    QMainWindow window; 
-    window.setWindowTitle("ABV Ground Station"); 
-    window.resize(1280, 720); 
-    window.setCentralWidget(central); 
+    QMainWindow window;
+    window.setWindowTitle("ABV Ground Station");
+    window.resize(1280, 720);
+    window.setCentralWidget(central);
 
     QPalette dark;
     dark.setColor(QPalette::Window,          QColor(30, 30, 30));
@@ -178,7 +198,7 @@ int main(int argc, char *argv[])
     dark.setColor(QPalette::HighlightedText, Qt::white);
     app.setPalette(dark);
 
-    window.show(); 
+    window.show();
     app.exec();
 
     rclcpp::shutdown(); 

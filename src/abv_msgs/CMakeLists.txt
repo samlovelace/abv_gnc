@@ -16,6 +16,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/AbvNodeStatus.msg"
   "msg/AbvResponse.msg"
   "msg/AbvState.msg"
+  "msg/AbvThrusterStatus.msg"
   "msg/AbvVec3.msg"
 
   "srv/AbvControlAction.srv"

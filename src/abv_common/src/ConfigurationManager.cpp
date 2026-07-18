@@ -52,6 +52,9 @@ void ConfigurationManager::loadConfiguration()
 
     YAML::Node heartbeatNode = config["Heartbeat"];
     parseHeartbeatConfig(heartbeatNode);
+
+    YAML::Node tableViewNode = config["TableView"];
+    parseTableViewConfig(tableViewNode);
 }
 
 void ConfigurationManager::parseGuidanceConfig(const YAML::Node& aNode)
@@ -114,6 +117,14 @@ void ConfigurationManager::parseHeartbeatConfig(const YAML::Node& aNode)
     mHeartbeatConfig.mRate = aNode["Rate"].as<double>();
     mHeartbeatConfig.mStaleAfter = aNode["StaleAfter"].as<double>();
     mHeartbeatConfig.mPingIntervalMs = aNode["PingIntervalMs"].as<int>();
+}
+
+void ConfigurationManager::parseTableViewConfig(const YAML::Node& aNode)
+{
+    mTableViewConfig.mWidth = aNode["Width"].as<double>();
+    mTableViewConfig.mHeight = aNode["Height"].as<double>();
+    mTableViewConfig.mRobotWidth = aNode["RobotWidth"].as<double>();
+    mTableViewConfig.mRobotLength = aNode["RobotLength"].as<double>();
 }
 
 
