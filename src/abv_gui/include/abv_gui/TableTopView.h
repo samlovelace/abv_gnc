@@ -22,6 +22,14 @@ class TableTopView : public QWidget
 public:
     explicit TableTopView(const TableViewConfig& aConfig, QWidget* parent = nullptr);
 
+    // Click-interaction mode: what a press/drag/release gesture on the table
+    // does. Only SetGoalPose is implemented today; this exists so a future
+    // mode (e.g. click-to-place a collision obstacle) can be added as a new
+    // enum value + a new branch in the mouse handlers, without touching the
+    // goal-pose code path.
+    enum class InteractionMode { SetGoalPose };
+    void setInteractionMode(InteractionMode aMode);
+
 public slots:
     // Expects a QVector<double>{x, y, yaw, valid} as produced by
     // conversions::navigationStateConvertor.
@@ -31,16 +39,31 @@ public slots:
     // string, index i = thruster (i+1) (see Control.Thrusters.Allocation).
     void onThrusterState(const QVariant& aData);
 
+    // Hides the proposed-goal ghost. Called after the caller has resolved
+    // (sent or cancelled) a goalPoseSelected signal.
+    void clearGoalGhost();
+
+signals:
+    // Emitted on mouse release after a SetGoalPose press/drag gesture. This
+    // widget doesn't know about ROS/CommandPanel - the caller decides what
+    // "sending" a goal pose means (see main.cpp).
+    void goalPoseSelected(double aX, double aY, double aYaw);
+
 protected:
     void paintEvent(QPaintEvent* aEvent) override;
+    void mousePressEvent(QMouseEvent* aEvent) override;
+    void mouseMoveEvent(QMouseEvent* aEvent) override;
+    void mouseReleaseEvent(QMouseEvent* aEvent) override;
 
 private:
     QRectF tableToWidget() const;
     double worldScale(const QRectF& aTableRect) const;
     QPointF worldToPixel(const QRectF& aTableRect, double aX, double aY) const;
+    QPointF pixelToWorld(const QRectF& aTableRect, const QPointF& aPixel) const;
 
     void drawGrid(QPainter& aPainter, const QRectF& aTableRect) const;
     void drawRobot(QPainter& aPainter, const QRectF& aTableRect) const;
+    void drawGoalGhost(QPainter& aPainter, const QRectF& aTableRect) const;
     void drawReadout(QPainter& aPainter) const;
 
     TableViewConfig mConfig;
@@ -51,4 +74,12 @@ private:
     bool mHasPose{false};
 
     QString mThrusterState{"00000000"};
+
+    InteractionMode mInteractionMode{InteractionMode::SetGoalPose};
+    bool mDraggingGoal{false};
+    bool mHasGoalGhost{false};
+    double mGoalX{0.0};
+    double mGoalY{0.0};
+    double mGoalYaw{0.0};
+    QPointF mDragStartWorld;
 };

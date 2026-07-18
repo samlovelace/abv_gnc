@@ -13,6 +13,8 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QGroupBox>
+#include <QMenu>
+#include <QCursor>
 #include <QDebug>
 #include <cmath>
 
@@ -138,6 +140,31 @@ int main(int argc, char *argv[])
             });
     QObject::connect(thrusterStateAdapter, &TopicAdapterBase::newDataVariant,
                       tableView, &TableTopView::onThrusterState);
+
+    // Click-drag-release on the table proposes a goal pose (ghost shown by
+    // tableView itself); on release we pop a small confirm menu and only
+    // publish if "Send Goal" is chosen. tableView knows nothing about ROS -
+    // it just reports the proposed pose. If sent, the ghost is left in
+    // place as a static marker of the commanded goal (cleared only if the
+    // user places a new one); if the menu is dismissed without choosing
+    // "Send Goal", the ghost is cleared since nothing was commanded.
+    QObject::connect(tableView, &TableTopView::goalPoseSelected,
+                      [tableView, panel](double x, double y, double yaw) {
+        QMenu menu;
+        QAction* sendAction = menu.addAction(
+            QString("Send Goal (%1, %2, %3\xC2\xB0)")
+                .arg(x, 0, 'f', 2).arg(y, 0, 'f', 2).arg(yaw * 180.0 / M_PI, 0, 'f', 0));
+
+        QAction* chosen = menu.exec(QCursor::pos());
+        if (chosen == sendAction)
+        {
+            panel->sendPoseCommand(x, y, yaw);
+        }
+        else
+        {
+            tableView->clearGoalGhost();
+        }
+    });
 
     mainLayout->insertWidget(0, tableView, 1);  // always-visible table view, left of the plots
 

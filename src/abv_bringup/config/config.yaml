@@ -38,7 +38,7 @@ Control:
   Gains:
     Kp: [25.0, 25.0, 5.0]
     Ki: [0, 0, 0]
-    Kd: [55.0, 55.0, 15.0]
+    Kd: [155.0, 155.0, 15.0]
 
   Thrusters:
     InputDiscretization:

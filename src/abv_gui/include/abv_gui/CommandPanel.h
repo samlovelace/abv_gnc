@@ -24,6 +24,12 @@ public:
     // mPoseXDirty et al.) so it doesn't clobber an in-progress/pending edit.
     void setCurrentPose(double aX, double aY, double aYaw);
 
+    // Builds and publishes an AbvControllerCommand type "pose" for the
+    // given pose. Factored out of onSendPose() so other callers (e.g. the
+    // table view's click-to-set-goal) can send a pose without going through
+    // the Pose panel's spin boxes.
+    void sendPoseCommand(double aX, double aY, double aYaw);
+
 public slots:
     // Slot counterpart of setCurrentPose for TopicAdapter::newDataVariant.
     // Connecting a signal to this (rather than calling setCurrentPose

@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QFont>
+#include <QMouseEvent>
 #include <cmath>
 
 namespace
@@ -10,12 +11,18 @@ namespace
     constexpr double kMargin = 28.0;       // px, room for the border/labels
     constexpr double kGridSpacing = 0.3;   // meters
     constexpr double kEps = 1e-6;
+    constexpr double kMinDragPixels = 18.0; // below this, treat a drag as "no heading intent" -> yaw 0
 }
 
 TableTopView::TableTopView(const TableViewConfig& aConfig, QWidget* parent)
     : QWidget(parent), mConfig(aConfig)
 {
     setMinimumSize(300, 200);
+}
+
+void TableTopView::setInteractionMode(InteractionMode aMode)
+{
+    mInteractionMode = aMode;
 }
 
 void TableTopView::onPoseUpdate(const QVariant& aData)
@@ -43,6 +50,12 @@ void TableTopView::onThrusterState(const QVariant& aData)
     }
 
     mThrusterState = state;
+    update();
+}
+
+void TableTopView::clearGoalGhost()
+{
+    mHasGoalGhost = false;
     update();
 }
 
@@ -88,6 +101,16 @@ QPointF TableTopView::worldToPixel(const QRectF& aTableRect, double aX, double a
         aTableRect.bottom() - aX * scale);
 }
 
+// Algebraic inverse of worldToPixel - same single spot for the axis mapping,
+// just solved the other way.
+QPointF TableTopView::pixelToWorld(const QRectF& aTableRect, const QPointF& aPixel) const
+{
+    double scale = worldScale(aTableRect);
+    return QPointF(
+        (aTableRect.bottom() - aPixel.y()) / scale,
+        (aTableRect.right() - aPixel.x()) / scale);
+}
+
 void TableTopView::paintEvent(QPaintEvent*)
 {
     QPainter p(this);
@@ -111,7 +134,65 @@ void TableTopView::paintEvent(QPaintEvent*)
         drawRobot(p, tableRect);
     }
 
+    if (mHasGoalGhost)
+    {
+        drawGoalGhost(p, tableRect);
+    }
+
     drawReadout(p);
+}
+
+void TableTopView::mousePressEvent(QMouseEvent* aEvent)
+{
+    QRectF tableRect = tableToWidget();
+    if (mInteractionMode != InteractionMode::SetGoalPose ||
+        !tableRect.isValid() || !tableRect.contains(aEvent->pos()))
+    {
+        QWidget::mousePressEvent(aEvent);
+        return;
+    }
+
+    QPointF world = pixelToWorld(tableRect, aEvent->pos());
+    mDragStartWorld = world;
+    mGoalX = world.x();
+    mGoalY = world.y();
+    mGoalYaw = 0.0;
+    mDraggingGoal = true;
+    mHasGoalGhost = true;
+    update();
+}
+
+void TableTopView::mouseMoveEvent(QMouseEvent* aEvent)
+{
+    if (!mDraggingGoal)
+    {
+        QWidget::mouseMoveEvent(aEvent);
+        return;
+    }
+
+    QRectF tableRect = tableToWidget();
+    QPointF world = pixelToWorld(tableRect, aEvent->pos());
+
+    double dx = world.x() - mDragStartWorld.x();
+    double dy = world.y() - mDragStartWorld.y();
+    if (std::hypot(dx, dy) * worldScale(tableRect) >= kMinDragPixels)
+    {
+        mGoalYaw = std::atan2(dy, dx);
+    }
+
+    update();
+}
+
+void TableTopView::mouseReleaseEvent(QMouseEvent* aEvent)
+{
+    if (!mDraggingGoal)
+    {
+        QWidget::mouseReleaseEvent(aEvent);
+        return;
+    }
+
+    mDraggingGoal = false;
+    emit goalPoseSelected(mGoalX, mGoalY, mGoalYaw);
 }
 
 void TableTopView::drawGrid(QPainter& aPainter, const QRectF& aTableRect) const
@@ -304,6 +385,46 @@ void TableTopView::drawRobot(QPainter& aPainter, const QRectF& aTableRect) const
     aPainter.setPen(QPen(QColor(60, 60, 65), 1.0));
     aPainter.setBrush(QColor(110, 110, 115));
     aPainter.drawPolygon(housingPixels);
+
+    aPainter.restore();
+}
+
+void TableTopView::drawGoalGhost(QPainter& aPainter, const QRectF& aTableRect) const
+{
+    double halfL = mConfig.mRobotLength / 2.0;
+    double halfW = mConfig.mRobotWidth / 2.0;
+
+    double cosY = std::cos(mGoalYaw);
+    double sinY = std::sin(mGoalYaw);
+
+    auto toPixel = [&](const QPointF& local) {
+        double wx = mGoalX + local.x() * cosY - local.y() * sinY;
+        double wy = mGoalY + local.x() * sinY + local.y() * cosY;
+        return worldToPixel(aTableRect, wx, wy);
+    };
+
+    // Deliberately simpler than the live robot glyph - a dashed outline
+    // square plus a heading line - so a proposed goal reads as a translucent
+    // preview rather than competing visually with the real vehicle.
+    QVector<QPointF> bodyLocal = {
+        {halfL,  halfW}, {halfL, -halfW}, {-halfL, -halfW}, {-halfL,  halfW}
+    };
+
+    QPolygonF bodyPixels;
+    for (const auto& v : bodyLocal) bodyPixels << toPixel(v);
+
+    aPainter.save();
+
+    QColor ghostColor(120, 200, 255);
+
+    QPen dashedPen(ghostColor, 1.5, Qt::DashLine);
+    aPainter.setPen(dashedPen);
+    aPainter.setBrush(QColor(120, 200, 255, 40));
+    aPainter.drawPolygon(bodyPixels);
+
+    QPen headingPen(ghostColor, 2.0);
+    aPainter.setPen(headingPen);
+    aPainter.drawLine(toPixel(QPointF(0.0, 0.0)), toPixel(QPointF(halfL * 1.4, 0.0)));
 
     aPainter.restore();
 }
