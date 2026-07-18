@@ -2,8 +2,13 @@
 #include "abv_common/ConfigurationManager.h"
 
 #include <QVBoxLayout>
-#include <QHBoxLayout>
+#include <QGridLayout>
 #include <QLabel>
+
+namespace
+{
+constexpr int kGridColumns = 2;
+}
 
 NodeHealthPanel::NodeHealthPanel(const QStringList& aExpectedNodes, const QString& aRobotIp, QWidget* parent)
     : QWidget(parent)
@@ -19,13 +24,24 @@ NodeHealthPanel::NodeHealthPanel(const QStringList& aExpectedNodes, const QStrin
     header->setStyleSheet("color: #ffffff; font-weight: bold;");
     layout->addWidget(header);
 
-    auto* row = new QHBoxLayout();
-    row->setSpacing(4);
+    // 2xN grid rather than one wide row (forces this panel's column wider
+    // than intended, stealing horizontal space from the plots next to it)
+    // or one tall single-file stack (looked visually unbalanced) - this
+    // keeps a compact footprint in both directions.
+    auto* grid = new QGridLayout();
+    grid->setSpacing(4);
+
+    int nextSlot = 0;
+    auto placeInGrid = [&](StatusIndicator* aIndicator)
+    {
+        grid->addWidget(aIndicator, nextSlot / kGridColumns, nextSlot % kGridColumns);
+        nextSlot++;
+    };
 
     // Comms indicator first - the more fundamental "is the robot even
     // reachable on the network" check, independent of any per-node status
     mCommsIndicator = new StatusIndicator("Comms");
-    row->addWidget(mCommsIndicator);
+    placeInGrid(mCommsIndicator);
 
     for (const QString& name : aExpectedNodes)
     {
@@ -33,11 +49,10 @@ NodeHealthPanel::NodeHealthPanel(const QStringList& aExpectedNodes, const QStrin
         mIndicators[name] = indicator;
         mEverSeen[name] = false;
         mLastSeen[name] = QElapsedTimer();
-        row->addWidget(indicator);
+        placeInGrid(indicator);
     }
 
-    row->addStretch();
-    layout->addLayout(row);
+    layout->addLayout(grid);
     layout->addStretch();
 
     mPinger = new NetworkPinger(aRobotIp, config.mPingIntervalMs, this);
