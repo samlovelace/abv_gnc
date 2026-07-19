@@ -67,8 +67,8 @@ Control:
   Dynamics:
     Mass: 12.7 # kg
     Inertia: 0.3 # kg-m^2
-    ThrusterForce: 0.08 # N
-    MomentArm: 0.125 # m
+    ThrusterForce: 0.1 # N
+    MomentArm: 0.1235 # m
 
 Heartbeat:
   Rate: 2 # Hz - per-node heartbeat publish rate
