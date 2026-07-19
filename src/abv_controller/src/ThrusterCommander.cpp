@@ -48,7 +48,12 @@ ThrusterCommander::~ThrusterCommander()
 
 void ThrusterCommander::commandThrusters(const std::string& aThrustersCmd)
 {
-    mThrusterDriver->send(aThrustersCmd); 
+    {
+        std::lock_guard<std::mutex> lock(mThrusterCommandMutex);
+        mThrusterCommand = aThrustersCmd;
+    }
+
+    mThrusterDriver->send(aThrustersCmd);
 }
 
 void ThrusterCommander::command(Eigen::Vector3d aControlInput)
@@ -102,7 +107,13 @@ Eigen::Vector3i ThrusterCommander::convertToThrustVector(Eigen::Vector3d aContro
 
 Eigen::Vector3d ThrusterCommander::getAppliedThrustVector()
 {
-    std::lock_guard<std::mutex> lock(mThrusterCommandMutex); 
-    return mAppliedThrustVector; 
+    std::lock_guard<std::mutex> lock(mThrusterCommandMutex);
+    return mAppliedThrustVector;
+}
+
+std::string ThrusterCommander::getThrusterCommand()
+{
+    std::lock_guard<std::mutex> lock(mThrusterCommandMutex);
+    return mThrusterCommand;
 }
 

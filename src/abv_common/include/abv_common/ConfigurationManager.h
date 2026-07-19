@@ -36,6 +36,7 @@ public:
     NavigationConfig& getNavigationConfig() { return mNavigationConfig; }
     ControlConfig& getControlConfig() { return mControlConfig; }
     HeartbeatConfig& getHeartbeatConfig() { return mHeartbeatConfig; }
+    TableViewConfig& getTableViewConfig() { return mTableViewConfig; }
 
 private: 
     /**
@@ -51,6 +52,7 @@ private:
     void parseNavigationConfig(const YAML::Node& aNode);
     void parseControlConfig(const YAML::Node& aNode);
     void parseHeartbeatConfig(const YAML::Node& aNode);
+    void parseTableViewConfig(const YAML::Node& aNode);
 
 private:
 
@@ -58,6 +60,7 @@ private:
     NavigationConfig mNavigationConfig;
     ControlConfig mControlConfig;
     HeartbeatConfig mHeartbeatConfig;
+    TableViewConfig mTableViewConfig;
 };
 
 #endif

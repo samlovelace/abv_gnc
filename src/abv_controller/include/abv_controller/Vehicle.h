@@ -55,8 +55,9 @@ public:
     bool needsFreshNavData();
     struct ControlStatus
     {
-        Eigen::Vector3d mAppliedThrust; 
-        Arrival::Status mStatus; 
+        Eigen::Vector3d mAppliedThrust;
+        Arrival::Status mStatus;
+        std::string mThrusterCommand;
     };
 
     ControlStatus getControlStatus(); 

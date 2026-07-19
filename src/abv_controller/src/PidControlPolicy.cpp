@@ -17,7 +17,7 @@ PidControlPolicy::~PidControlPolicy()
 bool PidControlPolicy::computeAction(const ControlContext& ctx, ActionContext& actionCtx)
 {
     actionCtx.controlInput = PID(ctx.error);
-    actionCtx.isGlobal = false;
+    actionCtx.isGlobal = true;
     return true;
 }
 

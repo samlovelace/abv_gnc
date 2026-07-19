@@ -38,19 +38,20 @@ Control:
   Gains:
     Kp: [25.0, 25.0, 5.0]
     Ki: [0, 0, 0]
-    Kd: [55.0, 55.0, 15.0]
+    Kd: [155.0, 155.0, 15.0]
 
   Thrusters:
     InputDiscretization:
       On: [0.2, 0.2, 0.2]
       Off: [0.09, 0.09, 0.09]
 
-    AllocationStrategy: LookupTable # LookupTable (current behavior) | Matrix
+    AllocationStrategy: LookupTable # LookupTable | Matrix
 
     Allocation:
-      x:   [0, 0, -1, -1, 0, 0, 1, 1]
-      y:   [1, 1, 0, 0, -1, -1, 0, 0]
+      x: [0, 0, -1, -1, 0, 0, 1, 1]
+      y: [1, 1, 0, 0, -1, -1, 0, 0]
       yaw: [-1, 1, -1, 1, -1, 1, -1, 1]
+
       # firing cutoff on the pseudo-inverse solution; Matrix strategy only.
       # Must stay below 0.125 (yaw-only commands solve to +-0.125 per thruster
       # since all 8 thrusters carry a yaw term, vs +-0.25 for pure x/y) or
@@ -66,10 +67,16 @@ Control:
   Dynamics:
     Mass: 12.7 # kg
     Inertia: 0.3 # kg-m^2
-    ThrusterForce: 0.08 # N
-    MomentArm: 0.125 # m
+    ThrusterForce: 0.1 # N
+    MomentArm: 0.1235 # m
 
 Heartbeat:
   Rate: 2 # Hz - per-node heartbeat publish rate
   StaleAfter: 2.0 # seconds - GUI marks a node disconnected if no heartbeat arrives within this window
   PingIntervalMs: 1000 # GUI-side: how often to ping the robot host for the Comms indicator
+
+TableView:
+  Width: 3.6 # meters - table X extent, GUI-side top-down view
+  Height: 1.8 # meters - table Y extent
+  RobotWidth: 0.35 # meters - footprint used to draw the robot glyph, tune to the real chassis
+  RobotLength: 0.35

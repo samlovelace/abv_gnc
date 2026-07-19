@@ -7,11 +7,13 @@
 #include "plog/Log.h"
 
 #include "abv_msgs/msg/abv_controller_status.hpp"
+#include "abv_msgs/msg/abv_thruster_status.hpp"
 
-StateMachine::StateMachine(std::shared_ptr<Vehicle> abv) : 
+StateMachine::StateMachine(std::shared_ptr<Vehicle> abv) :
     mDone(false), mActiveState(States::STARTUP), mVehicle(abv)
 {
-    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvControllerStatus>("abv/controller/status"); 
+    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvControllerStatus>("abv/controller/status");
+    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvThrusterStatus>("abv/controller/thrusters");
 }
 
 StateMachine::~StateMachine()
@@ -184,8 +186,12 @@ void StateMachine::controlStatusPublishLoop()
         statusToSend.set__arrival((uint8_t)status.mStatus);
         statusToSend.set__nav_ok(mVehicle->isNavOk());
 
-        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvControllerStatus>("abv/controller/status", statusToSend); 
+        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvControllerStatus>("abv/controller/status", statusToSend);
 
-        rate.block(); 
+        abv_msgs::msg::AbvThrusterStatus thrusterStatus;
+        thrusterStatus.set__thrusters(status.mThrusterCommand);
+        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvThrusterStatus>("abv/controller/thrusters", thrusterStatus);
+
+        rate.block();
     }
 }

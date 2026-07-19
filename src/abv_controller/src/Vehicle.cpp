@@ -27,6 +27,7 @@ Vehicle::Vehicle() :
         {
             LOGW << "Unknown ControlPolicy '" << mConfig.mControlPolicyType << "', defaulting to PID";
         }
+
         mController = std::make_unique<PidControlPolicy>();
     }
 }
@@ -111,7 +112,7 @@ void Vehicle::doVelocityControl()
     }
 
     // TODO: need to think through how to best handle body frame vel commands and whether a 
-    // velocity controller should be able to command body frame or global frame control inputs
+    // velocity controller should be able to command body frame as well as global frame control inputs
     setControlInput(actionCtx.controlInput, mIsGoalGlobal.get());
     doDirectionControl(); 
 }
@@ -132,7 +133,7 @@ void Vehicle::setGoalPose(Eigen::Vector3d aGoalPose)
     mGoalPose = aGoalPose;
     mGoalType = GoalType::POSE;
     mJustRecvdNewGoal.set(true); 
-    mIsGoalGlobal.set(false); // pose goals are always in global frame
+    mIsGoalGlobal.set(true); // pose goals are always in global frame
 }
 
 void Vehicle::setGoalVelocity(Eigen::Vector3d aGoalVel, bool anIsGlobal)
@@ -252,11 +253,12 @@ Vehicle::ControlStatus Vehicle::getControlStatus()
 {
     // TODO: expand this to include more controller status related stuff
 
-    ControlStatus cs; 
-    cs.mStatus = determineArrivalStatus(); 
-    cs.mAppliedThrust = mThrusterCommander->getAppliedThrustVector();     
-    
-    return cs;  
+    ControlStatus cs;
+    cs.mStatus = determineArrivalStatus();
+    cs.mAppliedThrust = mThrusterCommander->getAppliedThrustVector();
+    cs.mThrusterCommand = mThrusterCommander->getThrusterCommand();
+
+    return cs;
 }
 
 Arrival::Status Vehicle::determineArrivalStatus()

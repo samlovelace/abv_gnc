@@ -25,6 +25,7 @@ set(AUTOMOC_HDRS
   include/abv_gui/StatusPanel.h
   include/abv_gui/NetworkPinger.h
   include/abv_gui/NodeHealthPanel.h
+  include/abv_gui/TableTopView.h
 )
 
 set(SOURCES
@@ -34,6 +35,7 @@ set(SOURCES
   src/StatusPanel.cpp
   src/NetworkPinger.cpp
   src/NodeHealthPanel.cpp
+  src/TableTopView.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${AUTOMOC_HDRS})

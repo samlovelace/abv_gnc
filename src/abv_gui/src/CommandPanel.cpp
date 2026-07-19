@@ -341,21 +341,26 @@ void CommandPanel::setCurrentPose(double aX, double aY, double aYaw)
 
 void CommandPanel::onSendPose()
 {
-    abv_msgs::msg::AbvVec3 pose; 
-    pose.set__x(mPoseX->value()); 
-    pose.set__y(mPoseY->value()); 
-    pose.set__yaw(mPoseYaw->value()); 
-
-    abv_msgs::msg::AbvControllerCommand cmd; 
-    cmd.set__type("pose");
-    cmd.set__data(pose); 
-    
-    RosTopicManager::getInstance()->publishMessage("abv/controller/command", cmd);
+    sendPoseCommand(mPoseX->value(), mPoseY->value(), mPoseYaw->value());
 
     // sent - resume tracking live pose until the user edits a field again
     mPoseXDirty = false;
     mPoseYDirty = false;
     mPoseYawDirty = false;
+}
+
+void CommandPanel::sendPoseCommand(double aX, double aY, double aYaw)
+{
+    abv_msgs::msg::AbvVec3 pose;
+    pose.set__x(aX);
+    pose.set__y(aY);
+    pose.set__yaw(aYaw);
+
+    abv_msgs::msg::AbvControllerCommand cmd;
+    cmd.set__type("pose");
+    cmd.set__data(pose);
+
+    RosTopicManager::getInstance()->publishMessage("abv/controller/command", cmd);
 }
 
 void CommandPanel::onSendVelocity()

@@ -20,6 +20,7 @@ public:
     void commandThrusters(const std::string& aThrustersCmd);
 
     Eigen::Vector3d getAppliedThrustVector();
+    std::string getThrusterCommand();
 
 protected:
     Eigen::Vector3i convertToThrustVector(Eigen::Vector3d aControlInput);
