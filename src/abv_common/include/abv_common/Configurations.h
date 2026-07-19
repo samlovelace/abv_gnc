@@ -103,6 +103,14 @@ struct ControlConfig
     // Vehicle dynamics (used by the simulator)
     double mMass;
     double mInertia;
+
+    // true iff Dynamics.PropagationMode is "external": abv_simulator publishes
+    // a net body wrench and sources state (for damping + the nav/Optitrack
+    // publish path) from Gazebo instead of integrating locally.
+    bool mUseExternalPropagation;
+    std::string mExternalStateTopic;  // abv_msgs/AbvState, from abv_bridge's GazeboStateConvertor
+    std::string mWrenchCommandTopic;  // geometry_msgs/WrenchStamped, to ptera_sim's WrenchApplicator
+    std::string mWrenchTargetLink;    // stamped as the outgoing wrench's frame_id
 };
 
 namespace ConfigUtils

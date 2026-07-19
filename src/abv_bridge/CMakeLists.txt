@@ -12,8 +12,9 @@ find_package(abv_msgs REQUIRED)
 find_package(abv_common REQUIRED)
 find_package(ptera_msgs REQUIRED)
 
-set(SOURCES 
+set(SOURCES
   ${CMAKE_CURRENT_LIST_DIR}/src/ControllerStatusConvertor.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/GazeboStateConvertor.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/NavigationConvertor.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/WaypointConvertor.cpp

@@ -9,6 +9,7 @@
 #include <eigen3/Eigen/Dense>
 
 #include "abv_msgs/msg/abv_state.hpp"
+#include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "OptitrackEmulator.h"
 #include "UdpServer.h"
 #include "VehicleState.h"
@@ -40,6 +41,22 @@ private:
     double mMomentArm;
     double mTimestep;
     double mDamping;
+
+    // External (Gazebo-sourced) state propagation
+    bool mUseExternalPropagation;
+    std::string mExternalStateTopic;
+    std::string mWrenchCommandTopic;
+    std::string mWrenchTargetLink;
+    bool mExternalStateRecvd;
+
+    void externalStateCallback(abv_msgs::msg::AbvState::SharedPtr aMsg);
+    void setLatestExternalState(abv_msgs::msg::AbvState::SharedPtr aState) {std::lock_guard<std::mutex> lock(mExternalStateMutex); mExternalState = aState;}
+    abv_msgs::msg::AbvState::SharedPtr getLatestExternalState() {std::lock_guard<std::mutex> lock(mExternalStateMutex); return mExternalState;}
+
+    std::mutex mExternalStateMutex;
+    abv_msgs::msg::AbvState::SharedPtr mExternalState;
+
+    geometry_msgs::msg::WrenchStamped buildWrenchMsg(const Eigen::Vector2d& aForceWorld, double aTorqueZWorld);
 
     // control allocation matrix: row = contribution of each of the 8
     // thrusters to (fx, fy, tz) when that thruster fires alone. Sourced from
@@ -87,7 +104,7 @@ private:
 
     void convertThrusterCommandToForce(const std::string& aCommand);
     abv_msgs::msg::AbvState convertToIdl(VehicleState aState);
-    Eigen::Vector3d convertBodyForceToGlobal(const Eigen::Vector3d& aThrustForce); 
+    Eigen::Vector3d convertBodyForceToGlobal(const Eigen::Vector3d& aThrustForce, double aYaw);
     inline double wrapPi(double a);
 
     void addSensorNoise(); 

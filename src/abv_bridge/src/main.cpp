@@ -6,6 +6,7 @@
 #include "abv_bridge/NavigationConvertor.h"
 #include "abv_bridge/ControllerStatusConvertor.h"
 #include "abv_bridge/WaypointConvertor.h"
+#include "abv_bridge/GazeboStateConvertor.h"
 
 int main()
 {
@@ -21,6 +22,9 @@ int main()
 
     // Autonomy -> ABV
     WaypointConvertor waypoint("robot/vehicle/waypoint", "abv/guidance/command");
+
+    // Gazebo -> ABV Sim (external propagation feedback)
+    GazeboStateConvertor gazeboState("gazebo/robot/state", "abv/sim/gazebo_state");
 
     HeartbeatPublisher heartbeat("bridge");
 

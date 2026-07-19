@@ -11,6 +11,7 @@ find_package(Eigen3 REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(abv_msgs REQUIRED)
 find_package(abv_common REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(plog REQUIRED)
 find_package(Threads REQUIRED)
@@ -72,6 +73,7 @@ ament_target_dependencies(${PROJECT_NAME}
 	Eigen3
 	rclcpp
 	abv_msgs
+	geometry_msgs
 )
 
 # Install the executable

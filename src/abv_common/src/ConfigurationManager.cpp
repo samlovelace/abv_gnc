@@ -110,6 +110,12 @@ void ConfigurationManager::parseControlConfig(const YAML::Node& aNode)
     mControlConfig.mMomentArm = aNode["Dynamics"]["MomentArm"].as<double>();
     mControlConfig.mMass = aNode["Dynamics"]["Mass"].as<double>();
     mControlConfig.mInertia = aNode["Dynamics"]["Inertia"].as<double>();
+
+    std::string propagationMode = aNode["Dynamics"]["PropagationMode"].as<std::string>("internal");
+    mControlConfig.mUseExternalPropagation = ("external" == propagationMode);
+    mControlConfig.mExternalStateTopic = aNode["Dynamics"]["ExternalStateTopic"].as<std::string>("abv/sim/gazebo_state");
+    mControlConfig.mWrenchCommandTopic = aNode["Dynamics"]["WrenchCommandTopic"].as<std::string>("gazebo/wrench_cmd");
+    mControlConfig.mWrenchTargetLink = aNode["Dynamics"]["WrenchTargetLink"].as<std::string>("base_link");
 }
 
 void ConfigurationManager::parseHeartbeatConfig(const YAML::Node& aNode)
