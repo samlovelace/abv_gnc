@@ -101,7 +101,6 @@ Eigen::Vector3i ThrusterCommander::convertToThrustVector(Eigen::Vector3d aContro
 
     }
 
-    //LOGW << "ThrustDir" << thrustDir; 
     return thrustDir;
 }
 
