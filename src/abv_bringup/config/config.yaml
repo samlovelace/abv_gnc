@@ -18,10 +18,10 @@ Navigation:
 
   Network:
     Local:
-      Ip: 192.168.1.242
+      Ip: 192.168.1.15
 
     Server:
-      Ip: 127.0.0.1
+      Ip: 192.168.1.7
 
 Control:
   ControlPolicy: PID # which IControlPolicy Vehicle uses: PID | External
