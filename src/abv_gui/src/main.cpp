@@ -13,12 +13,18 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QGroupBox>
+#include <QMenu>
+#include <QCursor>
 #include <QDebug>
 #include <cmath>
 
 #include "abv_msgs/msg/abv_controller_command.hpp"
 #include "abv_msgs/msg/abv_guidance_command.hpp"
 #include "abv_msgs/msg/abv_guidance_status.hpp"
+#include "abv_msgs/msg/abv_heartbeat.hpp"
+#include "abv_msgs/msg/abv_thruster_status.hpp"
+
+#include "abv_common/ConfigurationManager.h"
 
 #include "abv_gui/LivePlot.h"
 #include "abv_gui/TopicAdapter.hpp"
@@ -29,10 +35,14 @@
 
 #include "abv_gui/CommandPanel.h"
 #include "abv_gui/StatusPanel.h"
+#include "abv_gui/NodeHealthPanel.h"
+#include "abv_gui/TableTopView.h"
 
 int main(int argc, char *argv[])
 {
-    rclcpp::init(0, nullptr); 
+    ConfigurationManager::getInstance()->loadConfiguration();
+
+    rclcpp::init(0, nullptr);
     RosTopicManager::getInstance("abv_gui")->spinNode();
     RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvControllerCommand>("abv/controller/command"); 
     RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvGuidanceCommand>("abv/guidance/command"); 
@@ -72,26 +82,93 @@ int main(int argc, char *argv[])
     auto* leftLayout = new QVBoxLayout();
     auto* rightLayout = new QVBoxLayout();
 
-    mainLayout->addLayout(leftLayout, 4);   // plots
+    mainLayout->addLayout(leftLayout, 3);   // plots
     mainLayout->addLayout(rightLayout, 1);  // values panel
 
     leftLayout->addWidget(posPlot);
     leftLayout->addWidget(velPlot);
     leftLayout->addWidget(ctrlPlot);
 
-    // STOP BUTTON 
+    // STOP BUTTON
     auto stopBtn = new ButtonAdapter("Stop", std::bind(&btn::action::stop), ButtonStyle::danger());
     stopBtn->resize(50, 50); 
      
     rightLayout->addWidget(stopBtn); 
 
-    CommandPanel* panel = new CommandPanel(); 
-    rightLayout->addWidget(panel); 
+    CommandPanel* panel = new CommandPanel();
+    rightLayout->addWidget(panel);
 
-    StatusPanel* status = new StatusPanel(); 
-    rightLayout->addWidget(status); 
+    StatusPanel* status = new StatusPanel();
+    rightLayout->addWidget(status);
 
-    auto* gdnceStatus = 
+    QString robotIp = QString::fromStdString(
+        ConfigurationManager::getInstance()->getNavigationConfig().mLocalIp);
+
+    auto* healthPanel = new NodeHealthPanel({"controller", "navigation", "guidance", "bridge"}, robotIp);
+    rightLayout->addWidget(healthPanel);
+
+    auto* heartbeatAdapter =
+        new TopicAdapter<abv_msgs::msg::AbvHeartbeat, QString>("abv/heartbeat",
+            [](const abv_msgs::msg::AbvHeartbeat& msg) {
+                return QString::fromStdString(msg.node_name);
+            });
+    QObject::connect(heartbeatAdapter, &TopicAdapterBase::newDataVariant,
+                      healthPanel, &NodeHealthPanel::onHeartbeat);
+    auto* poseSync =
+        new TopicAdapter<abv_msgs::msg::AbvState, QVector<double>>(
+            "abv/state", &conversions::navigationPositionConvertor);
+
+    // Connect (rather than mutating the panel's widgets inside the
+    // converter above) so the update is delivered on the GUI thread instead
+    // of racing the ROS subscription thread against the user editing the
+    // same spin boxes.
+    QObject::connect(poseSync, &TopicAdapterBase::newDataVariant,
+                      panel, &CommandPanel::onPoseSync);
+
+    auto* tableView = new TableTopView(ConfigurationManager::getInstance()->getTableViewConfig());
+
+    auto* tableStateAdapter =
+        new TopicAdapter<abv_msgs::msg::AbvState, QVector<double>>(
+            "abv/state", &conversions::navigationStateConvertor);
+    QObject::connect(tableStateAdapter, &TopicAdapterBase::newDataVariant,
+                      tableView, &TableTopView::onPoseUpdate);
+
+    auto* thrusterStateAdapter =
+        new TopicAdapter<abv_msgs::msg::AbvThrusterStatus, QString>("abv/controller/thrusters",
+            [](const abv_msgs::msg::AbvThrusterStatus& msg) {
+                return QString::fromStdString(msg.thrusters);
+            });
+    QObject::connect(thrusterStateAdapter, &TopicAdapterBase::newDataVariant,
+                      tableView, &TableTopView::onThrusterState);
+
+    // Click-drag-release on the table proposes a goal pose (ghost shown by
+    // tableView itself); on release we pop a small confirm menu and only
+    // publish if "Send Goal" is chosen. tableView knows nothing about ROS -
+    // it just reports the proposed pose. If sent, the ghost is left in
+    // place as a static marker of the commanded goal (cleared only if the
+    // user places a new one); if the menu is dismissed without choosing
+    // "Send Goal", the ghost is cleared since nothing was commanded.
+    QObject::connect(tableView, &TableTopView::goalPoseSelected,
+                      [tableView, panel](double x, double y, double yaw) {
+        QMenu menu;
+        QAction* sendAction = menu.addAction(
+            QString("Send Goal (%1, %2, %3\xC2\xB0)")
+                .arg(x, 0, 'f', 2).arg(y, 0, 'f', 2).arg(yaw * 180.0 / M_PI, 0, 'f', 0));
+
+        QAction* chosen = menu.exec(QCursor::pos());
+        if (chosen == sendAction)
+        {
+            panel->sendPoseCommand(x, y, yaw);
+        }
+        else
+        {
+            tableView->clearGoalGhost();
+        }
+    });
+
+    mainLayout->insertWidget(0, tableView, 1);  // always-visible table view, left of the plots
+
+    auto* gdnceStatus =
         new TopicAdapter<abv_msgs::msg::AbvGuidanceStatus, QString>("abv/guidance/status", 
             [status](const abv_msgs::msg::AbvGuidanceStatus& msg){
 
@@ -131,10 +208,10 @@ int main(int argc, char *argv[])
                 return ""; 
         });
 
-    QMainWindow window; 
-    window.setWindowTitle("ABV Ground Station"); 
-    window.resize(1280, 720); 
-    window.setCentralWidget(central); 
+    QMainWindow window;
+    window.setWindowTitle("ABV Ground Station");
+    window.resize(1280, 720);
+    window.setCentralWidget(central);
 
     QPalette dark;
     dark.setColor(QPalette::Window,          QColor(30, 30, 30));
@@ -148,7 +225,7 @@ int main(int argc, char *argv[])
     dark.setColor(QPalette::HighlightedText, Qt::white);
     app.setPalette(dark);
 
-    window.show(); 
+    window.show();
     app.exec();
 
     rclcpp::shutdown(); 

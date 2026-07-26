@@ -35,6 +35,7 @@ bool FromFileGenerator::init()
         std::string field;
         double x, y, yaw;
         double timeout = -1.0; // -1 means "use the configured default"
+        Eigen::Vector3d arrivalTol(-1.0, -1.0, -1.0); // per-axis <= 0 means "no override"
 
         std::getline(ss, field, ','); x = std::stod(field);
         std::getline(ss, field, ','); y = std::stod(field);
@@ -46,8 +47,19 @@ bool FromFileGenerator::init()
             timeout = std::stod(field);
         }
 
-        LOGV << "Wp: " << x << "," << y << "," << yaw << " (timeout: " << timeout << ")";
-        mPath.emplace_back(x, y, yaw, "pose", timeout);
+        // optional 5th-7th columns override the arrival tolerance [m, m, rad]
+        // for this waypoint; all three must be present or none are applied
+        std::string xTolField, yTolField, yawTolField;
+        if (std::getline(ss, xTolField, ',') &&
+            std::getline(ss, yTolField, ',') &&
+            std::getline(ss, yawTolField, ','))
+        {
+            arrivalTol << std::stod(xTolField), std::stod(yTolField), std::stod(yawTolField);
+        }
+
+        LOGV << "Wp: " << x << "," << y << "," << yaw << " (timeout: " << timeout
+             << ", tol: " << arrivalTol.transpose() << ")";
+        mPath.emplace_back(x, y, yaw, "pose", timeout, arrivalTol);
     }
 
     mIndex = 0;

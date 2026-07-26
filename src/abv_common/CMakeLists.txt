@@ -14,9 +14,11 @@ find_package(yaml-cpp REQUIRED)
 add_library(${PROJECT_NAME} SHARED
   src/ConfigurationManager.cpp
   src/DataLogger.cpp
+  src/HeartbeatPublisher.cpp
   src/RosTopicManager.cpp
   src/UdpClient.cpp
   src/RosNavigationListener.cpp
+  src/Watchdog.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

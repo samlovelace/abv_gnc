@@ -1,10 +1,12 @@
 
 #include "abv_common/RosNavigationListener.h"
 #include "abv_common/RosTopicManager.h"
+#include "abv_common/ConfigurationManager.h"
 
 RosNavigationListener::RosNavigationListener(
     std::function<void(abv_msgs::msg::AbvState::SharedPtr)> aCallback)
-    : mAcquiredState(false)
+    : mAcquiredState(false),
+      mNavDataTimeout(ConfigurationManager::getInstance()->getControlConfig().mNavDataTimeout)
 {
     auto cb = [this, aCallback](abv_msgs::msg::AbvState::SharedPtr msg)
     {
@@ -39,15 +41,19 @@ void RosNavigationListener::stateCallback(const abv_msgs::msg::AbvState::SharedP
     state[5] = aMsg->velocity.yaw; 
 
     {
-        std::lock_guard<std::mutex> lock(mCurrentStateMutex); 
-        mCurrentState = state; 
+        std::lock_guard<std::mutex> lock(mCurrentStateMutex);
+        mCurrentState = state;
 
         if(!mAcquiredState)
         {
-            // if this is the first callback invoked, set that we have acquired the state data 
-            mAcquiredState = true; 
+            // if this is the first callback invoked, set that we have acquired the state data
+            mAcquiredState = true;
         }
     }
+
+    mLastMsgValid.store(aMsg->valid);
+    mIsFresh.store(true);
+    mWatchdog.start(mNavDataTimeout, [this]{ mIsFresh.store(false); });
 }
 
 void RosNavigationListener::setState(const Eigen::Matrix<double, 6, 1>& aState)
@@ -58,7 +64,22 @@ void RosNavigationListener::setState(const Eigen::Matrix<double, 6, 1>& aState)
 
 bool RosNavigationListener::hasAcquiredStateData()
 {
-    return mAcquiredState; 
+    return mAcquiredState;
+}
+
+bool RosNavigationListener::isNavDataFresh()
+{
+    return mIsFresh.load();
+}
+
+bool RosNavigationListener::isNavDataValid()
+{
+    return mLastMsgValid.load();
+}
+
+bool RosNavigationListener::isNavOk()
+{
+    return isNavDataFresh() && isNavDataValid();
 }
 
 Eigen::Vector3d RosNavigationListener::getCurrentPose()
