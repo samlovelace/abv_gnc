@@ -48,6 +48,11 @@ public slots:
     // string, index i = thruster (i+1) (see Control.Thrusters.Allocation).
     void onThrusterState(const QVariant& aData);
 
+    // Expects a QVector<QPointF> of world-frame (x, y) points, as produced by
+    // conversions::pathConvertor - the remaining path abv_guidance is
+    // currently executing. Empty clears the drawn path.
+    void onPathUpdate(const QVariant& aData);
+
     // Hides the proposed-goal ghost. Called after the caller has resolved
     // (sent or cancelled) a goalPoseSelected signal.
     void clearGoalGhost();
@@ -87,6 +92,7 @@ private:
     QPointF pixelToWorld(const QRectF& aTableRect, const QPointF& aPixel) const;
 
     void drawGrid(QPainter& aPainter, const QRectF& aTableRect) const;
+    void drawPath(QPainter& aPainter, const QRectF& aTableRect) const;
     void drawRobot(QPainter& aPainter, const QRectF& aTableRect) const;
     void drawObstacles(QPainter& aPainter, const QRectF& aTableRect) const;
     void drawGoalGhost(QPainter& aPainter, const QRectF& aTableRect) const;
@@ -118,4 +124,8 @@ private:
     double mObstacleRadius{0.0};
 
     QVector<PlacedObstacle> mObstacles;
+
+    // World-frame (x, y) points of the remaining path abv_guidance is
+    // currently executing, from onPathUpdate.
+    QVector<QPointF> mPath;
 };

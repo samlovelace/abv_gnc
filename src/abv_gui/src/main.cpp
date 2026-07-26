@@ -23,6 +23,7 @@
 #include "abv_msgs/msg/abv_guidance_status.hpp"
 #include "abv_msgs/msg/abv_heartbeat.hpp"
 #include "abv_msgs/msg/abv_obstacle_array.hpp"
+#include "abv_msgs/msg/abv_path.hpp"
 #include "abv_msgs/msg/abv_thruster_status.hpp"
 
 #include "abv_common/ConfigurationManager.h"
@@ -142,6 +143,12 @@ int main(int argc, char *argv[])
             });
     QObject::connect(thrusterStateAdapter, &TopicAdapterBase::newDataVariant,
                       tableView, &TableTopView::onThrusterState);
+
+    auto* pathAdapter =
+        new TopicAdapter<abv_msgs::msg::AbvPath, QVector<QPointF>>(
+            "abv/guidance/path", &conversions::pathConvertor);
+    QObject::connect(pathAdapter, &TopicAdapterBase::newDataVariant,
+                      tableView, &TableTopView::onPathUpdate);
 
     // Full-replace obstacle set (no per-obstacle IDs) - main() is the source
     // of truth for what's currently published on abv/scene/obstacles.

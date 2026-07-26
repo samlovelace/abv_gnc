@@ -62,6 +62,12 @@ private:
     // this is the hook point for a future CollisionAvoidPathGenerator.
     Scene mScene;
 
+    // Remaining path (from the in-flight waypoint onward) of the active
+    // IPathGenerator, refreshed each time a waypoint is dispatched (see
+    // sendWaypoint()) and published at a constant rate by statusPublishLoop()
+    // for GUI visualization.
+    ThreadSafe<std::vector<Waypoint>> mCurrentPath;
+
     ThreadSafe<Arrival::Status> mArrivalStatus;
 
     std::thread mStatusPublishThread; 

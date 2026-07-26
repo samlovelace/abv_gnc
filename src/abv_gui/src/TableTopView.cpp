@@ -57,6 +57,12 @@ void TableTopView::onThrusterState(const QVariant& aData)
     update();
 }
 
+void TableTopView::onPathUpdate(const QVariant& aData)
+{
+    mPath = aData.value<QVector<QPointF>>();
+    update();
+}
+
 void TableTopView::clearGoalGhost()
 {
     mHasGoalGhost = false;
@@ -144,6 +150,8 @@ void TableTopView::paintEvent(QPaintEvent*)
     p.setPen(QPen(QColor(100, 100, 100), 2));
     p.setBrush(Qt::NoBrush);
     p.drawRect(tableRect);
+
+    drawPath(p, tableRect);
 
     if (mHasPose)
     {
@@ -305,6 +313,41 @@ void TableTopView::drawGrid(QPainter& aPainter, const QRectF& aTableRect) const
     aPainter.setBrush(QColor(140, 140, 140));
     QPointF origin = worldToPixel(aTableRect, 0.0, 0.0);
     aPainter.drawEllipse(origin, 3.5, 3.5);
+
+    aPainter.restore();
+}
+
+void TableTopView::drawPath(QPainter& aPainter, const QRectF& aTableRect) const
+{
+    if (!mHasPose || mPath.isEmpty())
+    {
+        return;
+    }
+
+    // Anchor the line to the robot's own live position rather than whatever
+    // (possibly stale) first point abv_guidance published - see
+    // StraightLineGenerator::getPath().
+    QPolygonF pixels;
+    pixels.reserve(mPath.size() + 1);
+    pixels << worldToPixel(aTableRect, mX, mY);
+    for (const QPointF& worldPt : mPath)
+    {
+        pixels << worldToPixel(aTableRect, worldPt.x(), worldPt.y());
+    }
+
+    aPainter.save();
+
+    // Tesla-style planned-path line: a soft, wider translucent glow pass
+    // underneath a crisp solid line on top, drawn before the robot glyph so
+    // the vehicle renders above the path it's following.
+    QPen glowPen(QColor(60, 140, 255, 60), 13.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+    aPainter.setPen(glowPen);
+    aPainter.setBrush(Qt::NoBrush);
+    aPainter.drawPolyline(pixels);
+
+    QPen linePen(QColor(70, 150, 255), 4.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+    aPainter.setPen(linePen);
+    aPainter.drawPolyline(pixels);
 
     aPainter.restore();
 }
