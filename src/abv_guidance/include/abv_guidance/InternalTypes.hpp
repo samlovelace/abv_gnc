@@ -15,9 +15,16 @@ struct Waypoint
     // the configured default" (GuidanceConfig::mWaypointTimeout).
     double mTimeout;
 
-    Waypoint() : mTimeout(-1.0) {}
-    Waypoint(double x, double y, double yaw, const std::string& aType, double aTimeout = -1.0)
-        : mType(aType), mPose(Eigen::Vector3d(x, y, yaw)), mTimeout(aTimeout)
+    // Per-waypoint, per-axis override for arrival tolerance [m, m, rad].
+    // Each axis <= 0 means "no override for this axis" - falls back to the
+    // enclosing Command's mArrivalTol, which itself falls back per-axis to
+    // the configured default in Vehicle::setArrivalTolerance.
+    Eigen::Vector3d mArrivalTol;
+
+    Waypoint() : mTimeout(-1.0), mArrivalTol(-1.0, -1.0, -1.0) {}
+    Waypoint(double x, double y, double yaw, const std::string& aType, double aTimeout = -1.0,
+             const Eigen::Vector3d& aArrivalTol = Eigen::Vector3d(-1.0, -1.0, -1.0))
+        : mType(aType), mPose(Eigen::Vector3d(x, y, yaw)), mTimeout(aTimeout), mArrivalTol(aArrivalTol)
     {;}
 
 };

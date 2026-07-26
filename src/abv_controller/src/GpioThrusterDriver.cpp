@@ -88,7 +88,6 @@ void GpioThrusterDriver::writePins(std::bitset<8> aThrustCommand)
     for(int i = 0; i < 8; i++)
     {
         int j = 7 - i;
-        LOGV << "Writing pin: " << mOutputPins[j] << " to " << aThrustCommand[i]; 
         gpioWrite(mOutputPins[j], aThrustCommand[i]);       // skipping isOutputPin check since we are directly using mOutputPins 
     }
 }

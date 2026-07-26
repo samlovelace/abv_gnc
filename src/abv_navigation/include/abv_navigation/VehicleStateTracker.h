@@ -5,6 +5,7 @@
 #include <thread> 
 
 #include "abv_navigation/IStateFetcher.h"
+#include "abv_navigation/StampedAbvState.h"
 #include "abv_common/Configurations.h"
 #include "abv_common/ConfigurationManager.h"
 #include "abv_common/ConsumableBuffer.hpp"
@@ -34,8 +35,13 @@ public:
 
 private:
 
-    // construct buffer first 
-    ConsumableBuffer<AbvState> mStateBuffer; 
+    // construct buffer first
+    ConsumableBuffer<StampedAbvState> mStateBuffer;
+
+    // time of the last real measurement update, and whether the estimate is
+    // still within the configured dead-reckoning bound of that measurement
+    std::chrono::system_clock::time_point mLastMeasurementTime;
+    bool mIsNavValid;
 
     // polymorphic state fetcher interface so we arent tied to optiTrack
     std::shared_ptr<IStateFetcher> mStateFetcher; // state fetcher interface class 
@@ -55,6 +61,11 @@ private:
     std::mutex mControlInputMutex; 
     Eigen::Vector3d mLatestControlInput; 
     void controllerStatusCallback(abv_msgs::msg::AbvControllerStatus::ConstSharedPtr aMsg);
-    
+  
+    // Pure helper (no ROS/threads) so the dead-reckoning bound check can be unit
+    // tested directly with fabricated time_points.
+    inline bool isWithinDeadReckonBound(std::chrono::system_clock::time_point aNow,
+                                        std::chrono::system_clock::time_point aLastMeasurementTime,
+                                        double aBoundDuration_s);
 };
 #endif // VEHICLESTATETRACKER_H
