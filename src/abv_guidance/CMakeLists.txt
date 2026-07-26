@@ -13,6 +13,7 @@ set(ABV_GUIDANCE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/PathWatchdog.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/RosCommandSource.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Scene.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/StateMachine.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/StraightLineGenerator.cpp
 )

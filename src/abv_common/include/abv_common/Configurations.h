@@ -61,6 +61,17 @@ struct TableViewConfig
     double mRobotLength; // meters
 };
 
+struct SceneConfig
+{
+    // meters - the 2D region (world frame, same convention as AbvVec3/AbvState)
+    // the ABV must remain within. Consumed by abv_guidance's Scene for
+    // table-bounds containment checks.
+    double mXMin;
+    double mXMax;
+    double mYMin;
+    double mYMax;
+};
+
 struct ControlConfig
 {
     int mStateMachineRate;

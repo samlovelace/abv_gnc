@@ -22,6 +22,7 @@
 #include "abv_msgs/msg/abv_guidance_command.hpp"
 #include "abv_msgs/msg/abv_guidance_status.hpp"
 #include "abv_msgs/msg/abv_heartbeat.hpp"
+#include "abv_msgs/msg/abv_obstacle_array.hpp"
 #include "abv_msgs/msg/abv_thruster_status.hpp"
 
 #include "abv_common/ConfigurationManager.h"
@@ -44,8 +45,9 @@ int main(int argc, char *argv[])
 
     rclcpp::init(0, nullptr);
     RosTopicManager::getInstance("abv_gui")->spinNode();
-    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvControllerCommand>("abv/controller/command"); 
-    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvGuidanceCommand>("abv/guidance/command"); 
+    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvControllerCommand>("abv/controller/command");
+    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvGuidanceCommand>("abv/guidance/command");
+    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvObstacleArray>("abv/scene/obstacles");
 
     QApplication app(argc, argv);
     app.setStyle("Fusion"); 
@@ -91,9 +93,9 @@ int main(int argc, char *argv[])
 
     // STOP BUTTON
     auto stopBtn = new ButtonAdapter("Stop", std::bind(&btn::action::stop), ButtonStyle::danger());
-    stopBtn->resize(50, 50); 
-     
-    rightLayout->addWidget(stopBtn); 
+    stopBtn->resize(50, 50);
+
+    rightLayout->addWidget(stopBtn);
 
     CommandPanel* panel = new CommandPanel();
     rightLayout->addWidget(panel);
@@ -141,8 +143,29 @@ int main(int argc, char *argv[])
     QObject::connect(thrusterStateAdapter, &TopicAdapterBase::newDataVariant,
                       tableView, &TableTopView::onThrusterState);
 
-    // Click-drag-release on the table proposes a goal pose (ghost shown by
-    // tableView itself); on release we pop a small confirm menu and only
+    // Full-replace obstacle set (no per-obstacle IDs) - main() is the source
+    // of truth for what's currently published on abv/scene/obstacles.
+    static std::vector<abv_msgs::msg::AbvObstacle> obstacles;
+
+    auto publishObstacles = []() {
+        abv_msgs::msg::AbvObstacleArray msg;
+        msg.set__obstacles(obstacles);
+        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvObstacleArray>(
+            "abv/scene/obstacles", msg);
+    };
+
+    auto refreshObstacleView = [tableView]() {
+        QVector<PlacedObstacle> view;
+        view.reserve(static_cast<int>(obstacles.size()));
+        for (const auto& o : obstacles)
+        {
+            view.push_back(PlacedObstacle{o.x, o.y, o.radius});
+        }
+        tableView->setObstacles(view);
+    };
+
+    // Left-click-drag-release on the table proposes a goal pose (ghost shown
+    // by tableView itself); on release we pop a small confirm menu and only
     // publish if "Send Goal" is chosen. tableView knows nothing about ROS -
     // it just reports the proposed pose. If sent, the ghost is left in
     // place as a static marker of the commanded goal (cleared only if the
@@ -164,6 +187,47 @@ int main(int argc, char *argv[])
         {
             tableView->clearGoalGhost();
         }
+    });
+
+    // Right-click-drag-release on the table proposes a circular obstacle
+    // (ghost shown by tableView itself); on release we pop a confirm menu,
+    // same shape as the goal-pose flow above. Confirming appends to the full
+    // obstacle set and republishes it (full-replace semantics - no
+    // per-obstacle IDs) on abv/scene/obstacles; cancelling just clears the
+    // ghost. A plain right-click (no drag) skips this signal entirely -
+    // tableView offers "Clear Obstacles" itself in that case (see
+    // clearObstaclesRequested below).
+    QObject::connect(tableView, &TableTopView::obstaclePlaced,
+                      [tableView, publishObstacles, refreshObstacleView](double x, double y, double radius) {
+        QMenu menu;
+        QAction* addAction = menu.addAction(
+            QString("Add Obstacle (%1, %2, r=%3)")
+                .arg(x, 0, 'f', 2).arg(y, 0, 'f', 2).arg(radius, 0, 'f', 2));
+
+        QAction* chosen = menu.exec(QCursor::pos());
+        if (chosen == addAction)
+        {
+            abv_msgs::msg::AbvObstacle obstacle;
+            obstacle.set__x(x);
+            obstacle.set__y(y);
+            obstacle.set__radius(radius);
+            obstacles.push_back(obstacle);
+
+            publishObstacles();
+        }
+
+        tableView->clearObstacleGhost();
+        refreshObstacleView();
+    });
+
+    // Right-click "Clear Obstacles" on the table (a plain right-click with no
+    // drag - see TableTopView::mouseReleaseEvent) republishes an empty
+    // obstacle set.
+    QObject::connect(tableView, &TableTopView::clearObstaclesRequested,
+                      [publishObstacles, refreshObstacleView]() {
+        obstacles.clear();
+        publishObstacles();
+        refreshObstacleView();
     });
 
     mainLayout->insertWidget(0, tableView, 1);  // always-visible table view, left of the plots

@@ -18,10 +18,10 @@ Navigation:
 
   Network:
     Local:
-      Ip: 192.168.1.15
+      Ip: 192.168.1.242
 
     Server:
-      Ip: 192.168.1.7
+      Ip: 127.0.0.1
 
 Control:
   ControlPolicy: PID # which IControlPolicy Vehicle uses: PID | External
@@ -69,7 +69,7 @@ Control:
     Inertia: 0.3 # kg-m^2
     ThrusterForce: 0.1 # N
     MomentArm: 0.1235 # m
-    PropagationMode: external # "internal" (self-integrate) | "external" (Gazebo-sourced, via abv/sim/gazebo_state)
+    PropagationMode: internal # "internal" (self-integrate) | "external" (Gazebo-sourced, via abv/sim/gazebo_state)
     ExternalStateTopic: abv/sim/gazebo_state # abv_msgs/AbvState, published by abv_bridge's GazeboStateConvertor
     WrenchCommandTopic: gazebo/wrench_cmd # geometry_msgs/WrenchStamped, consumed by ptera_sim's WrenchApplicator
     WrenchTargetLink: base_link # stamped as the wrench's frame_id
@@ -84,3 +84,9 @@ TableView:
   Height: 1.8 # meters - table Y extent
   RobotWidth: 0.35 # meters - footprint used to draw the robot glyph, tune to the real chassis
   RobotLength: 0.35
+
+Scene:
+  XMin: 0.0 # meters - region the ABV must remain within (world frame, same convention as AbvVec3/AbvState)
+  XMax: 3.6 # matches TableView.Width
+  YMin: 0.0
+  YMax: 1.8 # matches TableView.Height

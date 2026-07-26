@@ -37,6 +37,7 @@ public:
     ControlConfig& getControlConfig() { return mControlConfig; }
     HeartbeatConfig& getHeartbeatConfig() { return mHeartbeatConfig; }
     TableViewConfig& getTableViewConfig() { return mTableViewConfig; }
+    SceneConfig& getSceneConfig() { return mSceneConfig; }
 
 private: 
     /**
@@ -53,6 +54,7 @@ private:
     void parseControlConfig(const YAML::Node& aNode);
     void parseHeartbeatConfig(const YAML::Node& aNode);
     void parseTableViewConfig(const YAML::Node& aNode);
+    void parseSceneConfig(const YAML::Node& aNode);
 
 private:
 
@@ -61,6 +63,7 @@ private:
     ControlConfig mControlConfig;
     HeartbeatConfig mHeartbeatConfig;
     TableViewConfig mTableViewConfig;
+    SceneConfig mSceneConfig;
 };
 
 #endif
