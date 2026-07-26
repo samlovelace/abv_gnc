@@ -58,6 +58,9 @@ void ConfigurationManager::loadConfiguration()
 
     YAML::Node sceneNode = config["Scene"];
     parseSceneConfig(sceneNode);
+
+    YAML::Node collisionAvoidNode = config["CollisionAvoid"];
+    parseCollisionAvoidConfig(collisionAvoidNode);
 }
 
 void ConfigurationManager::parseGuidanceConfig(const YAML::Node& aNode)
@@ -142,6 +145,12 @@ void ConfigurationManager::parseSceneConfig(const YAML::Node& aNode)
     mSceneConfig.mXMax = aNode["XMax"].as<double>();
     mSceneConfig.mYMin = aNode["YMin"].as<double>();
     mSceneConfig.mYMax = aNode["YMax"].as<double>();
+}
+
+void ConfigurationManager::parseCollisionAvoidConfig(const YAML::Node& aNode)
+{
+    mCollisionAvoidConfig.mGridResolution = aNode["GridResolution"].as<double>();
+    mCollisionAvoidConfig.mReplanRate = aNode["ReplanRate"].as<double>();
 }
 
 

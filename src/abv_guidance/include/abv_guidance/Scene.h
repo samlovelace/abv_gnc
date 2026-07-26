@@ -20,6 +20,9 @@ public:
     Scene();
     ~Scene();
 
+    // the fixed tabletop bounds - the region isWithinBounds() checks against
+    const AxisAlignedBoundingBox& getBounds() const { return mBounds; }
+
     // true iff aBox lies fully within the configured scene limits
     bool isWithinBounds(const AxisAlignedBoundingBox& aBox) const;
 

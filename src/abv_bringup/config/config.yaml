@@ -90,3 +90,7 @@ Scene:
   XMax: 3.6 # matches TableView.Width
   YMin: 0.0
   YMax: 1.8 # matches TableView.Height
+
+CollisionAvoid:
+  GridResolution: 0.1 # meters/cell - CollisionAvoidPathGenerator's A* search grid
+  ReplanRate: 5 # Hz - background A* re-solve rate

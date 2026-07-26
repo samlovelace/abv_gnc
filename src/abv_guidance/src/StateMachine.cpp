@@ -14,6 +14,7 @@
 #include "abv_guidance/StateMachine.h"
 #include "abv_guidance/StraightLineGenerator.h"
 #include "abv_guidance/FromFileGenerator.h"
+#include "abv_guidance/CollisionAvoidPathGenerator.h"
 
 StateMachine::StateMachine() : 
     mDone(false), mActiveState(States::STARTUP)
@@ -118,8 +119,13 @@ void StateMachine::generatePath()
     }
     else if("file" == mCommand.mType || "File" == mCommand.mType)
     {
-        auto pathGen = std::make_unique<FromFileGenerator>(); 
-        mPathGenerator = std::move(pathGen); 
+        auto pathGen = std::make_unique<FromFileGenerator>();
+        mPathGenerator = std::move(pathGen);
+    }
+    else if("avoid" == mCommand.mType || "Avoid" == mCommand.mType)
+    {
+        auto pathGen = std::make_unique<CollisionAvoidPathGenerator>(mCommand.mGoal, mNavSource, mScene);
+        mPathGenerator = std::move(pathGen);
     }
     else
     {

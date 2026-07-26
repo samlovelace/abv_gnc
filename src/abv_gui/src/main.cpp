@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
     // tableView offers "Clear Obstacles" itself in that case (see
     // clearObstaclesRequested below).
     QObject::connect(tableView, &TableTopView::obstaclePlaced,
-                      [tableView, publishObstacles, refreshObstacleView](double x, double y, double radius) {
+                      [tableView, panel, publishObstacles, refreshObstacleView](double x, double y, double radius) {
         QMenu menu;
         QAction* addAction = menu.addAction(
             QString("Add Obstacle (%1, %2, r=%3)")
@@ -221,6 +221,7 @@ int main(int argc, char *argv[])
             obstacles.push_back(obstacle);
 
             publishObstacles();
+            panel->setObstaclesPresent(!obstacles.empty());
         }
 
         tableView->clearObstacleGhost();
@@ -231,9 +232,10 @@ int main(int argc, char *argv[])
     // drag - see TableTopView::mouseReleaseEvent) republishes an empty
     // obstacle set.
     QObject::connect(tableView, &TableTopView::clearObstaclesRequested,
-                      [publishObstacles, refreshObstacleView]() {
+                      [panel, publishObstacles, refreshObstacleView]() {
         obstacles.clear();
         publishObstacles();
+        panel->setObstaclesPresent(!obstacles.empty());
         refreshObstacleView();
     });
 

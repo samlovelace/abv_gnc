@@ -54,6 +54,18 @@ VehicleSimulator::VehicleSimulator(/* args */) :
     }
 
     mUseMatrixAllocation = ("Matrix" == config.mThrusterAllocationStrategy || "matrix" == config.mThrusterAllocationStrategy);
+
+    // Spawn inset from the table's bottom-right corner (world origin, see
+    // TableTopView's coordinate convention) by half the robot's footprint in
+    // each axis, so the whole body starts on the table rather than centered
+    // exactly on the corner with half of it hanging off the edge.
+    const TableViewConfig& tableConfig = ConfigurationManager::getInstance()->getTableViewConfig();
+    mVehicleState.x = tableConfig.mRobotLength / 2.0;
+    mVehicleState.y = tableConfig.mRobotWidth / 2.0;
+    mVehicleState.yaw = 0.0;
+    mVehicleState.vx = 0.0;
+    mVehicleState.vy = 0.0;
+    mVehicleState.omega = 0.0;
 }
 
 VehicleSimulator::~VehicleSimulator()

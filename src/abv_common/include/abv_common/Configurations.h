@@ -72,6 +72,12 @@ struct SceneConfig
     double mYMax;
 };
 
+struct CollisionAvoidConfig
+{
+    double mGridResolution; // meters/cell for CollisionAvoidPathGenerator's A* search grid
+    double mReplanRate;     // Hz - background re-solve rate
+};
+
 struct ControlConfig
 {
     int mStateMachineRate;

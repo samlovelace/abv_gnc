@@ -38,6 +38,7 @@ public:
     HeartbeatConfig& getHeartbeatConfig() { return mHeartbeatConfig; }
     TableViewConfig& getTableViewConfig() { return mTableViewConfig; }
     SceneConfig& getSceneConfig() { return mSceneConfig; }
+    CollisionAvoidConfig& getCollisionAvoidConfig() { return mCollisionAvoidConfig; }
 
 private: 
     /**
@@ -55,6 +56,7 @@ private:
     void parseHeartbeatConfig(const YAML::Node& aNode);
     void parseTableViewConfig(const YAML::Node& aNode);
     void parseSceneConfig(const YAML::Node& aNode);
+    void parseCollisionAvoidConfig(const YAML::Node& aNode);
 
 private:
 
@@ -64,6 +66,7 @@ private:
     HeartbeatConfig mHeartbeatConfig;
     TableViewConfig mTableViewConfig;
     SceneConfig mSceneConfig;
+    CollisionAvoidConfig mCollisionAvoidConfig;
 };
 
 #endif
