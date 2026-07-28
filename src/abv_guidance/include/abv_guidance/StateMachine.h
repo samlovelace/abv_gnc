@@ -15,6 +15,7 @@
 #include "abv_guidance/InternalTypes.hpp"
 #include "abv_guidance/ICommandSink.hpp"
 #include "abv_guidance/PathWatchdog.h"
+#include "abv_guidance/Scene.h"
 
 class StateMachine : public ICommandSink
 {
@@ -56,6 +57,16 @@ private:
     PathWatchdog mWatchdog;
     PathWatchdog mWaypointWatchdog;
     Waypoint mCurrentWaypoint;
+
+    // Table bounds + live obstacle set. Not yet consulted by generatePath() -
+    // this is the hook point for a future CollisionAvoidPathGenerator.
+    Scene mScene;
+
+    // Remaining path (from the in-flight waypoint onward) of the active
+    // IPathGenerator, refreshed each time a waypoint is dispatched (see
+    // sendWaypoint()) and published at a constant rate by statusPublishLoop()
+    // for GUI visualization.
+    ThreadSafe<std::vector<Waypoint>> mCurrentPath;
 
     ThreadSafe<Arrival::Status> mArrivalStatus;
 

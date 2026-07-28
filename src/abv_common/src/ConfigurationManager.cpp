@@ -55,6 +55,12 @@ void ConfigurationManager::loadConfiguration()
 
     YAML::Node tableViewNode = config["TableView"];
     parseTableViewConfig(tableViewNode);
+
+    YAML::Node sceneNode = config["Scene"];
+    parseSceneConfig(sceneNode);
+
+    YAML::Node collisionAvoidNode = config["CollisionAvoid"];
+    parseCollisionAvoidConfig(collisionAvoidNode);
 }
 
 void ConfigurationManager::parseGuidanceConfig(const YAML::Node& aNode)
@@ -131,6 +137,20 @@ void ConfigurationManager::parseTableViewConfig(const YAML::Node& aNode)
     mTableViewConfig.mHeight = aNode["Height"].as<double>();
     mTableViewConfig.mRobotWidth = aNode["RobotWidth"].as<double>();
     mTableViewConfig.mRobotLength = aNode["RobotLength"].as<double>();
+}
+
+void ConfigurationManager::parseSceneConfig(const YAML::Node& aNode)
+{
+    mSceneConfig.mXMin = aNode["XMin"].as<double>();
+    mSceneConfig.mXMax = aNode["XMax"].as<double>();
+    mSceneConfig.mYMin = aNode["YMin"].as<double>();
+    mSceneConfig.mYMax = aNode["YMax"].as<double>();
+}
+
+void ConfigurationManager::parseCollisionAvoidConfig(const YAML::Node& aNode)
+{
+    mCollisionAvoidConfig.mGridResolution = aNode["GridResolution"].as<double>();
+    mCollisionAvoidConfig.mReplanRate = aNode["ReplanRate"].as<double>();
 }
 
 
