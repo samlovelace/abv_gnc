@@ -20,9 +20,7 @@ It:
 
 - Receives the current estimated vehicle state
 - Generates a desired pose or trajectory
-- Publishes desired state information to `abv_control`
-
-The guidance layer does not perform state estimation or thruster allocation.
+- Publishes desired state information to `abv_controller`
 
 The guidance layer does not perform state estimation or thruster allocation.
 
@@ -67,11 +65,13 @@ Core components include:
 - `/abv/state`  
   Estimated state from `abv_navigation`.
 
-''TODO: Add blurb about generic command source''
+- `/abv/guidance/command`  
+  Commands the guidance state machine to begin executing a trajectory — see [`AbvGuidanceCommand`](../interface/abv_msgs.md#abvguidancecommand). Published by `abv_commander` (`path` command) or another external command source.
+
+- `/abv/controller/status`  
+  Arrival status from `abv_controller`, used to determine when to advance to the next waypoint.
 
 ### Published
 
 - `/abv/controller/command`  
   Target waypoints for the controller.
-
----

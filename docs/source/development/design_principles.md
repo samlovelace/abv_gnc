@@ -14,7 +14,7 @@ Examples include:
 
 - `abv_navigation` — State estimation
 - `abv_guidance` — Trajectory and waypoint generation
-- `abv_control` — Feedback control and thruster command computation
+- `abv_controller` — Feedback control and thruster command computation
 - `abv_msgs` — Interface definitions
 - Tooling packages (teleoperation, visualization, bringup)
 

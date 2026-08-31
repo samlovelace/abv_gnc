@@ -1,4 +1,4 @@
-# abv_control
+# abv_controller
 
 Feedback control and thruster command computation for the Air Bearing Vehicle (ABV) platform.
 
@@ -6,7 +6,7 @@ Feedback control and thruster command computation for the Air Bearing Vehicle (A
 
 ## Purpose
 
-The `abv_control` package is responsible for converting desired vehicle behavior into low-level thruster commands. It implements the control logic, state machine handling, and hardware interface required to actuate the vehicle.
+The `abv_controller` package is responsible for converting desired vehicle behavior into low-level thruster commands. It implements the control logic, state machine handling, and hardware interface required to actuate the vehicle.
 
 The package supports both closed-loop waypoint control and direct thruster control modes.
 
@@ -14,7 +14,7 @@ The package supports both closed-loop waypoint control and direct thruster contr
 
 ## Role in the GNC Pipeline
 
-`abv_control` sits downstream of navigation and guidance.
+`abv_controller` sits downstream of navigation and guidance.
 
 It:
 
@@ -43,7 +43,7 @@ This packages supports two operating modes:
 - Converts control inputs to thruster firing sequences
 - Does not perform internal feedback control
 
-Mode selection is handled in the command topic. ''TODO: add link to abv_msgs/AbvControllerCommand''
+Mode selection is handled by the `type` field of the incoming command — see [`AbvControllerCommand`](../interface/abv_msgs.md#abvcontrollercommand) for the full message layout.
 
 ---
 
@@ -75,5 +75,3 @@ Core classes within this package include:
 
 - `/abv/controller/status`  
   Arrival status and theoretical thrust vector.
-
----

@@ -61,4 +61,19 @@ You can verify the installation by checking that the packages are discoverable:
 ros2 pkg list | grep abv_
 ```
 
-If setup worked properly, you should see the various packages output by the above command.
+If setup worked properly, you should see the following packages in the output:
+
+- `abv_bridge`
+- `abv_bringup`
+- `abv_commander`
+- `abv_common`
+- `abv_controller`
+- `abv_description`
+- `abv_gui`
+- `abv_guidance`
+- `abv_msgs`
+- `abv_navigation`
+- `abv_rl`
+- `abv_rl-cpp`
+- `abv_simulator`
+- `abv_teleop`
