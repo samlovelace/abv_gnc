@@ -1,0 +1,51 @@
+@startuml architecture
+skinparam backgroundColor transparent
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+skinparam wrapWidth 200
+skinparam component {
+  BackgroundColor #f5f7fa
+  BorderColor #4a5a70
+  FontSize 13
+}
+skinparam package {
+  BackgroundColor #eef2f7
+  BorderColor #4a5a70
+  FontSize 13
+}
+skinparam arrow {
+  FontSize 11
+}
+
+package "Human operator (laptop)" as human_pkg {
+  component "abv_gui\nabv_commander\nabv_teleop" as human
+}
+
+package "External autonomy module" as auto_pkg {
+  component "ptera_msgs\nwaypoints / state" as autonomy
+}
+
+package "On board the ABV" as onboard {
+  component "abv_bridge" as bridge
+  component "abv_guidance" as gdnc
+  component "abv_navigation\n(EKF)" as nav
+  component "abv_controller\n(PID / External)" as ctrl
+}
+
+component "Thruster hardware" as hw
+component "External control policy\n(abv_rl / abv_rl-cpp)" as rl
+
+human -down-> gdnc : abv/guidance/command
+human -down-> ctrl : abv/controller/command
+
+autonomy <.right.> bridge : ptera_msgs
+bridge -down-> gdnc : abv/guidance/command
+
+gdnc -right-> ctrl : abv/controller/command
+ctrl -up-> nav : abv/controller/status
+nav -left-> gdnc : abv/state
+
+ctrl -down-> hw : thruster firings
+ctrl .down.> rl : abv/control_action\n(optional)
+
+@enduml

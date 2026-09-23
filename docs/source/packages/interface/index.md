@@ -6,4 +6,5 @@ Message and interface definitions.
 :maxdepth: 1
 
 abv_msgs
+abv_bridge
 ```
