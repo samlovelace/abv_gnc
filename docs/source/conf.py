@@ -17,6 +17,11 @@ extensions = [
     "myst_parser",
 ]
 
+# Auto-generates an #anchor for every heading (up to h3) so pages can
+# cross-reference a specific section of another page, e.g.
+# [AbvState](../interface/abv_msgs.md#abvstate).
+myst_heading_anchors = 3
+
 source_suffix = {
     ".rst": "restructuredtext",
     ".md": "markdown",
