@@ -11,17 +11,91 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Normal
+from typing import List
 
 
 LOG_SIG_MAX = 1
 LOG_SIG_MIN = -5
 epsilon = 1e-6
 
+## ==== DDQN Networks ====
+
 # Initialize Policy weights
 def weights_init_(m):
     if isinstance(m, nn.Linear):
         torch.nn.init.xavier_uniform_(m.weight, gain=1)
         torch.nn.init.constant_(m.bias, 0)
+
+class Sin(nn.Module):
+  """An element-wise sin activation wrapped as a nn.Module.
+
+  Shape:
+      - Input: `(N, *)` where `*` means, any number of additional dimensions
+      - Output: `(N, *)`, same shape as the input
+
+  Examples:
+      >>> m = Sin()
+      >>> input = torch.randn(2)
+      >>> output = m(input)
+  """
+
+  def forward(self, input):
+    return torch.sin(input)  # simply apply already implemented sin
+
+
+class Model(nn.Module):
+  """
+  Constructs a fully-connected neural network with flexible depth, width and
+  activation function choices.
+  """
+
+  def __init__(
+      self, dimList, actType="Tanh", output_activation=nn.Identity,
+      verbose=False
+  ):
+    """
+    Initalizes the neural network with dimension of each layer and the
+    following activation layer.
+
+    Args:
+        dimList (List): the dimension of each layer.
+        actType (str, optional): the type of activation function. Defaults to
+            'Tanh'. Currently supports 'Sin', 'Tanh' and 'ReLU'.
+        verbose (bool, optional):print messages if True. Defaults to False.
+    """
+    super(Model, self).__init__()
+
+    # Construct module list: if use `Python List`, the modules are not
+    # added to computation graph. Instead, we should use `nn.ModuleList()`.
+    self.moduleList = nn.ModuleList()
+    numLayer = len(dimList) - 1
+    for idx in range(numLayer):
+      i_dim = dimList[idx]
+      o_dim = dimList[idx + 1]
+
+      self.moduleList.append(nn.Linear(in_features=i_dim, out_features=o_dim))
+      if idx == numLayer - 1:  # final linear layer, no act.
+        self.moduleList.append(output_activation())
+      else:
+        if actType == "Sin":
+          self.moduleList.append(Sin())
+        elif actType == "Tanh":
+          self.moduleList.append(nn.Tanh())
+        elif actType == "ReLU":
+          self.moduleList.append(nn.ReLU())
+        else:
+          raise ValueError(
+              "Activation type ({:s}) is not included!".format(actType)
+          )
+    
+    if verbose:
+      print(self.moduleList)
+
+  def forward(self, x):
+    for m in self.moduleList:
+      x = m(x)
+    return x
+
 
 # == Scheduler ==
 class _scheduler(abc.ABC):
@@ -93,22 +167,6 @@ class StepLR(_scheduler):
     if self.endValue is not None and tmpValue <= self.endValue:
       return self.endValue
     return tmpValue
-  
-class Sin(nn.Module):
-  """An element-wise sin activation wrapped as a nn.Module.
-
-  Shape:
-      - Input: `(N, *)` where `*` means, any number of additional dimensions
-      - Output: `(N, *)`, same shape as the input
-
-  Examples:
-      >>> m = Sin()
-      >>> input = torch.randn(2)
-      >>> output = m(input)
-  """
-
-  def forward(self, input):
-    return torch.sin(input)  # simply apply already implemented sin
 
 
 class StepLRMargin(_scheduler):
@@ -154,6 +212,59 @@ class StepLRMargin(_scheduler):
       return self.endValue
     return tmpValue
 
+
+class StepResetLR(_scheduler):
+
+  def __init__(
+      self, initValue, period, resetPeriod, decay=0.1, endValue=0,
+      last_epoch=-1, verbose=False
+  ):
+    """Initializes an object of the scheduler with the specified attributes.
+
+    Args:
+        initValue (float): initial value of the variable.
+        period (int): the period to update the variable.
+        resetPeriod (int): the period to reset the variable to its initial
+            value.
+        decay (float, optional): the amount by which the variable decays.
+            Defaults to 0.1.
+        endValue (float, optional): the target value to decay to.
+            Defaults to 0.
+        last_epoch (int, optional): the index of the last epoch.
+            Defaults to -1.
+        verbose (bool, optional): print messages if True. Defaults to False.
+    """
+    self.initValue = initValue
+    self.period = period
+    self.decay = decay
+    self.endValue = endValue
+    self.resetPeriod = resetPeriod
+    super(StepResetLR, self).__init__(last_epoch, verbose)
+
+  def get_value(self):
+    """Returns the value of the variable.
+    """
+    if self.cnt == -1:
+      return self.initValue
+
+    numDecay = int(self.cnt / self.period)
+    tmpValue = self.initValue * (self.decay**numDecay)
+    if self.endValue is not None and tmpValue <= self.endValue:
+      return self.endValue
+    return tmpValue
+
+  def step(self):
+    """
+    Updates the index of the last epoch and the variable. It overrides the same
+    function in the parent class.
+    """
+    self.cnt += 1
+    value = self.get_value()
+    self.variable = value
+    if (self.cnt + 1) % self.resetPeriod == 0:
+      self.cnt = -1
+
+
 # ==== SAC Networks ====
 
 def build_mlp(dimList, activation, layernorm=False):
@@ -176,16 +287,16 @@ def build_mlp(dimList, activation, layernorm=False):
 
     return nn.Sequential(*layers)
 
-
 class QNetwork(nn.Module):
-    def __init__(self, CONFIG, dimList, numActions, numDisturb):
+    def __init__(self, CONFIG, dimList, numActions):
         super(QNetwork, self).__init__()
 
         self.config = CONFIG
         self.actType = CONFIG.ACTIVATION
+        # self.B = nn.Parameter(torch.normal(0, 0.01, size=(128, dimList[0])))
         sa_dimList = dimList.copy()
-        sa_dimList[0] = dimList[0] + numActions + numDisturb  # input is state-action pair
-        sa_dimList[-1] = 1  # output is Q-value
+        # sa_dimList[0] = 2 * self.B.shape[0] + dimList[0] + numActions  # input is state-action pair
+        sa_dimList[0] = dimList[0] + numActions
         print("QNetwork dimList:", sa_dimList)
 
         self.q_head1 = build_mlp(sa_dimList, self.actType, layernorm=False)
@@ -193,8 +304,48 @@ class QNetwork(nn.Module):
 
         self.apply(weights_init_)
 
-    def forward(self, state, action, disturbance):
-        xu = torch.cat([state, action, disturbance], 1)
+    def normalise(self, state, scale):
+
+        out = state.clone()
+
+        # indices 0, 1, and 7..15 -> divide by scale[0]
+        idx_scale0 = [0, 1, 7, 8, 10, 11, 13, 14]
+        out[:, idx_scale0] = state[:, idx_scale0] / scale["Length"]
+
+        # indices 4, 5 -> divide by scale[1]
+        out[:, 4:6] = state[:, 4:6] / scale["Velocity"]
+
+        # index 6 -> divide by scale[2]
+        out[:, 6] = state[:, 6] / scale["AngularRate"]
+
+        # index 2 -> sin, index 3 -> cos (angle representation)
+        out[:, 2] = torch.sin(state[:, 2])
+        out[:, 3] = torch.cos(state[:, 3])
+
+        return out
+
+    def fourier_encoding(self, state):
+        """
+            Fourier Encoding of the state to help with sharp gradients in Q value.
+    
+            state  (torch.tensor): [batch_size, obs_dim]
+            action (torch.tensor): [batch_size, action_dim]
+            """
+        proj = 2 * torch.pi * (state @ self.B.T)
+
+        return torch.concatenate([torch.sin(proj), torch.cos(proj), state], axis=-1)
+
+    def forward(self, state, action, scale):
+        """
+        Passes the batched State-Action pair through the Q Network.
+
+        state  (torch.tensor): [batch_size, obs_dim]
+        action (torch.tensor): [batch_size, action_dim]
+        """
+        # normalised_state = self.normalise(state, scale)
+        # encoded_state = self.fourier_encoding(normalised_state)
+        # xu = torch.cat([encoded_state, action], 1)
+        xu = torch.cat([state, action], 1)
 
         x1 = self.q_head1(xu)
         x2 = self.q_head2(xu)
@@ -262,3 +413,151 @@ class GaussianPolicy(nn.Module):
         self.action_scale = self.action_scale.to(device)
         self.action_bias = self.action_bias.to(device)
         return super(GaussianPolicy, self).to(device)
+    
+
+# -
+# MeanEnsembleNet
+# -
+
+class MaxEnsembleNet(nn.Module):
+    """
+    Wraps N networks; forward(x) returns their mean output.
+
+    Registered as nn.ModuleList so next(parameters()).is_cuda and any
+    other nn.Module checks work identically to a plain Q_network.
+    """
+
+    def __init__(self, networks: List[nn.Module]):
+        super().__init__()
+        self.networks = nn.ModuleList(networks)
+
+    def forward(self, x, u: torch.Tensor, norm_scale, mode="max") -> torch.Tensor:
+        """(B, A) — mean Q across all critics."""
+        qs = []
+        for net in self.networks:
+            q1, q2 = net(x, u, norm_scale)
+            qs.append(torch.max(q1, q2)) if mode == "max" else qs.append(torch.min(q1,q2))
+            out = torch.max(torch.stack(qs, dim=0), dim=0).values if mode == "max" else torch.min(torch.stack(qs, dim=0), dim=0).values
+        return out 
+
+    def stack(self, x, u: torch.Tensor) -> torch.Tensor:
+        """(K, B, A) — raw per-critic outputs, no averaging."""
+        qs = []
+        for net in self.networks:
+            q1, q2 = net(x, u)
+            qs.append(torch.max(q1, q2))
+        return torch.stack(qs, dim=0)
+
+
+class DeterministicPolicy(nn.Module):
+    def __init__(self, CONFIG, dimList, numActions, action_space=None):
+        super(DeterministicPolicy, self).__init__()
+        self.config = CONFIG
+        self.actType = CONFIG.ACTIVATION
+        self.mu_head = build_mlp(dimList, self.actType)
+
+        self.noise = torch.Tensor(numActions)
+
+        self.apply(weights_init_)
+
+        # action rescaling
+        if action_space is None:
+            self.action_scale = 1.
+            self.action_bias = 0.
+        else:
+            self.action_scale = torch.FloatTensor(
+                (action_space.high - action_space.low) / 2.)
+            self.action_bias = torch.FloatTensor(
+                (action_space.high + action_space.low) / 2.)
+
+    def forward(self, state):
+        mean = torch.tanh(self.mu_head(state)) * self.action_scale + self.action_bias
+        return mean
+
+    def sample(self, state):
+        mean = self.forward(state)
+        noise = self.noise.normal_(0., std=0.1)
+        noise = noise.clamp(-0.25, 0.25)
+        action = mean + noise
+        return action, torch.tensor(0.), mean
+
+    def to(self, device):
+        self.action_scale = self.action_scale.to(device)
+        self.action_bias = self.action_bias.to(device)
+        self.noise = self.noise.to(device)
+        return super(DeterministicPolicy, self).to(device)
+    
+
+class RNDPredictor(nn.Module):
+    def __init__(self, CONFIG, dimList, numActions):
+        super(RNDPredictor, self).__init__()
+
+        self.config = CONFIG
+        self.actType = CONFIG.ACTIVATION
+        print("RND Predictor dimList:", dimList)
+
+        self.bilinear = nn.Bilinear(dimList[0], numActions, dimList[1]) # initial layer is Bilinear conditioned
+
+        layers = []
+        layers.append(nn.ReLU())
+        numLayer = len(dimList) - 1
+        for idx in range(1, numLayer):
+            layers.append(nn.Linear(dimList[idx], dimList[idx + 1]))
+            if idx < numLayer - 1:          
+                layers.append(nn.ReLU())
+
+        self.mlp = nn.Sequential(*layers)      
+
+        self.apply(weights_init_)
+
+    def forward(self, state, action):
+
+        in1 = self.bilinear(state, action)
+        out = self.mlp(in1)
+
+        return out
+
+class RNDPrior(nn.Module):
+    def __init__(self, CONFIG, dimList, numActions):
+        super(RNDPrior, self).__init__()
+
+        self.config = CONFIG
+        self.actType = CONFIG.ACTIVATION
+        print("RND Prior dimList:", dimList)
+
+        layers = []
+        numLayer = len(dimList) - 1
+        for idx in range(numLayer):
+            layers.append(nn.Linear(dimList[idx], dimList[idx + 1]))
+            if idx < numLayer - 1:          
+                layers.append(nn.ReLU())
+            
+        self.mlp = nn.Sequential(*layers)
+
+        self.action_net = nn.Linear(numActions, dimList[-1] * 2)
+
+        self.film = FiLMBlock()
+
+        self.output = nn.Sequential(
+            nn.ReLU(),
+            nn.Linear(dimList[-1], 1)
+        )
+
+        self.apply(weights_init_)
+
+    def forward(self, state, action):
+
+        features = self.mlp(state)
+        gamma_beta = self.action_net(action)
+        gamma, beta = torch.chunk(gamma_beta, 2, dim=-1)
+        features = self.film(features, gamma, beta)
+        out = self.output(features)
+
+        return out
+    
+class FiLMBlock(nn.Module):
+    def __init__(self):
+        super(FiLMBlock, self).__init__()
+        
+    def forward(self, state, gamma, beta):               
+        return gamma * state + beta

@@ -97,6 +97,7 @@ class RLController:
         config_params = {
             "DEVICE": self.device,
             "ENV_NAME": "cont-obs-avoid-v0",
+            "MODE": "AARA_C",
             "NUM_ENVS": args.numEnvs,
             "SEED": args.randomSeed,
             "MAX_UPDATES": args.maxUpdates,
@@ -137,6 +138,7 @@ class RLController:
             "REWARD": args.reward,
             "PENALTY": args.penalty,
             "ALPHA": args.alpha,
+            "LAMBDA": args.lambda_,
             "POLICY": args.policy,
             "TARGET_UPDATE_INTERVAL": args.targetUpdateInterval,
             "AUTO_ALPHA_TUNING": args.autoAlphaTuning
@@ -148,10 +150,19 @@ class RLController:
 
         c_dimList     = [self.stateDim] + CONFIG.C_ARCHITECTURE + [self.actionNum]
         a_dimList     = [self.stateDim] + CONFIG.A_ARCHITECTURE + [self.actionNum]
-        self.sacAgent = SAC(CONFIG, c_dimList=c_dimList, a_dimList=a_dimList, action_space=action_space, disturbance_space=disturbance_space)
+        RNDpred_dimList = [self.stateDim] + [32] + [32] + [1]
+        RNDpost_dimList = [self.stateDim] + [32] + [32] + [1]
+        self.sacAgent = SAC(CONFIG, 
+                            c_dimList=c_dimList, 
+                            a_dimList=a_dimList, 
+                            RNDpred_dimList=RNDpred_dimList,
+                            RNDpost_dimList=RNDpost_dimList,
+                            action_space=action_space, 
+                            disturbance_space=disturbance_space)
 
         best_dir = os.path.join("/abv_gnc/src/abv_rl/abv_rl", "best_models")
-        self.sacAgent.load_best_models(best_dir, evaluate=True)
+        # q_val_dir = os.path.join("/abv_gnc/src/abv_rl/abv_rl", "best_models")
+        self.sacAgent.load_best_main_models(best_dir, mode="AARA_C", evaluate=True)
 
         # self.force_scale
 
@@ -193,6 +204,21 @@ class RLController:
         else:
             return dir_x, dir_y, -margin
 
+    def create_obs(self, state):
+        """
+        Function to create the observation vector that includes information
+        regarding the obstacles position and location. 
+        """
+
+        x_t, y_t = self.target_x_y_w_h[0, 0] - state[0], self.target_x_y_w_h[0, 1] - state[1] # relative position to the target
+        # observation = np.array([x_t, y_t, self.state[2], self.state[2], self.state[3], self.state[4], self.state[5]]) # relative position + 2 theta's + v
+        observation = np.array([x_t, y_t, state[2], state[3], state[4], state[5]]) # relative position + theta + v
+        for constraint_set in self.obstacles:
+            dir_x, dir_y, g_x_i = self.calculate_margin_circle(state[None, :2], constraint_set, negativeInside=False)
+            observation = np.concatenate([observation, dir_x, dir_y, g_x_i])
+
+        return observation
+
     def load_obj(self, filename):
         """Loads the object and return the object.
 
@@ -212,17 +238,13 @@ class RLController:
         omega = ctx.velocity[2]
         pose = np.array(ctx.pose)
 
-        observations_np = np.column_stack([rel_x, rel_y, theta, vx, vy, omega]) # relative position + theta + vx, vy, omega
-        for constraint_set in self.obstacles:
-            dir_x, dir_y, g_x_i = self.calculate_margin_circle(pose[None, :2], constraint_set, negativeInside=False)
-            observations_np = np.column_stack([observations_np, dir_x, dir_y, g_x_i])
-
-        observations = torch.FloatTensor(observations_np).to(self.device)
+        state = np.array[rel_x, rel_y, theta, vx, vy, omega]
+        observations = self.create_obs(state)
         
         _, _, action =  self.sacAgent.protagonist.sample(observations) # deterministic action
-        _, _, disturb = self.sacAgent.adversary.sample(observations) # deterministic disturbance
+        # _, _, disturb = self.sacAgent.adversary.sample(observations) # deterministic disturbance
 
-        q_val = self.sacAgent.Q_network(observations, action, disturb)
+        # q_val = self.sacAgent.Q_network(observations, action, disturb)
 
         x, y, yaw = action.squeeze(0).tolist()
         # l_x = self.target_margin(ctx.pose[:2])
