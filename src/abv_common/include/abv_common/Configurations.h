@@ -33,35 +33,84 @@ struct NavigationConfig
 {
     std::string mInterface;
     int mRate;
-    std::string mServerIp; 
-    std::string mLocalIp; 
+    std::string mServerIp;
+    std::string mLocalIp;
     std::string mRigidBodyName;
+
+    // Max duration (seconds) the EKF may free-run (predict-only, no real
+    // measurement) before its output is frozen and marked invalid.
+    double mMaxDeadReckonDuration;
+
+    // abv_simulator only: enables its synthetic burst-dropout mechanism
+    // (used to exercise disconnection handling end-to-end). Off by default.
+    bool mSimulateDropout;
+};
+
+struct HeartbeatConfig
+{
+    double mRate;         // Hz - how often each node publishes its heartbeat
+    double mStaleAfter;   // seconds - GUI-side threshold before a node is considered disconnected
+    int mPingIntervalMs;  // GUI-side: how often to ping the robot host for the Comms indicator
+};
+
+struct TableViewConfig
+{
+    double mWidth;       // meters - table X extent, GUI-side top-down view
+    double mHeight;      // meters - table Y extent
+    double mRobotWidth;  // meters - robot footprint used to draw the glyph
+    double mRobotLength; // meters
 };
 
 struct ControlConfig
 {
-    int mStateMachineRate; 
+    int mStateMachineRate;
 
-    // PID controller gains 
+    // which IControlPolicy implementation Vehicle should instantiate: "PID" or "External"
+    std::string mControlPolicyType;
+
+    // PID controller gains
     Eigen::Vector3d mKp;
     Eigen::Vector3d mKi;
     Eigen::Vector3d mKd;
 
     // Controller arrival
     Eigen::Vector3d mPoseArrivalTol;
-    double mArrivalDuration; 
+    double mArrivalDuration;
+
+    // Max time (seconds) since the last abv/state message was received
+    // before nav data is considered stale (catches full topic/node dropout).
+    double mNavDataTimeout;
 
     // ThrusterCommander & ThrusterDriver configs
-    std::string mThrusterDriverType; 
+    std::string mThrusterDriverType;
     std::vector<int> mGpioPins;
     Eigen::Vector3d mSchmittTriggerOn;
     Eigen::Vector3d mSchmittTriggerOff;
-  
+
+    // which IThrusterMapper implementation ThrusterCommander uses: "LookupTable" (default, current behavior) | "Matrix"
+    std::string mThrusterAllocationStrategy;
+
+    // Control allocation matrix rows: contribution of each of the 8 thrusters
+    // to (fx, fy, tz) when that thruster fires alone (unitless; mForce/mMomentArm
+    // scale these afterward). Matrix strategy only.
+    std::vector<int> mAllocationX;    // size 8
+    std::vector<int> mAllocationY;    // size 8
+    std::vector<int> mAllocationYaw;  // size 8
+    double mAllocationThreshold;      // firing cutoff on the pseudo-inverse solution. Matrix strategy only.
+
     double mForce;
     double mMomentArm;
     // Vehicle dynamics (used by the simulator)
     double mMass;
     double mInertia;
+
+    // true iff Dynamics.PropagationMode is "external": abv_simulator publishes
+    // a net body wrench and sources state (for damping + the nav/Optitrack
+    // publish path) from Gazebo instead of integrating locally.
+    bool mUseExternalPropagation;
+    std::string mExternalStateTopic;  // abv_msgs/AbvState, from abv_bridge's GazeboStateConvertor
+    std::string mWrenchCommandTopic;  // geometry_msgs/WrenchStamped, to ptera_sim's WrenchApplicator
+    std::string mWrenchTargetLink;    // stamped as the outgoing wrench's frame_id
 };
 
 namespace ConfigUtils

@@ -84,3 +84,12 @@ Then follow the prompts:
 | `Duration:` | duration in seconds, or `-1` to run the full path |
 
 `abv_guidance` will send each waypoint from `path.csv` to `abv_controller` in sequence, waiting until the ABV has arrived within tolerance of each pose before advancing to the next.
+
+Each line in `path.csv` is one waypoint: `x,y,yaw[,timeout[,x_tol,y_tol,yaw_tol]]`
+| Column | Required | Meaning |
+|---|---|---|
+| `x,y,yaw` | yes | goal pose (m, m, rad) |
+| `timeout` | no | seconds to wait for arrival before giving up on this waypoint; omit or use `-1` for the configured default (`Guidance.StateMachine.WaypointTimeout`) |
+| `x_tol,y_tol,yaw_tol` | no | per-axis arrival tolerance override (m, m, rad) for this waypoint only; must all three be present together, and `timeout` must be present (use `-1` as a placeholder) if you want to override tolerance without also overriding timeout. Falls back to the tolerance sent with the `path` command, then to the configured default (`Control.Arrival.Tolerance`)|
+
+For example, `0,0,0,-1,0.02,0.02,0.02` uses the default timeout but tightens the arrival tolerance to 2cm/2cm/~1.1&deg; for that one waypoint - useful for a final precision waypoint in an otherwise loosely-toleranced transit path.

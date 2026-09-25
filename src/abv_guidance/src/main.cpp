@@ -6,6 +6,7 @@
 #include "abv_common/DataLogger.h"
 #include "abv_common/SignalHandler.hpp"
 #include "abv_common/ConfigurationManager.h"
+#include "abv_common/HeartbeatPublisher.h"
 
 #include "abv_guidance/StateMachine.h"
 #include "abv_guidance/ICommandSource.hpp"
@@ -28,10 +29,12 @@ int main()
 
     for(const auto& s : sources)
     {
-        s->listen(); 
+        s->listen();
     }
 
-    sm.run(); 
+    HeartbeatPublisher heartbeat("guidance");
+
+    sm.run();
 
     rclcpp::shutdown(); 
 }

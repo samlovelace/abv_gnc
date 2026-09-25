@@ -7,7 +7,7 @@
 class SimulatedStateFetcher : public IStateFetcher
 {
 public:
-    SimulatedStateFetcher(ConsumableBuffer<AbvState>& aBuffer);
+    SimulatedStateFetcher(ConsumableBuffer<StampedAbvState>& aBuffer);
     ~SimulatedStateFetcher() override; 
 
     bool init() override; 

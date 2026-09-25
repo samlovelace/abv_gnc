@@ -3,7 +3,7 @@
 #include "abv_common/RosTopicManager.h"
 
 
-SimulatedStateFetcher::SimulatedStateFetcher(ConsumableBuffer<AbvState>& aBuffer) : IStateFetcher(aBuffer)
+SimulatedStateFetcher::SimulatedStateFetcher(ConsumableBuffer<StampedAbvState>& aBuffer) : IStateFetcher(aBuffer)
 {
     mAcquired.store(false);  
 }
@@ -32,7 +32,7 @@ void SimulatedStateFetcher::stateCallback(abv_msgs::msg::AbvState::SharedPtr aSi
     state.omega = aSimState->velocity.yaw;  
     
     // thread safe setting of state
-    mBuffer.put(state);  
+    mBuffer.put(StampedAbvState{state, std::chrono::system_clock::now()});
     if(!mAcquired.load())
-        mAcquired.store(true); 
+        mAcquired.store(true);
 }

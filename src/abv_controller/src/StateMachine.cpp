@@ -7,11 +7,13 @@
 #include "plog/Log.h"
 
 #include "abv_msgs/msg/abv_controller_status.hpp"
+#include "abv_msgs/msg/abv_thruster_status.hpp"
 
-StateMachine::StateMachine(std::shared_ptr<Vehicle> abv) : 
+StateMachine::StateMachine(std::shared_ptr<Vehicle> abv) :
     mDone(false), mActiveState(States::STARTUP), mVehicle(abv)
 {
-    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvControllerStatus>("abv/controller/status"); 
+    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvControllerStatus>("abv/controller/status");
+    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvThrusterStatus>("abv/controller/thrusters");
 }
 
 StateMachine::~StateMachine()
@@ -37,16 +39,6 @@ void StateMachine::run()
 
         switch (getActiveState())
         {
-        case States::STARTUP: 
-            
-            setActiveState(States::IDLE); 
-            
-            // if(mVehicle->hasAcquiredStateData())
-            // {
-            //     setActiveState(States::IDLE); 
-            //     break; 
-            // }
-
         case States::IDLE:
             // do nothing 
             break;
@@ -58,24 +50,63 @@ void StateMachine::run()
 
             if(mVehicle->isControlInputStale())
             {
-                mVehicle->stop(); 
+                mVehicle->stop();
                 setActiveState(States::IDLE);
-                break; 
-            }    
+                break;
+            }
 
-            // if here, control input not stale, apply it 
-            mVehicle->doDirectionControl(); 
+            if(mVehicle->needsFreshNavData() && !mVehicle->isNavOk())
+            {
+                // global-frame direction command lost nav data; explicitly
+                // reset mPreFaultState to IDLE (rather than leaving it
+                // untouched) so recovery can't replay a stale POSE_CONTROL/
+                // VELOCITY_CONTROL goal left over from an earlier fault
+                mPreFaultState = States::IDLE;
+                mVehicle->safeStop();
+                setActiveState(States::NAV_FAULT);
+                break;
+            }
+
+            // if here, control input not stale, apply it
+            mVehicle->doDirectionControl();
             break;
 
-        case States::POSE_CONTROL: 
-        
-            mVehicle->doPoseControl(); 
+        case States::POSE_CONTROL:
+
+            if(!mVehicle->isNavOk())
+            {
+                mPreFaultState = States::POSE_CONTROL;
+                mVehicle->safeStop();
+                setActiveState(States::NAV_FAULT);
+                break;
+            }
+
+            mVehicle->doPoseControl();
             break;
 
-        case States::VELOCITY_CONTROL: 
+        case States::VELOCITY_CONTROL:
 
-            mVehicle->doVelocityControl(); 
-            break; 
+            if(!mVehicle->isNavOk())
+            {
+                mPreFaultState = States::VELOCITY_CONTROL;
+                mVehicle->safeStop();
+                setActiveState(States::NAV_FAULT);
+                break;
+            }
+
+            mVehicle->doVelocityControl();
+            break;
+
+        case States::NAV_FAULT:
+
+            // re-issue every tick while faulted as a belt-and-suspenders retry
+            mVehicle->safeStop();
+
+            if(mVehicle->isNavOk())
+            {
+                setActiveState(mPreFaultState);
+            }
+            break;
 
         default:
             break;
@@ -115,8 +146,11 @@ std::string StateMachine::toString(StateMachine::States aState)
         stringToReturn = "VELOCITY_CONTROL"; 
         break; 
     case StateMachine::States::DIRECTION_CONTROL:
-        stringToReturn = "DIRECTION_CONTROL"; 
-        break; 
+        stringToReturn = "DIRECTION_CONTROL";
+        break;
+    case StateMachine::States::NAV_FAULT:
+        stringToReturn = "NAV_FAULT";
+        break;
     default:
         stringToReturn = "UNKNOWN"; 
         break;
@@ -149,10 +183,15 @@ void StateMachine::controlStatusPublishLoop()
         statusToSend.set__fy(status.mAppliedThrust.y()); 
         statusToSend.set__tz(status.mAppliedThrust.z());
         
-        statusToSend.set__arrival((uint8_t)status.mStatus); 
+        statusToSend.set__arrival((uint8_t)status.mStatus);
+        statusToSend.set__nav_ok(mVehicle->isNavOk());
 
-        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvControllerStatus>("abv/controller/status", statusToSend); 
+        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvControllerStatus>("abv/controller/status", statusToSend);
 
-        rate.block(); 
+        abv_msgs::msg::AbvThrusterStatus thrusterStatus;
+        thrusterStatus.set__thrusters(status.mThrusterCommand);
+        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvThrusterStatus>("abv/controller/thrusters", thrusterStatus);
+
+        rate.block();
     }
 }

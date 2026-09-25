@@ -42,13 +42,13 @@ def generate_launch_description():
             output='screen',
             emulate_tty=True,
         ),
-        Node(
-            package='abv_rl-cpp',
-            executable='abv_rl-cpp',
-            name='rl_policy_node', 
-            output='screen', 
-            emulate_tty=True,
-        ),
+        # Node(
+        #     package='abv_rl-cpp',
+        #     executable='abv_rl-cpp',
+        #     name='rl_policy_node', 
+        #     output='screen', 
+        #     emulate_tty=True,
+        # ),
 
         GroupAction(
             condition=IfCondition(LaunchConfiguration('sim')),

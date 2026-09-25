@@ -16,11 +16,12 @@ public:
     enum class States
     {
         STARTUP,
-        IDLE, 
+        IDLE,
         THRUSTER_CONTROL,
-        DIRECTION_CONTROL, 
-        POSE_CONTROL, 
-        VELOCITY_CONTROL, 
+        DIRECTION_CONTROL,
+        POSE_CONTROL,
+        VELOCITY_CONTROL,
+        NAV_FAULT,
         NUM_TYPES
     };
 
@@ -35,11 +36,16 @@ public:
     States getActiveState() {std::lock_guard<std::mutex> lock(mActiveStateMutex); return mActiveState;}
 
 private:
-    bool mDone; 
-    std::mutex mDoneMutex; 
-    States mActiveState; 
-    std::mutex mActiveStateMutex; 
-    std::shared_ptr<Vehicle> mVehicle; 
+    bool mDone;
+    std::mutex mDoneMutex;
+    States mActiveState;
+    std::mutex mActiveStateMutex;
+    std::shared_ptr<Vehicle> mVehicle;
+
+    // state to return to once nav data recovers from a NAV_FAULT; only set
+    // for POSE_CONTROL/VELOCITY_CONTROL so a fault from DIRECTION_CONTROL
+    // (a raw, non-persistent teleop input) resolves back to IDLE instead
+    States mPreFaultState{States::IDLE};
 
     std::thread mControlStatusPublishThread;
 

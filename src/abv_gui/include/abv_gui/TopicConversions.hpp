@@ -22,7 +22,18 @@ namespace conversions
         }; 
     }
 
-    inline QVector<double> 
+    inline QVector<double>
+    navigationStateConvertor(const abv_msgs::msg::AbvState& msg)
+    {
+        return QVector<double>{
+            msg.position.x,
+            msg.position.y,
+            msg.position.yaw,
+            msg.valid ? 1.0 : 0.0
+        };
+    }
+
+    inline QVector<double>
     navigationVelocityConvertor(const abv_msgs::msg::AbvState& msg)
     {
         return QVector<double> {

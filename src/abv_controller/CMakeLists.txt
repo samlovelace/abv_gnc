@@ -28,10 +28,12 @@ elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
 endif()
 
 # Source files (common)
-set(ABV_CONTROLLER_SOURCES 
+set(ABV_CONTROLLER_SOURCES
   src/CommandHandler.cpp
   src/ExternalControlPolicy.cpp
-  src/main.cpp 
+  src/LookupTableThrusterMapper.cpp
+  src/MatrixThrusterMapper.cpp
+  src/main.cpp
   src/PidControlPolicy.cpp
   src/StateMachine.cpp
   src/ThrusterCommander.cpp

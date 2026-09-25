@@ -6,10 +6,11 @@
 
 #include "abv_common/ConsumableBuffer.hpp"
 #include "abv_common/AbvState.hpp"
+#include "abv_navigation/StampedAbvState.h"
 class IStateFetcher
 {
 public:
-    explicit IStateFetcher(ConsumableBuffer<AbvState>& buffer)
+    explicit IStateFetcher(ConsumableBuffer<StampedAbvState>& buffer)
         : mBuffer(buffer), mAcquired(false)
     {}
 
@@ -20,7 +21,7 @@ public:
     virtual std::string type() { return "unknown"; }
 
 protected:
-    ConsumableBuffer<AbvState>& mBuffer;
+    ConsumableBuffer<StampedAbvState>& mBuffer;
     std::atomic<bool> mAcquired;
 };
 #endif // ISTATEFETCHER_H
