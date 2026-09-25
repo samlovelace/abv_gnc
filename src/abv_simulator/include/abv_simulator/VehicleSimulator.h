@@ -1,6 +1,7 @@
 #ifndef VEHICLESIMULATOR_H
 #define VEHICLESIMULATOR_H
 
+#include <memory>
 #include <mutex>
 #include <deque>
 #include <random>
@@ -8,7 +9,8 @@
 #include <eigen3/Eigen/Dense>
 
 #include "abv_msgs/msg/abv_state.hpp"
-#include "UdpServer.h" 
+#include "OptitrackEmulator.h"
+#include "UdpServer.h"
 #include "VehicleState.h"
 
 class VehicleSimulator
@@ -26,9 +28,11 @@ public:
 
 
 private:
-    std::unique_ptr<UdpServer> mUdpServer; 
-    std::string mThrusterCommand; 
-    std::mutex mThrusterCommandMutex; 
+    std::unique_ptr<UdpServer> mUdpServer;
+    std::unique_ptr<OptitrackEmulator> mOptitrackEmulator;
+    bool mUseOptitrackEmulator;
+    std::string mThrusterCommand;
+    std::mutex mThrusterCommandMutex;
 
     double mMass; 
     double mIzz; // moment of inertia of vehicle around vertical axis 

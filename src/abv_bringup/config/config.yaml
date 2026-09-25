@@ -6,18 +6,20 @@
 Guidance:
   StateMachine:
     Rate: 10 # Hz
+    WaypointTimeout: 30 # seconds - default max time to wait for arrival at a single waypoint
+    WaypointTimeoutToleranceScale: 2.0 # multiplier on arrival tolerance checked when a waypoint timeout fires
 
 Navigation:
-  Interface: simulated
+  Interface: optitrack
   Rate: 25 # Hz
   RigidBodyName: ABV1
 
   Network:
     Local:
-      Ip: 192.168.1.15
+      Ip: 192.168.1.242
 
     Server:
-      Ip: 192.168.1.152
+      Ip: 127.0.0.1
 
 Control:
   StateMachine:
@@ -28,9 +30,9 @@ Control:
     Duration: 3 # seconds
 
   Gains:
-    Kp: [5.0, 5.0, 5.0]
+    Kp: [25.0, 25.0, 5.0]
     Ki: [0, 0, 0]
-    Kd: [15.0, 15.0, 15.0]
+    Kd: [55.0, 55.0, 15.0]
 
   Thrusters:
     InputDiscretization:

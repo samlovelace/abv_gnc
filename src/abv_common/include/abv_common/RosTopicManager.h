@@ -1,7 +1,8 @@
-#ifndef ROSTOPICMANAGER_H   
+#ifndef ROSTOPICMANAGER_H
 #define ROSTOPICMANAGER_H
 
 #include <rclcpp/rclcpp.hpp>
+#include <vector>
 
 class RosTopicManager : public rclcpp::Node
 {
@@ -67,7 +68,14 @@ public:
     void createSubscriber(const std::string& aTopicName, std::function<void(const typename T::SharedPtr)> aCallback)
     {
         auto subscriber = this->create_subscription<T>(aTopicName, 10, aCallback);
-        mSubscribers[aTopicName] = std::dynamic_pointer_cast<rclcpp::SubscriptionBase>(subscriber);
+
+        // mSubscribers holds every subscription for a topic, not just the
+        // latest one - a plain map<string, SharedPtr> here would let a
+        // second createSubscriber() call for the same topic silently
+        // overwrite (and thus destroy/unsubscribe) an earlier one, since
+        // rclcpp::Subscription lifetime is refcounted via this shared_ptr
+        // and nothing else keeps it alive.
+        mSubscribers[aTopicName].push_back(std::dynamic_pointer_cast<rclcpp::SubscriptionBase>(subscriber));
     }
 
 private:
@@ -76,7 +84,7 @@ private:
     ~RosTopicManager();
 
     std::map<std::string, rclcpp::PublisherBase::SharedPtr> mPublishers;
-    std::map<std::string, rclcpp::SubscriptionBase::SharedPtr> mSubscribers;
+    std::map<std::string, std::vector<rclcpp::SubscriptionBase::SharedPtr>> mSubscribers;
 };
 
 #endif

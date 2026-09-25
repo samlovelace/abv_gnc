@@ -1,14 +1,38 @@
-#include <string> 
+#include <algorithm>
+#include <cctype>
+#include <string>
 #include <random>
 
 #include "abv_simulator/VehicleSimulator.h"
+#include "abv_common/ConfigurationManager.h"
 #include "abv_common/RosTopicManager.h"
+#include "plog/Log.h"
 
-VehicleSimulator::VehicleSimulator(/* args */) : 
-    mUdpServer(std::make_unique<UdpServer>(6969, std::bind(&VehicleSimulator::onRecieved, this, std::placeholders::_1))), 
-    mMass(12.7), mIzz(0.35), mThrusterForce(0.15), mMomentArm(0.1235), mTimestep(0.01), mDamping(0.0005),
+namespace
+{
+constexpr int kVrpnDefaultPort = 3883;
+
+bool isOptitrackInterface(std::string aInterface)
+{
+    std::transform(aInterface.begin(), aInterface.end(), aInterface.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+    return aInterface == "optitrack";
+}
+}
+
+VehicleSimulator::VehicleSimulator(/* args */) :
+    mUdpServer(std::make_unique<UdpServer>(6969, std::bind(&VehicleSimulator::onRecieved, this, std::placeholders::_1))),
+    mOptitrackEmulator(std::make_unique<OptitrackEmulator>(
+        ConfigurationManager::getInstance()->getNavigationConfig().mRigidBodyName,
+        kVrpnDefaultPort)),
+    mUseOptitrackEmulator(isOptitrackInterface(ConfigurationManager::getInstance()->getNavigationConfig().mInterface)),
+    mMass(ConfigurationManager::getInstance()->getControlConfig().mMass),
+    mIzz(ConfigurationManager::getInstance()->getControlConfig().mInertia),
+    mThrusterForce(ConfigurationManager::getInstance()->getControlConfig().mForce),
+    mMomentArm(ConfigurationManager::getInstance()->getControlConfig().mMomentArm),
+    mTimestep(0.01), mDamping(0.0005),
     mVelocity(Eigen::Vector2d::Zero()), mThrustForce(Eigen::Vector3d::Zero())
-{ 
+{
 
 }
 
@@ -18,9 +42,20 @@ VehicleSimulator::~VehicleSimulator()
 
 void VehicleSimulator::listen()
 {
-    mUdpServer->start(); 
-    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvState>("abv/sim/state"); 
-    RosTopicManager::getInstance()->spinNode(); 
+    mUdpServer->start();
+    RosTopicManager::getInstance()->spinNode();
+
+    if (mUseOptitrackEmulator)
+    {
+        if (!mOptitrackEmulator->init())
+        {
+            LOGE << "Failed to initialize OptitrackEmulator";
+        }
+    }
+    else
+    {
+        RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::AbvState>("abv/sim/state");
+    }
 }
 
 void VehicleSimulator::onRecieved(const std::string& message)
@@ -100,9 +135,16 @@ void VehicleSimulator::update(const double dt)
     // Publish only if not in dropout
     if (!mDropoutActive)
     {
-        RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvState>(
-            "abv/sim/state",
-            convertToIdl(mNoisyState));
+        if (mUseOptitrackEmulator)
+        {
+            mOptitrackEmulator->publishPose(mNoisyState.x, mNoisyState.y, mNoisyState.yaw);
+        }
+        else
+        {
+            RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvState>(
+                "abv/sim/state",
+                convertToIdl(mNoisyState));
+        }
     }
 }
 

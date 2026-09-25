@@ -51,11 +51,13 @@ private:
 
     Command mCommand;
 
-    std::unique_ptr<IPathGenerator> mPathGenerator; 
-    RosNavigationListener mNavSource; 
-    PathWatchdog mWatchdog; 
+    std::unique_ptr<IPathGenerator> mPathGenerator;
+    RosNavigationListener mNavSource;
+    PathWatchdog mWatchdog;
+    PathWatchdog mWaypointWatchdog;
+    Waypoint mCurrentWaypoint;
 
-    ThreadSafe<Arrival::Status> mArrivalStatus; 
+    ThreadSafe<Arrival::Status> mArrivalStatus;
 
     std::thread mStatusPublishThread; 
 
@@ -66,9 +68,11 @@ private:
     void waitForExecution();
     void waitForArrival();  
 
-    void onCommand(const Command& aCommand) override; 
-    void onTimeout(); 
-    void controllerStatusCallback(abv_msgs::msg::AbvControllerStatus::SharedPtr aStatus); 
+    void onCommand(const Command& aCommand) override;
+    void onTimeout();
+    void onWaypointTimeout();
+    void sendStopCommand();
+    void controllerStatusCallback(abv_msgs::msg::AbvControllerStatus::SharedPtr aStatus);
 
     void statusPublishLoop();
 

@@ -1,5 +1,6 @@
 
-#include <iostream> 
+#include <cmath>
+#include <iostream>
 #include "plog/Log.h"
 
 #include "abv_msgs/msg/abv_controller_command.hpp"
@@ -25,9 +26,12 @@ StateMachine::StateMachine() :
 
 StateMachine::~StateMachine()
 {
+    mWaypointWatchdog.cancel();
+    mWatchdog.cancel();
+
     if(mStatusPublishThread.joinable())
     {
-        mStatusPublishThread.join(); 
+        mStatusPublishThread.join();
     }
 }
 
@@ -137,31 +141,40 @@ void StateMachine::generatePath()
 
 void StateMachine::sendWaypoint()
 {
-    // get next waypoint from current IPathGenerator and send via ROS2 
-    Waypoint wp = mPathGenerator->getNext(); 
+    // get next waypoint from current IPathGenerator and send via ROS2
+    Waypoint wp = mPathGenerator->getNext();
+    mCurrentWaypoint = wp;
 
-    // convert to idl type and publish 
-    abv_msgs::msg::AbvControllerCommand cmd; 
-    cmd.set__type(wp.mType); 
-    
-    abv_msgs::msg::AbvVec3 vec; 
-    vec.set__x(wp.mPose.x()); 
-    vec.set__y(wp.mPose.y()); 
-    vec.set__yaw(wp.mPose.z()); 
+    // convert to idl type and publish
+    abv_msgs::msg::AbvControllerCommand cmd;
+    cmd.set__type(wp.mType);
 
-    cmd.set__data(vec); 
+    abv_msgs::msg::AbvVec3 vec;
+    vec.set__x(wp.mPose.x());
+    vec.set__y(wp.mPose.y());
+    vec.set__yaw(wp.mPose.z());
 
-    // set waypoint tolerance 
-    abv_msgs::msg::AbvVec3 tol; 
+    cmd.set__data(vec);
+
+    // set waypoint tolerance
+    abv_msgs::msg::AbvVec3 tol;
     tol.set__x(mCommand.mArrivalTol.x());
     tol.set__y(mCommand.mArrivalTol.y());
     tol.set__yaw(mCommand.mArrivalTol.z());
 
-    cmd.set__tolerance(tol); 
+    cmd.set__tolerance(tol);
 
-    LOGV << "Sending next waypoint..."; 
-    RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvControllerCommand>("abv/controller/command", cmd); 
-    setActiveState(States::WAITING_FOR_EXECUTION); 
+    LOGV << "Sending next waypoint...";
+    RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvControllerCommand>("abv/controller/command", cmd);
+    setActiveState(States::WAITING_FOR_EXECUTION);
+
+    // per-waypoint timeout: falls back to the configured default unless the
+    // path generator supplied its own override for this waypoint
+    double waypointTimeout = wp.mTimeout > 0.0
+        ? wp.mTimeout
+        : ConfigurationManager::getInstance()->getGuidanceConfig().mWaypointTimeout;
+
+    mWaypointWatchdog.start(waypointTimeout, std::bind(&StateMachine::onWaypointTimeout, this));
 }
 
 void StateMachine::waitForExecution()
@@ -175,11 +188,13 @@ void StateMachine::waitForExecution()
 
 void StateMachine::waitForArrival()
 {
-    // query controller status for arrival state, once arrived, send next waypoint 
+    // query controller status for arrival state, once arrived, send next waypoint
     if(mArrivalStatus.get() == Arrival::Status::ARRIVED)
     {
         // controller arrived on current waypoint, send next
-        LOGV << "Controller arrived..."; 
+        LOGV << "Controller arrived...";
+        mWaypointWatchdog.cancel();
+
         if(mPathGenerator->hasNext())
         {
             setActiveState(States::SEND_WAYPOINT);
@@ -209,13 +224,59 @@ void StateMachine::setActiveState(StateMachine::States aState)
 void StateMachine::onTimeout()
 {
     LOGV << "Commanded execution duration has been reached.";
-    
-    // send a STOP command to the controller  
-    abv_msgs::msg::AbvControllerCommand cmd; 
-    cmd.set__type("STOP"); 
+
+    mWaypointWatchdog.cancel();
+    sendStopCommand();
+
+    setActiveState(StateMachine::States::IDLE);
+}
+
+void StateMachine::sendStopCommand()
+{
+    abv_msgs::msg::AbvControllerCommand cmd;
+    cmd.set__type("STOP");
     RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvControllerCommand>("abv/controller/command", cmd);
-    
-    setActiveState(StateMachine::States::IDLE); 
+}
+
+void StateMachine::onWaypointTimeout()
+{
+    // stale timeout firing after we've already moved on (e.g. the overall
+    // path timeout or a new command already took us out of this waypoint)
+    if(getActiveState() != States::WAITING_FOR_EXECUTION && getActiveState() != States::WAITING_FOR_ARRIVAL)
+    {
+        return;
+    }
+
+    LOGW << "Timed out waiting for arrival at the current waypoint...";
+
+    Eigen::Vector3d error = mCurrentWaypoint.mPose - mNavSource.getCurrentPose();
+    error.z() = std::atan2(std::sin(error.z()), std::cos(error.z())); // wrap yaw to [-pi, pi]
+
+    Eigen::Vector3d relaxedTol = mCommand.mArrivalTol * ConfigurationManager::getInstance()->getGuidanceConfig().mWaypointTimeoutToleranceScale;
+    bool withinRelaxedTol = (error.array().abs() < relaxedTol.array()).all();
+
+    if(withinRelaxedTol)
+    {
+        LOGW << "Within relaxed arrival bounds, treating waypoint as reached and continuing...";
+
+        if(mPathGenerator->hasNext())
+        {
+            setActiveState(States::SEND_WAYPOINT);
+        }
+        else
+        {
+            // final waypoint accepted via relaxed tolerance - hold station here,
+            // same as a normal verified arrival (see waitForArrival()).
+            setActiveState(States::IDLE);
+        }
+    }
+    else
+    {
+        LOGW << "Not within relaxed arrival bounds, aborting path...";
+
+        sendStopCommand();
+        setActiveState(States::IDLE);
+    }
 }
 
 std::string StateMachine::toString(StateMachine::States aState)

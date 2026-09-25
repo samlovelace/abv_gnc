@@ -18,8 +18,6 @@ static const QString kHeaderStyle =
     "font-weight: bold;"
     "font-size: 14px;";
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 QLabel* StatusPanel::makeValueLabel()
 {
     auto* label = new QLabel("---");
@@ -47,8 +45,6 @@ QWidget* StatusPanel::makeSectionHeader(const QString& title)
     return w;
 }
 
-// ── Constructor ───────────────────────────────────────────────────────────────
-
 StatusPanel::StatusPanel(QWidget* parent)
     : QWidget(parent)
 {
@@ -56,7 +52,7 @@ StatusPanel::StatusPanel(QWidget* parent)
     layout->setContentsMargins(4, 4, 4, 4);
     layout->setSpacing(4);
 
-    // ── Panel header ──────────────────────────────────────────────────────────
+    // Panel header 
     auto* panelHeader = new QLabel("Status");
     panelHeader->setStyleSheet("color: #ffffff; font-weight: bold;");
     layout->addWidget(panelHeader);
@@ -66,7 +62,7 @@ StatusPanel::StatusPanel(QWidget* parent)
     topLine->setFrameShadow(QFrame::Sunken);
     layout->addWidget(topLine);
 
-    // ── Guidance section ──────────────────────────────────────────────────────
+    // Guidance section
     layout->addWidget(makeSectionHeader("Guidance"));
 
     auto* guidanceForm = new QFormLayout();
@@ -80,7 +76,7 @@ StatusPanel::StatusPanel(QWidget* parent)
     guidanceForm->addRow(guidanceSmLabel, mGuidanceSmState);
     layout->addLayout(guidanceForm);
 
-    // ── Controller section ────────────────────────────────────────────────────
+    // Controller section 
     layout->addWidget(makeSectionHeader("Controller"));
 
     auto* ctrlForm = new QFormLayout();
@@ -101,8 +97,6 @@ StatusPanel::StatusPanel(QWidget* parent)
 
     layout->addStretch();
 }
-
-// ── Public API ────────────────────────────────────────────────────────────────
 
 void StatusPanel::setGuidanceSmState(const QString& state)
 {

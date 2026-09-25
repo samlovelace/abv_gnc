@@ -6,15 +6,20 @@
 
 struct Waypoint
 {
-    std::string mType; 
+    std::string mType;
     Eigen::Vector3d mPose;
-    Eigen::Vector3d mVel; 
+    Eigen::Vector3d mVel;
 
-    Waypoint() {}
-    Waypoint(double x, double y, double yaw, const std::string& aType) 
-        : mType(aType), mPose(Eigen::Vector3d(x, y, yaw))
+    // Per-waypoint override (seconds) for how long the state machine will
+    // wait for arrival before giving up on this waypoint. <= 0 means "use
+    // the configured default" (GuidanceConfig::mWaypointTimeout).
+    double mTimeout;
+
+    Waypoint() : mTimeout(-1.0) {}
+    Waypoint(double x, double y, double yaw, const std::string& aType, double aTimeout = -1.0)
+        : mType(aType), mPose(Eigen::Vector3d(x, y, yaw)), mTimeout(aTimeout)
     {;}
-    
+
 };
 
 struct Command

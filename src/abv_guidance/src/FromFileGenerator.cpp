@@ -34,13 +34,20 @@ bool FromFileGenerator::init()
         std::stringstream ss(line);
         std::string field;
         double x, y, yaw;
+        double timeout = -1.0; // -1 means "use the configured default"
 
         std::getline(ss, field, ','); x = std::stod(field);
         std::getline(ss, field, ','); y = std::stod(field);
         std::getline(ss, field, ','); yaw = std::stod(field);
 
-        LOGV << "Wp: " << x << "," << y << "," << yaw; 
-        mPath.emplace_back(x, y, yaw, "pose");
+        // optional 4th column overrides the default waypoint timeout
+        if (std::getline(ss, field, ','))
+        {
+            timeout = std::stod(field);
+        }
+
+        LOGV << "Wp: " << x << "," << y << "," << yaw << " (timeout: " << timeout << ")";
+        mPath.emplace_back(x, y, yaw, "pose", timeout);
     }
 
     mIndex = 0;
