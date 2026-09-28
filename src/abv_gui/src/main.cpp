@@ -71,10 +71,10 @@ int main(int argc, char *argv[])
             "abv/state",
             &conversions::navigationVelocityConvertor); 
 
-    auto* ctrlAdapter = 
-        new TopicAdapter<abv_msgs::msg::AbvControllerStatus, QVector<double>>(
-            "abv/controller/status",
-            &conversions::controllerStatusConvertor);
+    auto* ctrlAdapter =
+        new TopicAdapter<abv_msgs::msg::AbvThrusterStatus, QVector<double>>(
+            "abv/thrusters/status",
+            &conversions::thrusterStatusConvertor);
 
     posPlot->connectTo(posAdapter); 
     velPlot->connectTo(velAdapter); 
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     QString robotIp = QString::fromStdString(
         ConfigurationManager::getInstance()->getNavigationConfig().mLocalIp);
 
-    auto* healthPanel = new NodeHealthPanel({"controller", "navigation", "guidance", "bridge"}, robotIp);
+    auto* healthPanel = new NodeHealthPanel({"goal_manager", "navigation", "guidance", "bridge", "control", "thrusters"}, robotIp);
     rightLayout->addWidget(healthPanel);
 
     auto* heartbeatAdapter =
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
                       tableView, &TableTopView::onPoseUpdate);
 
     auto* thrusterStateAdapter =
-        new TopicAdapter<abv_msgs::msg::AbvThrusterStatus, QString>("abv/controller/thrusters",
+        new TopicAdapter<abv_msgs::msg::AbvThrusterStatus, QString>("abv/thrusters/status",
             [](const abv_msgs::msg::AbvThrusterStatus& msg) {
                 return QString::fromStdString(msg.thrusters);
             });

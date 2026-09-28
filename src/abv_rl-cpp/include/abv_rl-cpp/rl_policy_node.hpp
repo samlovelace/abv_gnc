@@ -9,7 +9,7 @@
 #include <onnxruntime_cxx_api.h>
 
 #include "rclcpp/rclcpp.hpp"
-#include "abv_msgs/srv/abv_control_action.hpp"
+#include "abv_msgs/msg/abv_control_context.hpp"
 
 // ---------------------------------------------------------------------------
 // Obstacle represented as (center_x, center_y, radius)
@@ -88,18 +88,17 @@ private:
 };
 
 // ---------------------------------------------------------------------------
-// ROS 2 node
+// RL policy handler: subscribes to abv/controller/context (the same topic
+// abv_control subscribes to), runs inference on each message, and publishes
+// the resulting control effort on abv/thrusters/command - a structural peer
+// of abv_control's ControlLawHandler, interchangeable with it.
 // ---------------------------------------------------------------------------
-class RLPolicyNode : public rclcpp::Node {
+class RLPolicyNode {
 public:
     RLPolicyNode();
 
 private:
-    void handle_request(
-        const std::shared_ptr<abv_msgs::srv::AbvControlAction::Request>  req,
-              std::shared_ptr<abv_msgs::srv::AbvControlAction::Response> res
-    );
+    void contextCallback(abv_msgs::msg::AbvControlContext::SharedPtr aCtxMsg);
 
     std::unique_ptr<RLController> controller_;
-    rclcpp::Service<abv_msgs::srv::AbvControlAction>::SharedPtr service_;
 };

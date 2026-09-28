@@ -8,6 +8,7 @@ find_package(std_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/AbvControlContext.msg"
   "msg/AbvControllerCommand.msg"
   "msg/AbvControllerStatus.msg"
   "msg/AbvGuidanceCommand.msg"
@@ -19,10 +20,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/AbvPath.msg"
   "msg/AbvResponse.msg"
   "msg/AbvState.msg"
+  "msg/AbvThrusterCommand.msg"
   "msg/AbvThrusterStatus.msg"
   "msg/AbvVec3.msg"
-
-  "srv/AbvControlAction.srv"
   DEPENDENCIES std_msgs
 )
 
