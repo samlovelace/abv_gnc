@@ -10,6 +10,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "abv_msgs/msg/abv_control_context.hpp"
+#include "abv_msgs/msg/abv_policy_active.hpp"
 
 // ---------------------------------------------------------------------------
 // Obstacle represented as (center_x, center_y, radius)
@@ -92,6 +93,11 @@ private:
 // abv_control subscribes to), runs inference on each message, and publishes
 // the resulting control effort on abv/thrusters/command - a structural peer
 // of abv_control's ControlLawHandler, interchangeable with it.
+//
+// Also subscribes to abv/policy/active and gates contextCallback on it: when
+// this node isn't the active policy, it skips running inference AND
+// publishing entirely (not just relying on abv_thrusters' downstream
+// arbiter), so a switched-away policy genuinely stops running.
 // ---------------------------------------------------------------------------
 class RLPolicyNode {
 public:
@@ -99,6 +105,9 @@ public:
 
 private:
     void contextCallback(abv_msgs::msg::AbvControlContext::SharedPtr aCtxMsg);
+    void policyActiveCallback(abv_msgs::msg::AbvPolicyActive::SharedPtr aMsg);
 
     std::unique_ptr<RLController> controller_;
+    const std::string mPolicyName{"rl"};
+    bool mIsActive{false};
 };

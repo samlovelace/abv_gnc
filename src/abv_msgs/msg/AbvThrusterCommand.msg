@@ -7,3 +7,10 @@ bool is_global      # true if `data` is in the world frame; abv_thrusters conver
 
 AbvVec3 data         # control effort (fx, fy, tz), for type "direction"
 string thrusters     # 8-char '0'/'1' string, for type "thruster"
+
+# Identity of the control-law node that computed this command ("pid", "rl",
+# etc). Left empty for abv_goal_manager's direct writes (thruster/direction/
+# stop paths), which always bypass the active-policy arbiter in
+# abv_thrusters. Non-empty values are gated against abv/policy/active -
+# see abv_policy_registry.
+string policy_name

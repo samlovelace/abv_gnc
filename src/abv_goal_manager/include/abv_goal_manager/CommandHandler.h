@@ -34,11 +34,12 @@ public:
      */
     enum class CommandType
     {
-        THRUSTER, 
-        POSE, 
+        THRUSTER,
+        POSE,
         VELOCITY,
-        STOP, 
+        STOP,
         DIRECTION,
+        CLEAR,
         NUM_TYPES
     };
 

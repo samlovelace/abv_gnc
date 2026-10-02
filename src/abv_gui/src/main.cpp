@@ -25,6 +25,8 @@
 #include "abv_msgs/msg/abv_obstacle_array.hpp"
 #include "abv_msgs/msg/abv_path.hpp"
 #include "abv_msgs/msg/abv_thruster_status.hpp"
+#include "abv_msgs/msg/abv_policy_active.hpp"
+#include "abv_msgs/msg/abv_policy_registry.hpp"
 
 #include "abv_common/ConfigurationManager.h"
 
@@ -39,6 +41,7 @@
 #include "abv_gui/StatusPanel.h"
 #include "abv_gui/NodeHealthPanel.h"
 #include "abv_gui/TableTopView.h"
+#include "abv_gui/PolicySelectorPanel.h"
 
 int main(int argc, char *argv[])
 {
@@ -103,6 +106,29 @@ int main(int argc, char *argv[])
 
     StatusPanel* status = new StatusPanel();
     rightLayout->addWidget(status);
+
+    PolicySelectorPanel* policyPanel = new PolicySelectorPanel();
+    rightLayout->addWidget(policyPanel);
+
+    auto* policyRegistryAdapter =
+        new TopicAdapter<abv_msgs::msg::AbvPolicyRegistry, QString>("abv/policy/registry",
+            [](const abv_msgs::msg::AbvPolicyRegistry& msg) {
+                QStringList parts;
+                for (const auto& entry : msg.policies) {
+                    parts << QString::fromStdString(entry.policy_name) + ":" + (entry.alive ? "1" : "0");
+                }
+                return parts.join(";");
+            });
+    QObject::connect(policyRegistryAdapter, &TopicAdapterBase::newDataVariant,
+                      policyPanel, &PolicySelectorPanel::onRegistryUpdate);
+
+    auto* policyActiveAdapter =
+        new TopicAdapter<abv_msgs::msg::AbvPolicyActive, QString>("abv/policy/active",
+            [](const abv_msgs::msg::AbvPolicyActive& msg) {
+                return QString::fromStdString(msg.policy_name);
+            });
+    QObject::connect(policyActiveAdapter, &TopicAdapterBase::newDataVariant,
+                      policyPanel, &PolicySelectorPanel::onActivePolicyChanged);
 
     QString robotIp = QString::fromStdString(
         ConfigurationManager::getInstance()->getNavigationConfig().mLocalIp);

@@ -18,11 +18,15 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/AbvObstacle.msg"
   "msg/AbvObstacleArray.msg"
   "msg/AbvPath.msg"
+  "msg/AbvPolicyActive.msg"
+  "msg/AbvPolicyEntry.msg"
+  "msg/AbvPolicyRegistry.msg"
   "msg/AbvResponse.msg"
   "msg/AbvState.msg"
   "msg/AbvThrusterCommand.msg"
   "msg/AbvThrusterStatus.msg"
   "msg/AbvVec3.msg"
+  "srv/AbvPolicySwitch.srv"
   DEPENDENCIES std_msgs
 )
 

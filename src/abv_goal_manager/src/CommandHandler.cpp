@@ -37,9 +37,19 @@ void CommandHandler::commandCallback(abv_msgs::msg::AbvControllerCommand::Shared
     {
         case CommandType::STOP:
         {
-            mGoalManager->stop(); 
-            setNewActiveState(StateMachine::States::IDLE); 
-        
+            mGoalManager->stop();
+            setNewActiveState(StateMachine::States::IDLE);
+
+            break;
+        }
+        case CommandType::CLEAR:
+        {
+            // unlike STOP, this does not publish a new thruster command -
+            // used by abv_policy_registry after a successful policy switch
+            // to clear the active goal without driving the vehicle at all
+            mGoalManager->clearGoal();
+            setNewActiveState(StateMachine::States::IDLE);
+
             break;
         }
         case CommandType::THRUSTER:
@@ -143,7 +153,11 @@ CommandHandler::CommandType CommandHandler::toEnum(const std::string& aType)
     }
     else if ("STOP" == aType || "stop" == aType || "Stop" == aType)
     {
-        enumToReturn = CommandType::STOP; 
+        enumToReturn = CommandType::STOP;
+    }
+    else if ("CLEAR" == aType || "clear" == aType || "Clear" == aType)
+    {
+        enumToReturn = CommandType::CLEAR;
     }
     else
     {
@@ -168,11 +182,14 @@ std::string CommandHandler::toString(CommandType aCmdType)
     case CommandType::VELOCITY: 
         stringToReturn = "VELOCITY_CONTROL"; 
         break;
-    case CommandType::STOP: 
-        stringToReturn = "STOP"; 
+    case CommandType::STOP:
+        stringToReturn = "STOP";
         break;
-    case CommandType::DIRECTION: 
-        stringToReturn = "DIRECTION"; 
+    case CommandType::CLEAR:
+        stringToReturn = "CLEAR";
+        break;
+    case CommandType::DIRECTION:
+        stringToReturn = "DIRECTION";
     default:
         break;
     }

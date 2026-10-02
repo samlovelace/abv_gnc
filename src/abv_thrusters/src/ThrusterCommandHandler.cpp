@@ -11,6 +11,8 @@ ThrusterCommandHandler::ThrusterCommandHandler() :
     topicManager->createPublisher<abv_msgs::msg::AbvThrusterStatus>("abv/thrusters/status");
     topicManager->createSubscriber<abv_msgs::msg::AbvThrusterCommand>("abv/thrusters/command",
                                     std::bind(&ThrusterCommandHandler::commandCallback, this, std::placeholders::_1));
+    topicManager->createSubscriber<abv_msgs::msg::AbvPolicyActive>("abv/policy/active",
+                                    std::bind(&ThrusterCommandHandler::policyActiveCallback, this, std::placeholders::_1));
 
     topicManager->spinNode();
 }
@@ -19,8 +21,19 @@ ThrusterCommandHandler::~ThrusterCommandHandler()
 {
 }
 
+void ThrusterCommandHandler::policyActiveCallback(abv_msgs::msg::AbvPolicyActive::SharedPtr aMsg)
+{
+    mActivePolicy = aMsg->policy_name;
+}
+
 void ThrusterCommandHandler::commandCallback(abv_msgs::msg::AbvThrusterCommand::SharedPtr aCmdMsg)
 {
+    if(!aCmdMsg->policy_name.empty() && aCmdMsg->policy_name != mActivePolicy)
+    {
+        LOGV << "Dropping thruster command from inactive policy '" << aCmdMsg->policy_name << "' (active: '" << mActivePolicy << "')";
+        return;
+    }
+
     if("thruster" == aCmdMsg->type)
     {
         mThrusterCommander->commandThrusters(aCmdMsg->thrusters);

@@ -14,6 +14,7 @@ public:
     ~PidControlLaw();
 
     bool computeAction(const ControlContext& ctx, ActionContext& actionCtx) override;
+    void reset() override;
 
 private:
     ControlLawConfig mConfig;

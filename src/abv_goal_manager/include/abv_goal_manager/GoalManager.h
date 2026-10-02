@@ -37,6 +37,12 @@ public:
     // current goal, so the goal can be auto-resumed once nav data recovers
     void safeStop();
 
+    // clears the active goal (state machine goes to IDLE) WITHOUT publishing
+    // a thruster command, unlike stop() - used on a control-policy switch so
+    // the vehicle isn't driven by a goal computed for the policy that just
+    // got swapped out, without issuing a new command of its own
+    void clearGoal();
+
     Eigen::Vector3d getGoalPose();
     Eigen::Vector3d getGoalVelocity();
     Eigen::Vector3d getControlInput();

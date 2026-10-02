@@ -30,6 +30,15 @@ def generate_launch_description():
         additional_env={'ROS_DOMAIN_ID': os.environ.get('ROS_DOMAIN_ID', '0')},
         output='screen')
 
+    # required alongside any control-policy node (abv_control/abv_rl-cpp) -
+    # without it abv/policy/active never publishes, and abv_thrusters'
+    # arbiter silently drops every policy-sourced thruster command
+    policy_registry = ExecuteProcess(
+        name='abv_policy_registry',
+        cmd=['sudo', './scripts/run.sh', 'abv_policy_registry'],
+        additional_env={'ROS_DOMAIN_ID': os.environ.get('ROS_DOMAIN_ID', '0')},
+        output='screen')
+
     # needs root for GPIO thruster access (see GpioThrusterDriver)
     thrusters = ExecuteProcess(
         name='abv_thrusters',
@@ -37,4 +46,4 @@ def generate_launch_description():
         additional_env={'ROS_DOMAIN_ID': os.environ.get('ROS_DOMAIN_ID', '0')},
         output='screen')
 
-    return LaunchDescription([guidance, navigation, goal_manager, control, thrusters])
+    return LaunchDescription([guidance, navigation, goal_manager, control, thrusters, policy_registry])

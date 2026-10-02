@@ -28,5 +28,12 @@ class IControlLaw
 public:
     virtual ~IControlLaw() = default;
     virtual bool computeAction(const ControlContext& ctx, ActionContext& actionCtx) = 0;
+
+    // Called by ControlLawHandler when this law transitions from inactive to
+    // active (a policy switch activated it) - clears any time-dependent
+    // internal state (integral accumulators, previous-error/previous-time
+    // for derivative/dt) so a long gap while inactive doesn't produce a
+    // huge dt on the first tick back. Default no-op for stateless laws.
+    virtual void reset() {}
 };
 #endif //ICONTROLLAW_HPP

@@ -79,4 +79,13 @@ def generate_launch_description():
         output='screen'
     )
 
-    return LaunchDescription([guidance, navigation, goal_manager, control, thrusters, rl])
+    # required alongside any control-policy node (abv_control/abv_rl-cpp) -
+    # without it abv/policy/active never publishes, and abv_thrusters'
+    # arbiter silently drops every policy-sourced thruster command
+    policy_registry = ExecuteProcess(
+        name='abv_policy_registry',
+        cmd=['sudo', '--preserve-env=ROS_DOMAIN_ID', './scripts/run.sh', 'abv_policy_registry'],
+        additional_env={'ROS_DOMAIN_ID': os.environ.get('ROS_DOMAIN_ID', '0')},
+        output='screen')
+
+    return LaunchDescription([guidance, navigation, goal_manager, control, thrusters, rl, policy_registry])

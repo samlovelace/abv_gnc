@@ -7,6 +7,8 @@
 #include <chrono>
 
 #include "abv_common/RosTopicManager.h"
+#include "abv_common/HeartbeatPublisher.h"
+#include "abv_common/ConfigurationManager.h"
 #include "abv_msgs/msg/abv_thruster_command.hpp"
 
 // ==========================================================================
@@ -162,7 +164,7 @@ RLPolicyNode::RLPolicyNode()
     auto node = RosTopicManager::getInstance();
 
     // Declare & read parameters
-    node->declare_parameter<std::string>("model_dir",     "/home/optimus/abv_gnc/src/abv_rl-cpp/abv_rl_onnx/");
+    node->declare_parameter<std::string>("model_dir",     "/home/sam/dev/cpp/robot_ws/src/abv_gnc/src/abv_rl-cpp/abv_rl_onnx/");
     node->declare_parameter<int>        ("num_obstacles", 3);
     node->declare_parameter<int>        ("num_critics",   3);
 
@@ -208,12 +210,24 @@ RLPolicyNode::RLPolicyNode()
     node->createPublisher<abv_msgs::msg::AbvThrusterCommand>("abv/thrusters/command");
     node->createSubscriber<abv_msgs::msg::AbvControlContext>("abv/controller/context",
         std::bind(&RLPolicyNode::contextCallback, this, std::placeholders::_1));
+    node->createSubscriber<abv_msgs::msg::AbvPolicyActive>("abv/policy/active",
+        std::bind(&RLPolicyNode::policyActiveCallback, this, std::placeholders::_1));
 
     RCLCPP_INFO(node->get_logger(), "RL policy node ready (ONNX runtime)");
 }
 
+void RLPolicyNode::policyActiveCallback(abv_msgs::msg::AbvPolicyActive::SharedPtr aMsg)
+{
+    mIsActive = (aMsg->policy_name == mPolicyName);
+}
+
 void RLPolicyNode::contextCallback(abv_msgs::msg::AbvControlContext::SharedPtr aCtxMsg)
 {
+    if(!mIsActive)
+    {
+        return;
+    }
+
     std::array<float, 3> pose     = {static_cast<float>(aCtxMsg->pose.x),
                                      static_cast<float>(aCtxMsg->pose.y),
                                      static_cast<float>(aCtxMsg->pose.yaw)};
@@ -232,6 +246,7 @@ void RLPolicyNode::contextCallback(abv_msgs::msg::AbvControlContext::SharedPtr a
     cmd.data.x = action[0];
     cmd.data.y = action[1];
     cmd.data.yaw = action[2];
+    cmd.policy_name = mPolicyName;
 
     RosTopicManager::getInstance()->publishMessage<abv_msgs::msg::AbvThrusterCommand>("abv/thrusters/command", cmd);
 }
@@ -241,9 +256,16 @@ void RLPolicyNode::contextCallback(abv_msgs::msg::AbvControlContext::SharedPtr a
 // ==========================================================================
 int main(int argc, char** argv)
 {
+    // HeartbeatPublisher reads Heartbeat.Rate from here - this node never
+    // needed abv_bringup's config.yaml before (ROS parameters only), so
+    // this load was missing; without it mRate is uninitialized and
+    // HeartbeatPublisher's timer period computation can throw.
+    ConfigurationManager::getInstance()->loadConfiguration();
+
     rclcpp::init(argc, argv);
     RosTopicManager::getInstance("abv_rl");
     RosTopicManager::getInstance()->spinNode();
+    HeartbeatPublisher policyHeartbeat("rl", "abv/policy/status");
 
     RLPolicyNode rlPolicyNode;
 

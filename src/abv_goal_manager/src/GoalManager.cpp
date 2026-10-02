@@ -238,6 +238,12 @@ void GoalManager::safeStop()
     // active goal can be auto-resumed once nav data is fresh again
 }
 
+void GoalManager::clearGoal()
+{
+    LOGV << "Clearing active goal (no new thruster command published)";
+    mGoalType = GoalType::NUM_TYPES; // so arrival state goes to IDLE
+}
+
 void GoalManager::publishThrusterCommand(const std::string& aType, Eigen::Vector3d aData, bool anIsGlobal, const std::string& aThrusters)
 {
     abv_msgs::msg::AbvThrusterCommand cmd;

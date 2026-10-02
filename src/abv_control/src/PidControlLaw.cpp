@@ -21,6 +21,13 @@ bool PidControlLaw::computeAction(const ControlContext& ctx, ActionContext& acti
     return true;
 }
 
+void PidControlLaw::reset()
+{
+    mPrevTime = std::chrono::steady_clock::now();
+    mPrevPoseError = Eigen::Vector3d::Zero();
+    mPoseErrorIntegral = Eigen::Vector3d::Zero();
+}
+
 Eigen::Vector3d PidControlLaw::PID(Eigen::Vector3d aPoseError)
 {
     using namespace std::chrono;

@@ -18,6 +18,7 @@ int main()
     RosTopicManager::getInstance("abv_control");
     RosTopicManager::getInstance()->spinNode();
     HeartbeatPublisher heartbeat("control");
+    HeartbeatPublisher policyHeartbeat("control", "abv/policy/status");
 
     ControlLawHandler controlLawHandler;
 
