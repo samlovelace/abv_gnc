@@ -11,7 +11,9 @@
 
 // Lets the operator see which control-policy nodes (abv_control -> "control",
 // abv_rl-cpp -> "rl") are currently alive and switch which one is active, via
-// the abv/policy/switch service hosted by abv_policy_registry.
+// the abv/policy/switch service hosted by abv_policy_registry. The active
+// policy itself is displayed elsewhere (see ActivePolicyBanner, top-center of
+// the main window) - this panel is switching-only plus the ack/nak result.
 class PolicySelectorPanel : public QWidget
 {
     Q_OBJECT
@@ -24,14 +26,10 @@ public slots:
     // (alive is "1"/"0").
     void onRegistryUpdate(const QVariant& aData);
 
-    // aData is the active policy name (empty string = none active)
-    void onActivePolicyChanged(const QVariant& aData);
-
 private:
     void onSwitchClicked();
 
     QComboBox* mSelector{nullptr};
-    QLabel* mActiveLabel{nullptr};
     QLabel* mStatusLabel{nullptr};
 
     rclcpp::Client<abv_msgs::srv::AbvPolicySwitch>::SharedPtr mSwitchClient;

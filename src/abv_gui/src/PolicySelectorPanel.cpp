@@ -37,10 +37,6 @@ PolicySelectorPanel::PolicySelectorPanel(QWidget* parent)
     selectorRow->addWidget(switchBtn);
     layout->addLayout(selectorRow);
 
-    mActiveLabel = new QLabel("Active: ---");
-    mActiveLabel->setStyleSheet(kLabelStyle);
-    layout->addWidget(mActiveLabel);
-
     mStatusLabel = new QLabel();
     mStatusLabel->setStyleSheet(kLabelStyle);
     layout->addWidget(mStatusLabel);
@@ -78,12 +74,6 @@ void PolicySelectorPanel::onRegistryUpdate(const QVariant& aData)
     }
 
     mSelector->blockSignals(false);
-}
-
-void PolicySelectorPanel::onActivePolicyChanged(const QVariant& aData)
-{
-    QString activePolicy = aData.toString();
-    mActiveLabel->setText(activePolicy.isEmpty() ? "Active: none" : "Active: " + activePolicy);
 }
 
 void PolicySelectorPanel::onSwitchClicked()

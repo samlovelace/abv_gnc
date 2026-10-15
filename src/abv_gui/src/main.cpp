@@ -42,6 +42,7 @@
 #include "abv_gui/NodeHealthPanel.h"
 #include "abv_gui/TableTopView.h"
 #include "abv_gui/PolicySelectorPanel.h"
+#include "abv_gui/ActivePolicyBanner.h"
 
 int main(int argc, char *argv[])
 {
@@ -83,13 +84,24 @@ int main(int argc, char *argv[])
     velPlot->connectTo(velAdapter); 
     ctrlPlot->connectTo(ctrlAdapter); 
 
-    auto* central = new QWidget(); 
-    auto* mainLayout = new QHBoxLayout(central);
+    auto* central = new QWidget();
+    auto* outerLayout = new QVBoxLayout(central);
+    // zeroed so the banner below spans edge-to-edge; mainLayout restores the
+    // usual breathing room for everything underneath it
+    outerLayout->setContentsMargins(0, 0, 0, 0);
+    outerLayout->setSpacing(0);
+
+    auto* activePolicyBanner = new ActivePolicyBanner();
+    outerLayout->addWidget(activePolicyBanner);
+
+    auto* mainLayout = new QHBoxLayout();
+    mainLayout->setContentsMargins(9, 9, 9, 9);
     auto* leftLayout = new QVBoxLayout();
     auto* rightLayout = new QVBoxLayout();
 
     mainLayout->addLayout(leftLayout, 3);   // plots
     mainLayout->addLayout(rightLayout, 1);  // values panel
+    outerLayout->addLayout(mainLayout);
 
     leftLayout->addWidget(posPlot);
     leftLayout->addWidget(velPlot);
@@ -128,7 +140,7 @@ int main(int argc, char *argv[])
                 return QString::fromStdString(msg.policy_name);
             });
     QObject::connect(policyActiveAdapter, &TopicAdapterBase::newDataVariant,
-                      policyPanel, &PolicySelectorPanel::onActivePolicyChanged);
+                      activePolicyBanner, &ActivePolicyBanner::setActivePolicy);
 
     QString robotIp = QString::fromStdString(
         ConfigurationManager::getInstance()->getNavigationConfig().mLocalIp);
