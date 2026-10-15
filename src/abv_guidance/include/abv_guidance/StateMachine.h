@@ -86,7 +86,7 @@ private:
 
     // per-axis: aWaypoint's override if > 0, else mCommand.mArrivalTol
     // (which itself falls back to the configured default in
-    // Vehicle::setArrivalTolerance)
+    // GoalManager::setArrivalTolerance)
     Eigen::Vector3d resolveArrivalTolerance(const Waypoint& aWaypoint) const;
     void controllerStatusCallback(abv_msgs::msg::AbvControllerStatus::SharedPtr aStatus);
 

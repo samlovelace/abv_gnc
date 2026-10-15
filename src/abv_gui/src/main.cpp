@@ -25,6 +25,8 @@
 #include "abv_msgs/msg/abv_obstacle_array.hpp"
 #include "abv_msgs/msg/abv_path.hpp"
 #include "abv_msgs/msg/abv_thruster_status.hpp"
+#include "abv_msgs/msg/abv_policy_active.hpp"
+#include "abv_msgs/msg/abv_policy_registry.hpp"
 
 #include "abv_common/ConfigurationManager.h"
 
@@ -39,6 +41,8 @@
 #include "abv_gui/StatusPanel.h"
 #include "abv_gui/NodeHealthPanel.h"
 #include "abv_gui/TableTopView.h"
+#include "abv_gui/PolicySelectorPanel.h"
+#include "abv_gui/ActivePolicyBanner.h"
 
 int main(int argc, char *argv[])
 {
@@ -71,22 +75,33 @@ int main(int argc, char *argv[])
             "abv/state",
             &conversions::navigationVelocityConvertor); 
 
-    auto* ctrlAdapter = 
-        new TopicAdapter<abv_msgs::msg::AbvControllerStatus, QVector<double>>(
-            "abv/controller/status",
-            &conversions::controllerStatusConvertor);
+    auto* ctrlAdapter =
+        new TopicAdapter<abv_msgs::msg::AbvThrusterStatus, QVector<double>>(
+            "abv/thrusters/status",
+            &conversions::thrusterStatusConvertor);
 
     posPlot->connectTo(posAdapter); 
     velPlot->connectTo(velAdapter); 
     ctrlPlot->connectTo(ctrlAdapter); 
 
-    auto* central = new QWidget(); 
-    auto* mainLayout = new QHBoxLayout(central);
+    auto* central = new QWidget();
+    auto* outerLayout = new QVBoxLayout(central);
+    // zeroed so the banner below spans edge-to-edge; mainLayout restores the
+    // usual breathing room for everything underneath it
+    outerLayout->setContentsMargins(0, 0, 0, 0);
+    outerLayout->setSpacing(0);
+
+    auto* activePolicyBanner = new ActivePolicyBanner();
+    outerLayout->addWidget(activePolicyBanner);
+
+    auto* mainLayout = new QHBoxLayout();
+    mainLayout->setContentsMargins(9, 9, 9, 9);
     auto* leftLayout = new QVBoxLayout();
     auto* rightLayout = new QVBoxLayout();
 
     mainLayout->addLayout(leftLayout, 3);   // plots
     mainLayout->addLayout(rightLayout, 1);  // values panel
+    outerLayout->addLayout(mainLayout);
 
     leftLayout->addWidget(posPlot);
     leftLayout->addWidget(velPlot);
@@ -104,10 +119,33 @@ int main(int argc, char *argv[])
     StatusPanel* status = new StatusPanel();
     rightLayout->addWidget(status);
 
+    PolicySelectorPanel* policyPanel = new PolicySelectorPanel();
+    rightLayout->addWidget(policyPanel);
+
+    auto* policyRegistryAdapter =
+        new TopicAdapter<abv_msgs::msg::AbvPolicyRegistry, QString>("abv/policy/registry",
+            [](const abv_msgs::msg::AbvPolicyRegistry& msg) {
+                QStringList parts;
+                for (const auto& entry : msg.policies) {
+                    parts << QString::fromStdString(entry.policy_name) + ":" + (entry.alive ? "1" : "0");
+                }
+                return parts.join(";");
+            });
+    QObject::connect(policyRegistryAdapter, &TopicAdapterBase::newDataVariant,
+                      policyPanel, &PolicySelectorPanel::onRegistryUpdate);
+
+    auto* policyActiveAdapter =
+        new TopicAdapter<abv_msgs::msg::AbvPolicyActive, QString>("abv/policy/active",
+            [](const abv_msgs::msg::AbvPolicyActive& msg) {
+                return QString::fromStdString(msg.policy_name);
+            });
+    QObject::connect(policyActiveAdapter, &TopicAdapterBase::newDataVariant,
+                      activePolicyBanner, &ActivePolicyBanner::setActivePolicy);
+
     QString robotIp = QString::fromStdString(
         ConfigurationManager::getInstance()->getNavigationConfig().mLocalIp);
 
-    auto* healthPanel = new NodeHealthPanel({"controller", "navigation", "guidance", "bridge"}, robotIp);
+    auto* healthPanel = new NodeHealthPanel({"goal_manager", "navigation", "guidance", "bridge", "control", "thrusters"}, robotIp);
     rightLayout->addWidget(healthPanel);
 
     auto* heartbeatAdapter =
@@ -137,7 +175,7 @@ int main(int argc, char *argv[])
                       tableView, &TableTopView::onPoseUpdate);
 
     auto* thrusterStateAdapter =
-        new TopicAdapter<abv_msgs::msg::AbvThrusterStatus, QString>("abv/controller/thrusters",
+        new TopicAdapter<abv_msgs::msg::AbvThrusterStatus, QString>("abv/thrusters/status",
             [](const abv_msgs::msg::AbvThrusterStatus& msg) {
                 return QString::fromStdString(msg.thrusters);
             });

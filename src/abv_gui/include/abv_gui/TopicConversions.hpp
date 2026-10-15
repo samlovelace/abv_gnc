@@ -6,6 +6,7 @@
 #include "abv_msgs/msg/abv_state.hpp"
 #include "abv_msgs/msg/abv_controller_status.hpp"
 #include "abv_msgs/msg/abv_controller_command.hpp"
+#include "abv_msgs/msg/abv_thruster_status.hpp"
 #include "abv_msgs/msg/abv_path.hpp"
 
 // outgoing types
@@ -45,12 +46,12 @@ namespace conversions
         };
     }
 
-    inline QVector<double> 
-    controllerStatusConvertor(const abv_msgs::msg::AbvControllerStatus& msg)
+    inline QVector<double>
+    thrusterStatusConvertor(const abv_msgs::msg::AbvThrusterStatus& msg)
     {
         return QVector<double> {
-            msg.fx, 
-            msg.fy, 
+            msg.fx,
+            msg.fy,
             msg.tz
         };
     }

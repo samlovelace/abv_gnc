@@ -35,6 +35,8 @@ public:
     GuidanceConfig& getGuidanceConfig() { return mGuidanceConfig; }
     NavigationConfig& getNavigationConfig() { return mNavigationConfig; }
     ControlConfig& getControlConfig() { return mControlConfig; }
+    ControlLawConfig& getControlLawConfig() { return mControlLawConfig; }
+    ThrusterConfig& getThrusterConfig() { return mThrusterConfig; }
     HeartbeatConfig& getHeartbeatConfig() { return mHeartbeatConfig; }
     TableViewConfig& getTableViewConfig() { return mTableViewConfig; }
     SceneConfig& getSceneConfig() { return mSceneConfig; }
@@ -53,6 +55,8 @@ private:
     void parseGuidanceConfig(const YAML::Node& aNode);
     void parseNavigationConfig(const YAML::Node& aNode);
     void parseControlConfig(const YAML::Node& aNode);
+    void parseControlLawConfig(const YAML::Node& aNode);
+    void parseThrusterConfig(const YAML::Node& aNode);
     void parseHeartbeatConfig(const YAML::Node& aNode);
     void parseTableViewConfig(const YAML::Node& aNode);
     void parseSceneConfig(const YAML::Node& aNode);
@@ -63,6 +67,8 @@ private:
     GuidanceConfig mGuidanceConfig;
     NavigationConfig mNavigationConfig;
     ControlConfig mControlConfig;
+    ControlLawConfig mControlLawConfig;
+    ThrusterConfig mThrusterConfig;
     HeartbeatConfig mHeartbeatConfig;
     TableViewConfig mTableViewConfig;
     SceneConfig mSceneConfig;
