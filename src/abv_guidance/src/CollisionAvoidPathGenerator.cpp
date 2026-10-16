@@ -47,7 +47,7 @@ namespace
 }
 
 CollisionAvoidPathGenerator::CollisionAvoidPathGenerator(const Waypoint& aGoal, RosNavigationListener& aNavSource, const Scene& aScene)
-    : mGoal(aGoal), mNavSource(aNavSource), mScene(aScene)
+    : mGoal(aGoal), mNavSource(aNavSource), mScene(aScene), mTrajHeading(0.0)
 {
     mGridResolution = ConfigurationManager::getInstance()->getCollisionAvoidConfig().mGridResolution;
 
@@ -72,6 +72,12 @@ CollisionAvoidPathGenerator::~CollisionAvoidPathGenerator()
 bool CollisionAvoidPathGenerator::init()
 {
     Eigen::Vector3d start = mNavSource.getCurrentPose();
+    
+    // relative position vector from start to goal 
+    Eigen::Vector2d p_G_S = Eigen::Vector2d(mGoal.mPose.x() - start.x(), mGoal.mPose.y() - start.y()); 
+    double relativeHeading = atan2(p_G_S.y(), p_G_S.x()); 
+    mTrajHeading = abs(relativeHeading) < M_PI/2 ? 0.0 : M_PI;
+    
     std::vector<Waypoint> path = solveAStar(start, mGoal.mPose);
 
     if(path.empty())
@@ -278,15 +284,7 @@ std::vector<Waypoint> CollisionAvoidPathGenerator::solveAStar(const Eigen::Vecto
     for(std::size_t i = 0; i < cellPath.size(); ++i)
     {
         Eigen::Vector2d worldPt = cellToWorld(cellPath[i].first, cellPath[i].second);
-        double yaw = aGoalPose.z();
-
-        if(i + 1 < cellPath.size())
-        {
-            Eigen::Vector2d nextPt = cellToWorld(cellPath[i + 1].first, cellPath[i + 1].second);
-            yaw = std::atan2(nextPt.y() - worldPt.y(), nextPt.x() - worldPt.x());
-        }
-
-        path.emplace_back(worldPt.x(), worldPt.y(), yaw, mGoal.mType);
+        path.emplace_back(worldPt.x(), worldPt.y(), mTrajHeading, mGoal.mType);
     }
 
     // Exact commanded goal pose for the final waypoint, not the goal cell's

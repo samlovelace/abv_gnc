@@ -45,6 +45,7 @@ private:
     Waypoint mGoal;
     RosNavigationListener& mNavSource;
     const Scene& mScene;
+    double mTrajHeading; 
 
     double mGridResolution;
     double mRobotHalfExtent;
