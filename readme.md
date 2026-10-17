@@ -47,12 +47,16 @@ The software suite is comprised of multiple ROS 2 packages, each implementing a 
         <td>dummy pkg for common code</td>
     </tr>
     <tr>
-        <td><code>abv_controller</code></td>
-        <td>feedback control via PID, thruster actuation</td>
+        <td><code>abv_control</code></td>
+        <td>classical control laws (PID), the <code>control</code> policy</td>
     </tr>
     <tr>
         <td><code>abv_description</code></td>
         <td> urdf description with rviz launch files </td>
+    </tr>
+    <tr>
+        <td><code>abv_goal_manager</code></td>
+        <td>command intake, goal state machine, arrival detection</td>
     </tr>
     <tr>
       <td><code>abv_gui</code></td>
@@ -71,12 +75,28 @@ The software suite is comprised of multiple ROS 2 packages, each implementing a 
       <td>state estimation via EKF, Optitrack integration</td>
     </tr>
     <tr>
+        <td><code>abv_policy_registry</code></td>
+        <td>runtime discovery and switching of control policies</td>
+    </tr>
+    <tr>
+        <td><code>abv_rl</code></td>
+        <td>RL training code and ONNX export (Python)</td>
+    </tr>
+    <tr>
+        <td><code>abv_rl-cpp</code></td>
+        <td>experimental RL control policy (ONNX Runtime), the <code>rl</code> policy</td>
+    </tr>
+    <tr>
         <td><code>abv_simulator</code></td>
         <td>numerical simulator for ABV dynamics</td>
     </tr>
     <tr>
         <td><code>abv_teleop</code></td>
         <td>keyboard or game controller teleop of the ABV </td>
+    </tr>
+    <tr>
+        <td><code>abv_thrusters</code></td>
+        <td>thruster allocation, policy arbitration, GPIO/UDP drivers</td>
     </tr>
   </tbody>
 </table>
@@ -86,6 +106,8 @@ After cloning the repo, run the setup script to install any missing dependencies
 <pre><code>./scripts/setup.sh
 </code></pre>
 
+Note: <code>abv_rl-cpp</code> requires ONNX Runtime, which the setup script does not install. Install it first, or build with <code>colcon build --packages-skip abv_rl-cpp</code>. See the <a href="https://abv-gnc.readthedocs.io/en/latest/getting_started/installation.html">installation docs</a>.
+
 After the script finishes, launch the core GNC nodes.
 
 <h4> Jetson Orin </h4>
@@ -93,5 +115,10 @@ After the script finishes, launch the core GNC nodes.
 </code></pre>
 
 <h4>General</h4>
-<pre><code>ros2 launch abv_bringup gnc.launch.py
+<pre><code>ros2 launch abv_bringup gnc.launch.py            # add sim:=true for the simulator, GUI and commander
 </code></pre>
+
+No control policy is active at startup. Select one (<code>control</code> or <code>rl</code>) from the GUI's Control Policy panel, or with:
+<pre><code>ros2 service call /abv/policy/switch abv_msgs/srv/AbvPolicySwitch "{policy_name: control}"
+</code></pre>
+Until then, pose, velocity and path commands won't move the vehicle.
