@@ -21,7 +21,9 @@ It:
 The estimated state is consumed by:
 
 - `abv_guidance`
-- `abv_controller`
+- `abv_goal_manager`
+- `abv_thrusters` (yaw, for world→body frame conversion)
+- `abv_gui` and `abv_bridge`
 
 This package does not depend on guidance or control logic.
 
@@ -32,8 +34,8 @@ This package does not depend on guidance or control logic.
 Core classes within this package include:
 
 - `VehicleStateTracker`: Owns the state-tracking loop. Selects and initializes the configured `IStateFetcher`, feeds its raw measurements into the `ExtendedKalmanFilter`, and hands the filtered result to `RosStatePublisher`.
-- `IStateFetcher`: Interface for acquiring raw state measurements, so the tracker isn't tied to any one sensing source. Implementations: `OptitrackStateFetcher_LibMocap` (real hardware, via `libmotioncapture`) and `SimulatedStateFetcher` (reads `abv/sim/state` when `Navigation.Interface` is set for simulation).
-- `ExtendedKalmanFilter`: Fuses raw measurements over time to produce a smoothed pose/velocity estimate, and free-runs (dead-reckons) between measurements up to `Navigation.MaxDeadReckonDuration` before the output is marked invalid. Also accepts the latest applied force/torque from `abv_controller`'s `AbvControllerStatus` as an EKF control input.
+- `IStateFetcher`: Interface for acquiring raw state measurements, so the tracker isn't tied to any one sensing source. Implementations: `OptitrackStateFetcher_LibMocap` (real hardware, via `libmotioncapture`) and `SimulatedStateFetcher` (reads `abv/sim/state`). Selected by `Navigation.Interface`: `optitrack` or `simulated`. When running `abv_simulator` with `optitrack`, the simulator emulates the OptiTrack VRPN server, so the OptiTrack fetcher is exercised in simulation too.
+- `ExtendedKalmanFilter`: Fuses raw measurements over time to produce a smoothed pose/velocity estimate, and free-runs (dead-reckons) between measurements up to `Navigation.MaxDeadReckonDuration` before the output is marked invalid. Also accepts the latest applied force/torque from `abv_thrusters`' `AbvThrusterStatus` as an EKF control input.
 - `RosStatePublisher`: Converts the internal `AbvState` representation to the `abv_msgs::msg::AbvState` IDL type and publishes it.
 
 ## Topics
@@ -41,10 +43,10 @@ Core classes within this package include:
 ### Subscribed
 
 - `/abv/sim/state`  
-  Simulated vehicle state, consumed instead of real sensor data when `Navigation.Interface` is configured for simulation (via `SimulatedStateFetcher`).
+  Simulated vehicle state, consumed instead of real sensor data when `Navigation.Interface: simulated` (via `SimulatedStateFetcher`).
 
-- `/abv/controller/status`  
-  Applied force/torque (`fx`, `fy`, `tz`) from `abv_controller`, used as the EKF's control input.
+- `/abv/thrusters/status`  
+  Applied force/torque (`fx`, `fy`, `tz`) from `abv_thrusters`, used as the EKF's control input.
 
 ### Published
 

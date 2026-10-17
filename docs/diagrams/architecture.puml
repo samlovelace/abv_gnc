@@ -27,25 +27,37 @@ package "External autonomy module" as auto_pkg {
 
 package "On board the ABV" as onboard {
   component "abv_bridge" as bridge
-  component "abv_guidance" as gdnc
+  component "abv_guidance\n(line / file / avoid)" as gdnc
   component "abv_navigation\n(EKF)" as nav
-  component "abv_controller\n(PID / External)" as ctrl
+  component "abv_goal_manager" as gm
+  component "abv_control\n(PID)" as ctrl
+  component "abv_rl-cpp\n(RL, ONNX)" as rl
+  component "abv_policy_registry" as reg
+  component "abv_thrusters" as thr
 }
 
-component "Thruster hardware" as hw
-component "External control policy\n(abv_rl / abv_rl-cpp)" as rl
+component "Thruster hardware\n(or abv_simulator)" as hw
 
-human -down-> gdnc : abv/guidance/command
-human -down-> ctrl : abv/controller/command
+human -down-> gdnc : abv/guidance/command\nabv/scene/obstacles
+human -down-> gm : abv/controller/command
+human -down-> reg : abv/policy/switch
 
 autonomy <.right.> bridge : ptera_msgs
 bridge -down-> gdnc : abv/guidance/command
 
-gdnc -right-> ctrl : abv/controller/command
-ctrl -up-> nav : abv/controller/status
-nav -left-> gdnc : abv/state
+gdnc -down-> gm : abv/controller/command
+gm -up-> gdnc : abv/controller/status
+gm -down-> ctrl : abv/controller/context
+gm -down-> rl : abv/controller/context
+reg .down.> ctrl : abv/policy/active
+reg .down.> rl : abv/policy/active
+reg .down.> thr : abv/policy/active
+ctrl -down-> thr : abv/thrusters/command
+rl -down-> thr : abv/thrusters/command
+gm -down-> thr : direct commands
 
-ctrl -down-> hw : thruster firings
-ctrl .down.> rl : abv/control_action\n(optional)
+thr -down-> hw : thruster firings
+thr -up-> nav : abv/thrusters/status
+nav -up-> gdnc : abv/state
 
 @enduml

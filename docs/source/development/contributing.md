@@ -24,7 +24,9 @@ The repository follows a standard ROS 2 workspace layout:
 
 - `src/` — ROS2 packages
 - `docs/` — Documentation
-- `tools/` — Supporting scripts and utilities
+- `scripts/` — Setup (`setup.sh`), Jetson run helper (`run.sh`), and a simulation helper (`sim.sh`, currently out of date — use `gnc.launch.py sim:=true` instead)
+- `docker/` — Development containers for testing the setup script (see [Installation](../getting_started/installation.md#docker-development))
+- `test/` — Test scaffolding (currently disabled)
 
 Each ROS2 package should:
 
@@ -87,7 +89,7 @@ All frame conventions must be consistent across the stack.
 
 ## Testing
 
-Little to no automated testing has been developed. If that is of interest to the reader, feel free to add unit and or functional tests to the repo.
+Little to no automated testing has been developed; the `test/` folder is currently commented out and predates the `abv_controller` split. If that is of interest to the reader, feel free to add unit and or functional tests to the repo.
 
 ## Pull Request Guidelines
 
