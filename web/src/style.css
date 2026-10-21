@@ -1,0 +1,46 @@
+.topbar {
+  position: sticky;
+  top: 0;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 8px 16px;
+}
+.topbar .right {
+  justify-self: end;
+}
+
+.topbar button {
+  color: red;
+  size: 100px;
+  border-radius: 3px;
+}
+
+.policy {
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.policy[data-state="stale"] {
+  opacity: 0.4;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #888;
+}
+.tabs button {
+  padding: 8px 16px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.tabs button.active {
+  border-bottom: 2px solid #1f6feb;
+  font-weight: 600;
+}
+.view[hidden] {
+  display: none;
+} /* without this, a rule like display:flex on .view overrides [hidden] */
