@@ -33,3 +33,30 @@ export interface AbvThrusterStatus {
   fy: number;
   fz: number;
 }
+
+export interface AbvObstacle {
+  x: number;
+  y: number;
+  radius: number;
+}
+
+export interface AbvObstacleArray {
+  obstacles: AbvObstacle[];
+}
+
+export interface AbvGuidanceCommand {
+  type: string;
+  duration: number;
+  goal_state: AbvState;
+  arrival_tolerance: AbvState;
+}
+
+export interface AbvVec3 {
+  x: number;
+  y: number;
+  yaw: number;
+}
+
+export interface AbvPath {
+  waypoints: AbvVec3[];
+}

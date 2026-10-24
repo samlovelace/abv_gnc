@@ -30,6 +30,21 @@ export class RosClient {
     return this.#latest.get(topic) as T | undefined;
   }
 
+  #getTopic(name: string, messageType: string): ROSLIB.Topic {
+    let t = this.#topics.get(name);
+
+    if (!t) {
+      t = new ROSLIB.Topic({ ros: this.#ros, name, messageType });
+      this.#topics.set(name, t);
+    }
+
+    return t;
+  }
+
+  publish<T extends object>(topic: string, messageType: string, msg: T): void {
+    this.#getTopic(topic, messageType).publish(msg);
+  }
+
   #getService(name: string, serviceType: string): ROSLIB.Service {
     let s = this.#services.get(name);
 

@@ -9,13 +9,13 @@ export class XYZPlot {
   constructor(
     el: HTMLElement,
     title: string,
-    private windowSec = 30,
+    private windowSec = 300,
   ) {
     this.#plot = new uPlot(
       {
         title,
         width: el.clientWidth,
-        height: 220,
+        height: el.clientHeight,
         scales: { x: { time: false } }, // x axis is plain seconds
         series: [
           {},
@@ -23,13 +23,33 @@ export class XYZPlot {
           { label: "y", stroke: "green", width: 3 },
           { label: "z", stroke: "blue", width: 3 },
         ],
+        axes: [
+          // X-axis grid settings (index 0)
+          {
+            grid: {
+              show: true,
+              stroke: "rgba(255, 255, 255, 0.3)", // Line color
+              width: 1, // Line width in pixels
+              //dash: [5, 5], // Optional dash pattern [dash, gap]
+            },
+          },
+          // Y-axis grid settings (index 1)
+          {
+            grid: {
+              show: true,
+              stroke: "rgba(255, 255, 255, 0.3)",
+              width: 1,
+              //dash: [5, 5], // Optional dash pattern [dash, gap]
+            },
+          },
+        ],
       },
       this.#data as uPlot.AlignedData,
       el,
     );
 
     new ResizeObserver(() =>
-      this.#plot.setSize({ width: el.clientWidth, height: 220 }),
+      this.#plot.setSize({ width: el.clientWidth, height: el.clientHeight }),
     ).observe(el);
   }
 

@@ -2,12 +2,14 @@ import { RosClient } from "./ros";
 import { PolicyHandler } from "./policy-handler";
 import type { Handler } from "./handler";
 import { TelemetryHandler } from "./telemetry-handler";
+import { TableInteractionHandler } from "./table-interaction-handler";
 
 // TODO: get ip from the abv config
 const ros = new RosClient(`ws://192.168.1.242:9090`);
 const handlers: Handler[] = [
   new PolicyHandler(ros, document.body),
   new TelemetryHandler(ros, document.body),
+  new TableInteractionHandler(ros, document.body),
 ];
 
 function frame() {
