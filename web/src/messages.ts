@@ -60,3 +60,11 @@ export interface AbvVec3 {
 export interface AbvPath {
   waypoints: AbvVec3[];
 }
+
+export interface AbvControllerCommand {
+  type: string;
+  is_global: boolean;
+  data: AbvVec3;
+  tolerance: AbvVec3;
+  thrusters: string;
+}

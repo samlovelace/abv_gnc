@@ -24,8 +24,11 @@ export class XYZPlot {
           { label: "z", stroke: "blue", width: 3 },
         ],
         axes: [
-          // X-axis grid settings (index 0)
+          // X-axis (time) - index 0
           {
+            stroke: "#ccc", // tick label color - uPlot defaults to black,
+            // invisible against this page's dark background
+            ticks: { stroke: "#ccc" },
             grid: {
               show: true,
               stroke: "rgba(255, 255, 255, 0.3)", // Line color
@@ -33,8 +36,10 @@ export class XYZPlot {
               //dash: [5, 5], // Optional dash pattern [dash, gap]
             },
           },
-          // Y-axis grid settings (index 1)
+          // Y-axis (value) - index 1
           {
+            stroke: "#ccc",
+            ticks: { stroke: "#ccc" },
             grid: {
               show: true,
               stroke: "rgba(255, 255, 255, 0.3)",

@@ -13,24 +13,19 @@
 
 import type { Handler } from "./handler";
 import type { RosClient } from "./ros";
-import type {
-  AbvState,
-  AbvObstacle,
-  AbvObstacleArray,
-  AbvGuidanceCommand,
-} from "./messages";
+import type { AbvObstacle, AbvObstacleArray } from "./messages";
 import { must } from "./dom";
 import { showConfirmPopup } from "./confirm-popup";
 import { ROBOT_HALF_LENGTH, ROBOT_HALF_WIDTH } from "./telemetry-handler";
 import { svgEl } from "./svg";
+import { publishPoseGoal } from "./guidance";
+import { setObstaclesPresent } from "./obstacle-state";
 
 // matches TableTopView.cpp's kMinDragPixels - below this, a drag reads as
 // "no real intent" (yaw stays 0 / a right-click reads as "clear obstacles"
 // instead of "add obstacle")
 const MIN_DRAG_PIXELS = 18;
 
-const GUIDANCE_COMMAND_TOPIC = "abv/guidance/command";
-const GUIDANCE_COMMAND_TYPE = "abv_msgs/msg/AbvGuidanceCommand";
 const OBSTACLES_TOPIC = "abv/scene/obstacles";
 const OBSTACLES_TYPE = "abv_msgs/msg/AbvObstacleArray";
 
@@ -39,14 +34,6 @@ const OBSTACLES_TYPE = "abv_msgs/msg/AbvObstacleArray";
 const GOAL_GHOST_COLOR = "#78c8ff";
 const OBSTACLE_GHOST_COLOR = "#ff8c64";
 const OBSTACLE_COLOR = "#dc503c";
-
-function zeroState(): AbvState {
-  return {
-    valid: true,
-    position: { x: 0, y: 0, yaw: 0 },
-    velocity: { x: 0, y: 0, yaw: 0 },
-  };
-}
 
 export class TableInteractionHandler implements Handler {
   #ros: RosClient;
@@ -300,19 +287,11 @@ export class TableInteractionHandler implements Handler {
   }
 
   #publishGoal(x: number, y: number, yaw: number): void {
-    const goalState = zeroState();
-    goalState.position = { x, y, yaw };
-
-    const cmd: AbvGuidanceCommand = {
-      type: this.#obstacles.length > 0 ? "avoid" : "line",
-      duration: -1,
-      goal_state: goalState,
-      arrival_tolerance: zeroState(),
-    };
-    this.#ros.publish(GUIDANCE_COMMAND_TOPIC, GUIDANCE_COMMAND_TYPE, cmd);
+    publishPoseGoal(this.#ros, x, y, yaw);
   }
 
   #publishObstacles(): void {
+    setObstaclesPresent(this.#obstacles.length > 0);
     const msg: AbvObstacleArray = { obstacles: this.#obstacles };
     this.#ros.publish(OBSTACLES_TOPIC, OBSTACLES_TYPE, msg);
   }

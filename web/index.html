@@ -80,63 +80,120 @@
       </section>
 
       <section class="command-panel">
-        <section class="pose-command-panel">
-          <label>Pose</label>
-          <label>x, y, yaw: </label
-          ><input
-            id="x-pose"
-            type="number"
-            value="0"
-            min="-1"
-            max="1"
-            step="0.1"
-          />
-          <input
-            id="y-pose"
-            type="number"
-            value="0"
-            min="-1"
-            max="1"
-            step="0.1"
-          />
-          <input
-            id="yaw-pose"
-            type="number"
-            value="0"
-            min="-1"
-            max="1"
-            step="0.1"
-          />
+        <label>Command</label>
+        <div class="command-mode-row">
+          <select id="command-mode-select">
+            <option value="pose">Pose</option>
+            <option value="velocity">Velocity</option>
+            <option value="path">Path</option>
+            <option value="thruster">Thruster</option>
+          </select>
+          <label class="body-frame-label">
+            <input type="checkbox" id="body-frame-checkbox" />
+            Body Frame
+          </label>
+        </div>
+
+        <section class="pose-command-panel" data-mode-panel="pose">
+          <div class="pose-cmd-x-row">
+            <label for="pose-cmd-x">x:</label
+            ><input
+              id="pose-cmd-x"
+              type="number"
+              value="0"
+              min="-100"
+              max="100"
+              step="0.05"
+            />
+          </div>
+          <div class="pose-cmd-y-row">
+            <label for="pose-cmd-y">y: </label>
+            <input
+              id="pose-cmd-y"
+              type="number"
+              value="0"
+              min="-100"
+              max="100"
+              step="0.05"
+            />
+          </div>
+          <div class="pose-cmd-yaw-row">
+            <label for="pose-cmd-yaw">yaw: </label>
+            <input
+              id="pose-cmd-yaw"
+              type="number"
+              value="0"
+              min="-100"
+              max="100"
+              step="0.05"
+            />
+          </div>
           <button id="pose-cmd-btn">Send</button>
         </section>
-        <section class="velocity-command-panel">
-          <label>Velocity</label>
-          <label>x, y, yaw: </label
-          ><input
-            id="x-vel"
-            type="number"
-            value="0"
-            min="-1"
-            max="1"
-            step="0.1"
-          />
-          <input
-            id="y-vel"
-            type="number"
-            value="0"
-            min="-1"
-            max="1"
-            step="0.1"
-          />
-          <input
-            id="yaw-vel"
-            type="number"
-            value="0"
-            min="-1"
-            max="1"
-            step="0.1"
-          />
+
+        <section class="velocity-command-panel" data-mode-panel="velocity">
+          <div class="vel-cmd-x-row">
+            <label for="vel-cmd-x">x:</label>
+            <input
+              id="vel-cmd-x"
+              type="number"
+              value="0"
+              min="-10"
+              max="10"
+              step="0.05"
+            />
+          </div>
+          <div class="vel-cmd-y-row">
+            <label for="vel-cmd-y">y:</label>
+            <input
+              id="vel-cmd-y"
+              type="number"
+              value="0"
+              min="-10"
+              max="10"
+              step="0.05"
+            />
+          </div>
+          <div class="vel-cmd-yaw-row">
+            <label for="vel-cmd-yaw">yaw:</label>
+            <input
+              id="vel-cmd-yaw"
+              type="number"
+              value="0"
+              min="-10"
+              max="10"
+              step="0.05"
+            />
+          </div>
           <button id="vel-cmd-btn">Send</button>
+        </section>
+
+        <section class="path-command-panel" data-mode-panel="path">
+          <div class="path-type-row">
+            <label>Path Type: </label>
+            <select id="path-type-select">
+              <option value="File">File</option>
+            </select>
+          </div>
+          <div class="path-duration-row">
+            <label>Duration (s): </label
+            ><input
+              id="path-duration"
+              type="number"
+              value="0"
+              min="0"
+              max="1000"
+              step="1"
+            />
+          </div>
+          <button id="path-cmd-btn">Send</button>
+        </section>
+
+        <section class="thruster-command-panel" data-mode-panel="thruster">
+          <label>Thrusters</label>
+          <div id="thruster-grid" class="thruster-grid"></div>
+          <label>Axes</label>
+          <div id="axis-grid" class="axis-grid"></div>
         </section>
       </section>
     </main>

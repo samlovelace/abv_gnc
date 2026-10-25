@@ -113,11 +113,105 @@ body {
 }
 
 .pose-command-panel,
-.velocity-command-panel {
+.velocity-command-panel,
+.path-command-panel,
+.thruster-command-panel {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
+}
+
+.command-mode-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.body-frame-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.thruster-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.axis-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.btn-warning {
+  background-color: #b45309;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-warning:hover {
+  background-color: #d97706;
+}
+
+.btn-warning:active {
+  background-color: #92400e;
+}
+
+#pose-cmd-btn,
+#vel-cmd-btn,
+#path-cmd-btn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 24px;
+
+  font-size: 28px;
+  cursor: pointer;
+}
+
+#pose-cmd-btn:hover,
+#vel-cmd-btn:hover,
+#path-cmd-btn:hover {
+  background-color: #1a6ff7;
+}
+
+#pose-cmd-btn:active,
+#vel-cmd-btn:active,
+#path-cmd-btn:active {
+  background-color: #3b82f6;
+}
+
+.pose-command-panel,
+.velocity-command-panel,
+.path-command-panel {
+  display: grid;
+  grid-template-columns: max-content 1fr; /* label column sizes to the longest label */
+  gap: 8px 12px; /* row gap, column gap */
+  align-items: center;
+}
+
+/* The row divs shouldn't create their own boxes; let label/input become grid items */
+.pose-command-panel > div,
+.velocity-command-panel > div,
+.path-command-panel > div {
+  display: contents;
+}
+
+/* Button spans both columns */
+.pose-command-panel > button,
+.velocity-command-panel > button,
+.path-command-panel > button {
+  grid-column: 1 / -1;
 }
 
 .confirm-popup {

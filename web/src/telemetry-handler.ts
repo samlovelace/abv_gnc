@@ -26,20 +26,8 @@ export const ROBOT_HALF_WIDTH = 0.175;
 const THRUSTER_OFF_COLOR = "#323235";
 const THRUSTER_ON_COLOR = "#f19346";
 
-type Readout = { el: HTMLInputElement; get: (m: AbvState) => number };
-
-const READOUTS: Record<string, (m: AbvState) => number> = {
-  "x-pose": (m) => m.position.x,
-  "y-pose": (m) => m.position.y,
-  "yaw-pose": (m) => m.position.yaw,
-  "x-vel": (m) => m.velocity.x,
-  "y-vel": (m) => m.velocity.y,
-  "yaw-vel": (m) => m.velocity.yaw,
-};
-
 export class TelemetryHandler implements Handler {
   #plots: XYZPlot[];
-  #readouts: Readout[] = [];
   #pending?: AbvState;
   #vehicle: SVGGElement;
   #thrusters: VehicleGlyph;
@@ -52,12 +40,6 @@ export class TelemetryHandler implements Handler {
     const vel = new XYZPlot(must(root, "#plot-vel"), "Velocity");
     const inp = new XYZPlot(must(root, "#plot-input"), "Control Input");
     this.#plots = [pos, vel, inp];
-
-    for (const [id, get] of Object.entries(READOUTS)) {
-      const el = must<HTMLInputElement>(root, `#${id}`);
-      el.readOnly = true; // display only
-      this.#readouts.push({ el, get });
-    }
 
     ros.watch<AbvState>("abv/state", "abv_msgs/msg/AbvState", (m) => {
       const t = performance.now() / 1000;
@@ -123,7 +105,6 @@ export class TelemetryHandler implements Handler {
     const m = this.#pending;
     if (!m) return;
     this.#pending = undefined;
-    for (const { el, get } of this.#readouts) el.value = get(m).toFixed(3);
 
     const { x, y, yaw } = m.position;
     const deg = (yaw * 180) / Math.PI; // assuming yaw is in radians
@@ -138,7 +119,9 @@ export class TelemetryHandler implements Handler {
     // no path, matching drawPath's `if (mPath.isEmpty()) return;`
     const pathPoints =
       this.#pathWaypoints.length > 0
-        ? [{ x, y }, ...this.#pathWaypoints].map((p) => `${p.x},${p.y}`).join(" ")
+        ? [{ x, y }, ...this.#pathWaypoints]
+            .map((p) => `${p.x},${p.y}`)
+            .join(" ")
         : "";
     this.#pathGlow.setAttribute("points", pathPoints);
     this.#pathLine.setAttribute("points", pathPoints);
