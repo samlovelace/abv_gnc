@@ -10,14 +10,19 @@ The `abv_commander` package can be used to send various commands to the ABV GNC 
 
 After running the package, a list of available commands can be displayed by entering `help` into the command line prompt. The list of available commands is also outlined below
 
-- `pose` - sends a desired x, y, yaw pose to the `abv_controller` module
-- `vel` - sends a desired x, y, yaw velocity to the `abv_controller` module
-- `stop` - sends a [0, 0, 0] thrust vector so that the `abv_controller` will stop firing the thrusters
-- `path` - sends a desired path command to the `abv_guidance` module
+- `pose` - sends a desired x, y, yaw pose to `abv_goal_manager`
+- `vel` - sends a desired x, y, yaw velocity to `abv_goal_manager` (world frame)
+- `stop` - sends a `STOP` command, so `abv_goal_manager` zeroes the thrusters and clears the current goal
+- `path` - sends a path command (type and duration) to `abv_guidance`. Only `file` is usable from here; `line` and `avoid` need a goal pose, which the CLI doesn't prompt for
+
+Pose and velocity commands only move the vehicle once a control policy is active — see [`abv_policy_registry`](../gnc/abv_policy_registry.md).
 
 ## Topics
 
 ### Published
 
 - `/abv/controller/command`  
-  Sends commands to `abv_controller` or `abv_guidance`.
+  `pose`, `vel`, and `stop` commands, to `abv_goal_manager`.
+
+- `/abv/guidance/command`  
+  `path` commands, to `abv_guidance`.

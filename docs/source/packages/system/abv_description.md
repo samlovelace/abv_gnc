@@ -16,7 +16,7 @@ The `abv_description` package provides a URDF/xacro model of the vehicle and a l
 
 - `x_joint` (prismatic, x) → `y_joint` (prismatic, y) → `yaw_joint` (revolute, yaw) → `vehicle_link`, which carries the visual mesh (`meshes/abv_chassis/abv_v2.dae`).
 
-`urdf/abv.urdf.xacro` is the top-level model that instantiates the chassis macro; `urdf/abv_chassis-standalone.urdf.xacro` provides a standalone (non-macro) version for previewing the chassis alone. `urdf/manipulators/` additionally holds xacro models for arm attachments (`widow_xl`, `mycobot_280_pi`) used on variants of the platform carrying a manipulator.
+`urdf/abv.urdf.xacro` is the top-level model that instantiates the chassis macro and attaches a `widow_xl` arm (joint prefix `wxr_`) to `vehicle_link`; `urdf/abv_chassis-standalone.urdf.xacro` provides a standalone (non-macro) version for previewing the chassis alone. `urdf/manipulators/` holds the `widow_xl` arm model (`widow_xl.urdf.xacro`, plus a standalone version for previewing it alone).
 
 ## Usage
 
