@@ -1,0 +1,28 @@
+<mujoco model="tasktable">
+
+    <worldbody>
+        <body name="task_table" pos="0.42 0 0.015">
+      <geom name="task_table_top" type="box" size="0.30 0.26 0.015" material="table_mat" contype="1" conaffinity="1" condim="6" friction="2.2 0.12 0.02" solref="0.002 1" solimp="0.98 0.995 0.0005"/>
+      <geom name="task_pick_zone" type="box" pos="0 -0.13 0.0132" size="0.285 0.12 0.002" material="pick_zone_mat" contype="0" conaffinity="0"/>
+      <geom name="task_place_zone" type="box" pos="0 0.13 0.0132" size="0.285 0.12 0.002" material="place_zone_mat" contype="0" conaffinity="0"/>
+    </body>
+
+    <body name="red_cube" pos="0.34 -0.13 0.055">
+      <freejoint/>
+      <geom type="box" size="0.025 0.025 0.025" material="object_red_mat" contype="1" conaffinity="1" condim="6" mass="0.04" friction="1.5 0.04 0.01" solref="0.002 1" solimp="0.98 0.995 0.0005"/>
+    </body>
+    <body name="blue_block" pos="0.50 0.11 0.048">
+      <freejoint/>
+      <geom type="box" size="0.045 0.022 0.018" material="object_blue_mat" contype="1" conaffinity="1" condim="6" mass="0.05" friction="1.5 0.04 0.01" solref="0.002 1" solimp="0.98 0.995 0.0005"/>
+    </body>
+    <body name="yellow_cylinder" pos="0.44 -0.02 0.065">
+      <freejoint/>
+      <geom type="cylinder" size="0.022 0.035" material="object_yellow_mat" contype="1" conaffinity="1" condim="6" mass="0.04" friction="1.5 0.04 0.01" solref="0.002 1" solimp="0.98 0.995 0.0005"/>
+    </body>
+    <body name="ik_target" mocap="true" pos="0.34 0 0.20">
+      <geom name="ik_target_sphere" type="sphere" size="0.025" material="target_mat" contype="0" conaffinity="0"/>
+      <site name="ik_target_site" pos="0 0 0" size="0.035" rgba="1 0.55 0.12 0"/>
+    </body>
+    </worldbody>
+
+</mujoco>

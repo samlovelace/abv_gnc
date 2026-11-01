@@ -67,6 +67,9 @@ void ConfigurationManager::loadConfiguration()
 
     YAML::Node collisionAvoidNode = config["CollisionAvoid"];
     parseCollisionAvoidConfig(collisionAvoidNode);
+
+    YAML::Node objDetectionNode = config["ObjDetection"];
+    parseObjDetectionConfig(objDetectionNode);
 }
 
 void ConfigurationManager::parseGuidanceConfig(const YAML::Node& aNode)
@@ -167,6 +170,18 @@ void ConfigurationManager::parseCollisionAvoidConfig(const YAML::Node& aNode)
 {
     mCollisionAvoidConfig.mGridResolution = aNode["GridResolution"].as<double>();
     mCollisionAvoidConfig.mReplanRate = aNode["ReplanRate"].as<double>();
+}
+
+void ConfigurationManager::parseObjDetectionConfig(const YAML::Node& aNode)
+{
+    mObjDetectionConfig.mType = aNode["Type"].as<std::string>();
+    mObjDetectionConfig.mModelPath = aNode["ModelPath"].as<std::string>();
+    mObjDetectionConfig.mClassNames = aNode["ClassNames"].as<std::vector<std::string>>();
+
+    mObjDetectionConfig.mInputSize = aNode["InputSize"].as<int>(640);
+    mObjDetectionConfig.mConfThresh = aNode["ConfThresh"].as<double>(0.25);
+    mObjDetectionConfig.mIouThresh = aNode["IouThresh"].as<double>(0.45);
+    mObjDetectionConfig.mUseCuda = aNode["UseCuda"].as<bool>(false);
 }
 
 

@@ -1,0 +1,43 @@
+# Config for the rebot-arm-on-tabletop scene. A different manipulator,
+# camera, or robot entirely = a different one of these files (different
+# world/mounts/joint names/module args) - sim.py and sim_modules.py don't
+# need to change.
+
+world: worlds/rebot-tabletop.xml
+node_name: mujoco_sim
+
+# Mount offsets applied in Python after the model loads (MjModel.body_pos/
+# body_quat) - not in the MJCF itself, since the arm's own file is
+# deliberately mount-agnostic (see rebot-arm.xml's comment on why <frame>
+# can't do this at the XML level).
+mounts:
+  - body: base_link
+    pos: [0, -0.30, 0.775]
+    quat: [0.707, 0, 0, 0.707]
+
+modules:
+  - type: ArmControl
+    enabled: true
+    args:
+      joint_names:
+        [
+          joint1,
+          joint2,
+          joint3,
+          joint4,
+          joint5,
+          joint6,
+          finger_left,
+          finger_right,
+        ]
+      state_topic: joint_states
+      cmd_topic: joint_commands
+
+  - type: CameraPublisher
+    enabled: true
+    args:
+      camera_name: overhead
+      width: 640
+      height: 480
+      topic: camera/camera/color/image_raw
+      frame_id: overhead_camera

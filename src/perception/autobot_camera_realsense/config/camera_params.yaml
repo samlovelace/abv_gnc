@@ -1,0 +1,14 @@
+# Optional full parameter override file for realsense2_camera, wired in via
+# this package's `config_file` launch argument. Only needed for parameters
+# not already exposed as their own launch argument in launch/camera.launch.py
+# (e.g. depth/rgb resolution+fps profiles, imu settings). Leave config_file
+# at its default (the sentinel string "''", not a real empty string - see
+# camera.launch.py) to skip this file entirely and use realsense2_camera's
+# own built-in defaults.
+#
+# See https://github.com/IntelRealSense/realsense-ros for the full parameter
+# list - names must match exactly.
+/**:
+  ros__parameters:
+    depth_module.profile: "640,480,30"
+    rgb_camera.profile: "640,480,30"
