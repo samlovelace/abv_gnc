@@ -5,6 +5,7 @@ project(abv_msgs)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
@@ -26,9 +27,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/AbvThrusterCommand.msg"
   "msg/AbvThrusterStatus.msg"
   "msg/AbvVec3.msg"
+  "msg/Detection2D.msg"
+  "msg/Detections2D.msg"
   "srv/AbvPolicySwitch.srv"
-  DEPENDENCIES std_msgs
+  DEPENDENCIES std_msgs sensor_msgs
 )
 
-ament_export_dependencies(rosidl_default_generators std_msgs)
+ament_export_dependencies(rosidl_default_generators std_msgs sensor_msgs)
 ament_package()

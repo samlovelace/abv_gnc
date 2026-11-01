@@ -141,6 +141,18 @@ struct ThrusterConfig
     double mMomentArm;
 };
 
+struct ObjDetectionConfig
+{
+    std::string mType;        // which IDetector implementation, e.g. "yolo11-seg"
+    std::string mModelPath;
+    std::vector<std::string> mClassNames;  // index == class channel in the model output
+
+    int mInputSize;
+    double mConfThresh;
+    double mIouThresh;
+    bool mUseCuda;
+};
+
 namespace ConfigUtils
 {
     static Eigen::Vector3d parseVector3d(const YAML::Node& node) 

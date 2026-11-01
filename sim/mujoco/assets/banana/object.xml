@@ -1,0 +1,38 @@
+<mujoco>
+<!-- =================================================
+    Copyright 2019 Vikash Kumar
+    Model   :: Objects (MuJoCoV2.0)
+    Author  :: Vikash Kumar (vikashplus@gmail.com), Sudeep Dasari (sdasari@andrew.cmu.edu )
+    Details :: https://github.com/vikashplus/object_sim
+    License :: Under Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+====================================================== -©vk©-->
+  <compiler meshdir="" />
+
+  <!-- "../assets/common.xml", not a bare "common.xml": common.xml is
+       shared (lives at assets/common.xml, not duplicated per-object), and
+       MuJoCo's nested-include path resolution for a file reached through a
+       "../"-containing include (this file is included from
+       worlds/rebot-tabletop.xml via "../assets/banana/object.xml") doesn't
+       resolve bare/simple relative paths the way you'd expect - confirmed
+       empirically with a minimal repro. This exact string is the one that
+       actually lands on the right file. -->
+  <include file="../assets/common.xml" />
+  <!-- same reasoning as common.xml above - these two live in this same
+       assets/banana/ directory, but still need the full root-relative
+       path for the same nested-include resolution reason. -->
+  <include file="../assets/banana/assets.xml" />
+  <worldbody>
+    <!-- Centered on table.xml's tabletop (x=y=0) and resting just above its
+         top surface (z=0.775, same datum as the arm's own mount in
+         config/rebot_tabletop.yaml), with a small clearance so it visibly
+         settles under gravity rather than starting embedded in the table.
+         freejoint added - this is a droppable/graspable prop (matches the
+         "grab" childclass's own joint defaults in assets/common.xml, and
+         the pattern tasktable.xml's other objects already use), not a
+         fixture, so it needs real DOF to actually land on the table. -->
+    <body name="object" pos="0 0 0.825" childclass="grab">
+      <freejoint/>
+      <include file="../assets/banana/body.xml"/>
+    </body>
+  </worldbody>
+</mujoco>

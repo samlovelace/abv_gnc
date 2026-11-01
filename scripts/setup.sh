@@ -18,13 +18,22 @@
 #   1. Installs ROS2 Humble Desktop
 #   2. Installs system dependencies via apt
 #   3. Builds and installs third-party libs from source (plog, libmotioncapture, JETGPIO)
-#   4. Builds the ABV ROS2 packages via colcon
+#   4. Installs librealsense2 (apt on x86_64, source+RSUSB on Jetson/aarch64)
+#      and clones realsense-ros into the workspace so colcon builds it
+#   5. Builds the ABV ROS2 packages via colcon
 #
 # Third-party libs are cloned to ~/libs by default (see LIBS_DIR)
 ##########################################################################
 
 # where to clone libs that need built from source
 LIBS_DIR=~/libs
+
+# verify these against https://github.com/IntelRealSense/librealsense/releases
+# and https://github.com/IntelRealSense/realsense-ros/releases before relying
+# on them long-term - pinned here for a reproducible install, not guaranteed
+# to stay the right choice as new releases come out
+REALSENSE_SDK_TAG=v2.59.1
+REALSENSE_ROS_TAG=4.59.1
 
 # List of required system packages
 DEPENDENCIES=(
@@ -101,6 +110,34 @@ install_from_source() {
     sudo make install
 }
 
+install_librealsense() {
+    ARCH="$(uname -m)"
+
+    if [ "$ARCH" = "aarch64" ]; then
+        # Jetson's L4T kernel isn't one of the Ubuntu HWE kernels
+        # librealsense2-dkms supports, so the prebuilt kernel module fails to
+        # build there. The documented workaround is the RSUSB backend, which
+        # talks to the camera over USB directly instead of a kernel module -
+        # this skips the dkms apt package entirely and builds librealsense2
+        # from source with that backend forced on.
+        echo "[realsense] aarch64 (Jetson) detected - building librealsense2 from source with RSUSB backend..."
+        install_from_source librealsense IntelRealSense/librealsense "$REALSENSE_SDK_TAG" "$LIBS_DIR" \
+            "-DFORCE_RSUSB_BACKEND=ON" \
+            "-DBUILD_EXAMPLES=OFF" \
+            "-DBUILD_GRAPHICAL_EXAMPLES=OFF"
+    else
+        echo "[realsense] Installing librealsense2 via apt..."
+        sudo mkdir -p /etc/apt/keyrings
+        curl -sSf https://librealsense.realsenseai.com/Debian/librealsenseai.asc \
+            | gpg --dearmor | sudo tee /etc/apt/keyrings/librealsenseai.gpg >/dev/null
+        sudo apt-get install -y apt-transport-https
+        echo "deb [signed-by=/etc/apt/keyrings/librealsenseai.gpg] https://librealsense.realsenseai.com/Debian/apt-repo $(lsb_release -cs) main" \
+            | sudo tee /etc/apt/sources.list.d/librealsense.list
+        sudo apt update
+        sudo apt-get install -y librealsense2-dkms librealsense2-utils librealsense2-dev
+    fi
+}
+
 install_ros() {
     echo "[ROS] Starting installation of ROS 2 Humble..."
 
@@ -175,6 +212,13 @@ install_from_source plog SergiusTheBest/plog 1.1.10 $LIBS_DIR
 install_from_source libmotioncapture samlovelace/libmotioncapture main "$LIBS_DIR" \
     "-DCMAKE_INSTALL_PREFIX=/usr/local"
 
+# librealsense2 SDK - apt on x86_64, source+RSUSB on Jetson/aarch64 (see
+# install_librealsense). Not gated behind check_and_install: the source-build
+# path doesn't register as a dpkg package, so that guard would never
+# recognize it as installed on Jetson - same reasoning as plog/
+# libmotioncapture above, which are unconditionally re-run every time too.
+install_librealsense
+
 # custom steps for JETGPIO
 clone_and_checkout JETGPIO Rubberazer/JETGPIO v1.2 "$LIBS_DIR"
 echo "orinagx" > hardware
@@ -185,7 +229,22 @@ make && sudo make install
 ROBOT_WS=~/robot_ws
 mkdir -p "$ROBOT_WS"/src
 clone_and_checkout ptera samlovelace/ptera main "$ROBOT_WS"/src
+
+# realsense-ros (the realsense2_camera node that autobot_camera_realsense's
+# launch/camera.launch.py wraps) - cloned as source rather than apt-installed
+# so it builds the same way on both x86_64 and Jetson/aarch64, since Intel
+# only publishes prebuilt ros-humble-realsense2-camera debs for x86_64
+clone_and_checkout realsense-ros IntelRealSense/realsense-ros "$REALSENSE_ROS_TAG" "$ROBOT_WS"/src
+
+# resolve ROS package.xml dependencies (realsense-ros needs cv_bridge,
+# diagnostic_updater, etc.) for everything now sitting in ROBOT_WS/src
 source /opt/ros/humble/setup.bash
+if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then
+    sudo rosdep init
+fi
+rosdep update
+rosdep install --from-paths "$ROBOT_WS"/src --ignore-src -r -y
+
 cd "$ROBOT_WS" && colcon build --packages-skip ptera_sim
 
 # build the main workspace
