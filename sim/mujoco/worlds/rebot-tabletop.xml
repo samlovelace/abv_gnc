@@ -1,0 +1,32 @@
+<mujoco model="tabletop_scene">
+
+    <compiler angle="radian"/>
+
+    <option gravity="0 0 -9.81"/>
+    <statistic center="0 0 0.75" extent="1.5"/>
+
+    <visual>
+        <global azimuth="135" elevation="-25"/>
+    </visual>
+
+    <worldbody>
+
+        <light pos="0 0 3"/>
+
+        <camera name="overhead"
+                pos="0 0 1.5"
+                fovy="60"/>
+
+        <geom name="ground"
+              type="plane"
+              size="5 5 0.1"
+              rgba="0.8 0.8 0.8 1"/>
+
+    </worldbody>
+
+    <!-- Reusable assets -->
+    <include file="../assets/table.xml"/>
+    <include file="../assets/banana/object.xml"/>
+    <include file ="../assets/rebot-arm/mjcf/rebot-arm.xml"/>
+
+</mujoco>
