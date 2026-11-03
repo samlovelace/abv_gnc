@@ -5,12 +5,12 @@ Core guidance, navigation, and control modules.
 ```{toctree}
 :maxdepth: 1
 
-abv_guidance
-abv_navigation
-abv_goal_manager
-abv_control
-abv_thrusters
-abv_policy_registry
-abv_rl
-abv_controller
+autobot_guidance
+autobot_navigation
+autobot_goal_manager
+autobot_control
+autobot_thrusters
+autobot_policy_registry
+autobot_rl
+autobot_controller
 ```

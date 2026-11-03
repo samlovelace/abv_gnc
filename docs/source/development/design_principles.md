@@ -12,13 +12,13 @@ The ABV stack is structured as independent ROS 2 packages with clearly defined r
 
 Examples include:
 
-- `abv_navigation` — State estimation
-- `abv_guidance` — Trajectory and waypoint generation
-- `abv_goal_manager` — Goal tracking and arrival detection
-- `abv_control` — Feedback control law (PID)
-- `abv_thrusters` — Thruster allocation and hardware drivers
-- `abv_policy_registry` — Selection of the active control policy
-- `abv_msgs` — Interface definitions
+- `autobot_navigation` — State estimation
+- `autobot_guidance` — Trajectory and waypoint generation
+- `autobot_goal_manager` — Goal tracking and arrival detection
+- `autobot_control` — Feedback control law (PID)
+- `autobot_thrusters` — Thruster allocation and hardware drivers
+- `autobot_policy_registry` — Selection of the active control policy
+- `autobot_msgs` — Interface definitions
 - Tooling packages (teleoperation, visualization, bringup)
 
 Each package owns a single primary responsibility.
@@ -34,7 +34,7 @@ Each package owns a single primary responsibility.
 
 ## Clear Interface Boundaries
 
-All communication between packages occurs through ROS 2 topics using message definitions from `abv_msgs`.
+All communication between packages occurs through ROS 2 topics using message definitions from `autobot_msgs`.
 
 Packages do not directly depend on internal classes from other packages.
 
@@ -129,7 +129,7 @@ Predictable timing behavior is essential for stable control performance.
 
 The architecture is designed so that:
 
-- Alternative controllers can replace existing ones — and run side by side: any node that consumes `abv/controller/context`, publishes on `abv/thrusters/command` with its own `policy_name`, and heartbeats on `abv/policy/status` becomes a selectable policy, switchable at runtime through `abv_policy_registry` (this is how `abv_rl-cpp` plugs in next to `abv_control`)
+- Alternative controllers can replace existing ones — and run side by side: any node that consumes `abv/controller/context`, publishes on `abv/thrusters/command` with its own `policy_name`, and heartbeats on `abv/policy/status` becomes a selectable policy, switchable at runtime through `autobot_policy_registry` (this is how `autobot_rl-cpp` plugs in next to `autobot_control`)
 - Different state estimators can be inserted
 - Additional sensors can be integrated
 - New tools can subscribe to existing topics

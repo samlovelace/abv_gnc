@@ -1,4 +1,4 @@
-# abv_thrusters
+# autobot_thrusters
 
 Thruster allocation, policy arbitration, and hardware drivers for the Air Bearing Vehicle (ABV) platform.
 
@@ -6,18 +6,18 @@ Thruster allocation, policy arbitration, and hardware drivers for the Air Bearin
 
 ## Purpose
 
-The `abv_thrusters` package is the only package that drives the thrusters. It converts a continuous control input into a discrete 8-thruster firing pattern and sends it to the hardware (or the simulator), and it decides which control-policy commands are allowed through.
+The `autobot_thrusters` package is the only package that drives the thrusters. It converts a continuous control input into a discrete 8-thruster firing pattern and sends it to the hardware (or the simulator), and it decides which control-policy commands are allowed through.
 
 ---
 
 ## Role in the GNC Pipeline
 
-`abv_thrusters` is the last stage of the pipeline.
+`autobot_thrusters` is the last stage of the pipeline.
 
 It:
 
-- Receives `AbvThrusterCommand`s from `abv_goal_manager`, `abv_control`, and `abv_rl-cpp`
-- **Drops** any command whose `policy_name` is set but doesn't match `abv/policy/active`. Commands with an empty `policy_name` (`abv_goal_manager`'s direct thruster/direction/stop writes) always pass. Until a policy is activated, every policy-sourced command is dropped
+- Receives `AbvThrusterCommand`s from `autobot_goal_manager`, `autobot_control`, and `autobot_rl-cpp`
+- **Drops** any command whose `policy_name` is set but doesn't match `abv/policy/active`. Commands with an empty `policy_name` (`autobot_goal_manager`'s direct thruster/direction/stop writes) always pass. Until a policy is activated, every policy-sourced command is dropped
 - Rotates world-frame (`is_global`) inputs into the body frame using the latest `abv/state` yaw
 - Discretizes and allocates the input to thrusters, and sends the pattern to the driver
 - Publishes the firing pattern and resulting applied force/torque on `abv/thrusters/status`
@@ -40,7 +40,7 @@ It:
 The driver is chosen at **compile time** from the target architecture:
 
 - **ARM (Jetson)** — `GpioThrusterDriver`, using JETGPIO on the pins in `Thrusters.ThrusterDriver.GPIO.pins`. Requires root, which is why `jetson.launch.py` runs this node under `sudo`.
-- **x86** — `UdpThrusterDriver`, sending the firing pattern over UDP to `127.0.0.1:6969` for [`abv_simulator`](../tools/abv_simulator.md).
+- **x86** — `UdpThrusterDriver`, sending the firing pattern over UDP to `127.0.0.1:6969` for [`autobot_simulator`](../tools/autobot_simulator.md).
 
 ---
 
@@ -57,11 +57,11 @@ The driver is chosen at **compile time** from the target architecture:
 
 ### Subscribed
 
-- `/abv/thrusters/command` — [`AbvThrusterCommand`](../interface/abv_msgs.md#abvthrustercommand)
-- `/abv/policy/active` — from `abv_policy_registry`
+- `/abv/thrusters/command` — [`AbvThrusterCommand`](../interface/autobot_msgs.md#abvthrustercommand)
+- `/abv/policy/active` — from `autobot_policy_registry`
 - `/abv/state` — yaw for frame conversion
 
 ### Published
 
-- `/abv/thrusters/status` — [`AbvThrusterStatus`](../interface/abv_msgs.md#abvthrusterstatus), consumed by `abv_navigation` (EKF control input) and `abv_gui`
+- `/abv/thrusters/status` — [`AbvThrusterStatus`](../interface/autobot_msgs.md#abvthrusterstatus), consumed by `autobot_navigation` (EKF control input) and `autobot_gui`
 - `/abv/heartbeat` — liveness, as `thrusters`

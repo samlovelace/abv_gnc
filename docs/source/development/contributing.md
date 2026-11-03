@@ -9,7 +9,7 @@ The ABV stack is designed as a modular robotics software platform.
 Core principles:
 
 - Clear separation of responsibilities (navigation, guidance, control, tools)
-- Strict interface boundaries defined in `abv_msgs`
+- Strict interface boundaries defined in `autobot_msgs`
 - No cross-layer coupling
 - Hardware-specific code isolated from algorithmic logic
 - Simulation-first validation (when possible) before hardware testing
@@ -73,7 +73,7 @@ New packages should not introduce circular dependencies.
 
 ## Adding or Modifying Messages
 
-All shared interfaces are defined in `abv_msgs`.
+All shared interfaces are defined in `autobot_msgs`.
 
 When adding or modifying a message:
 
@@ -89,7 +89,7 @@ All frame conventions must be consistent across the stack.
 
 ## Testing
 
-Little to no automated testing has been developed; the `test/` folder is currently commented out and predates the `abv_controller` split. If that is of interest to the reader, feel free to add unit and or functional tests to the repo.
+Little to no automated testing has been developed; the `test/` folder is currently commented out and predates the `autobot_controller` split. If that is of interest to the reader, feel free to add unit and or functional tests to the repo.
 
 ## Pull Request Guidelines
 

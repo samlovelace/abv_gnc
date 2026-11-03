@@ -1,6 +1,6 @@
 
 #include <gtest/gtest.h>
-#include "abv_controller/ThrusterCommander.h"
+#include "autobot_controller/ThrusterCommander.h"
 
 class ThrusterCommander_Test : public ::testing::Test, public ThrusterCommander
 {

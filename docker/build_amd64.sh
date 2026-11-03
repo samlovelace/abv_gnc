@@ -14,8 +14,8 @@ set -e
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-docker build  -t abv_gnc-amd64 -f docker/dockerfile .
+docker build  -t autobot-amd64 -f docker/dockerfile .
 docker run -it \
-    -v "$REPO_ROOT":/abv_gnc \
-    abv_gnc-amd64 \
-    bash /abv_gnc/scripts/setup.sh
+    -v "$REPO_ROOT":/autobot \
+    autobot-amd64 \
+    bash /autobot/scripts/setup.sh

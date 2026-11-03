@@ -1,6 +1,6 @@
 #pragma once
 #include <opencv2/core.hpp>
-#include "abv_common/Tensor.hpp"
+#include "autobot_common/Tensor.hpp"
 #include "autobot_obj_detection/Detection.hpp"
 
 // Letterbox-resizes bgr into an S x S canvas (padded with 114/255 gray),

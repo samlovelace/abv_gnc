@@ -1,0 +1,51 @@
+cmake_minimum_required(VERSION 3.8)
+project(autobot_navigation)
+
+# Compiler flags
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# Packages
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(autobot_msgs REQUIRED)
+find_package(autobot_common REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(yaml-cpp REQUIRED)
+find_package(plog REQUIRED)
+find_package(libmotioncapture REQUIRED)
+
+set(SOURCES
+	src/ExtendedKalmanFilter.cpp
+	src/OptitrackStateFetcher_LibMocap.cpp
+	src/RosStatePublisher.cpp
+	src/SimulatedStateFetcher.cpp
+	src/VehicleStateTracker.cpp
+	src/main.cpp
+)
+
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/include
+    ${COMMON_INCLUDE_DIR}
+    ${EIGEN3_INCLUDE_DIRS}
+)
+
+# Dependencies
+target_link_libraries(${PROJECT_NAME}
+	autobot_common::autobot_common
+	yaml-cpp
+	plog::plog
+	libmotioncapture::libmotioncapture
+)
+ament_target_dependencies(${PROJECT_NAME}
+	rclcpp
+	autobot_msgs
+	Eigen3
+)
+
+install(TARGETS ${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
+
+ament_package()

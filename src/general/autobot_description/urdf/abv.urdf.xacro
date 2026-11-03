@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="abv">
+
+    <xacro:include
+        filename="$(find autobot_description)/urdf/autobot_chassis.urdf.xacro"
+    />
+    <xacro:include
+        filename="$(find autobot_description)/urdf/manipulators/widow_xl.urdf.xacro"
+    />
+
+    <link name="world" />
+
+    <xacro:autobot_chassis parent="world">
+        <origin xyz="0 0 0" rpy="0 0 0" />
+    </xacro:autobot_chassis>
+
+    <xacro:widow_xl prefix="wxr_" parent="vehicle_link">
+        <origin xyz="0.155 -0.205 0.3" rpy="0 -1.57 1.57" />
+    </xacro:widow_xl>
+
+    <!-- <xacro:widow_xl prefix="wxl_" parent="vehicle_link">
+        <origin xyz="0.155 0.205 0.3" rpy="0 1.57 1.57" />
+    </xacro:widow_xl> -->
+
+</robot>

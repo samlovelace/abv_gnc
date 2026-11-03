@@ -1,6 +1,6 @@
 #!/bin/bash
 ##########################################################################
-# Setup script for running abv_gnc on Rocky Linux
+# Setup script for running autobot on Rocky Linux
 # Installs Docker CE and X11 forwarding dependencies
 #
 # Usage:
