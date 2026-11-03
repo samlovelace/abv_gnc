@@ -1,6 +1,6 @@
 #!/bin/bash
 ##########################################################################
-# runs a container from the abv_gnc-amd64 image, mounting the workspace 
+# runs a container from the autobot-amd64 image, mounting the workspace 
 # Primarily a development tool, not meant to be used for running the 
 # software in a production sense. 
 #
@@ -24,6 +24,6 @@ docker run -it \
   -e QT_X11_NO_MITSHM=1 \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
   -v /dev:/dev \
-  -v "$REPO_ROOT":/abv_gnc \
-  abv_gnc-amd64:latest \
+  -v "$REPO_ROOT":/autobot \
+  autobot-amd64:latest \
   bash

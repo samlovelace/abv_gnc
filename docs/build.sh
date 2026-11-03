@@ -1,6 +1,6 @@
 #!/bin/bash
 ##########################################################################
-# Builds the abv_gnc Sphinx documentation locally.
+# Builds the autobot Sphinx documentation locally.
 #
 # Usage:
 #   ./build.sh          # build docs into build/html

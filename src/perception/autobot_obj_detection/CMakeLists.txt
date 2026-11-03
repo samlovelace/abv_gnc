@@ -12,8 +12,8 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(abv_common REQUIRED)
-find_package(abv_msgs REQUIRED)
+find_package(autobot_common REQUIRED)
+find_package(autobot_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED COMPONENTS core imgproc)
 
@@ -30,7 +30,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 target_link_libraries(${PROJECT_NAME}
-  abv_common::abv_common
+  autobot_common::autobot_common
   ${OpenCV_LIBS}
   cv_bridge::cv_bridge
 )
@@ -38,7 +38,7 @@ target_link_libraries(${PROJECT_NAME}
 ament_target_dependencies(${PROJECT_NAME}
   rclcpp
   sensor_msgs
-  abv_msgs
+  autobot_msgs
 )
 
 install(TARGETS ${PROJECT_NAME}

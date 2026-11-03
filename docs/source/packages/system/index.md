@@ -5,7 +5,7 @@ Supporting infrastructure packages: launch/configuration, shared C++ library cod
 ```{toctree}
 :maxdepth: 1
 
-abv_bringup
-abv_common
-abv_description
+autobot_bringup
+autobot_common
+autobot_description
 ```

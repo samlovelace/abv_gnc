@@ -1,0 +1,199 @@
+##################################################
+# Configuration file for the guidance, navigation
+# and control modules running on the abv.
+#################################################
+
+Guidance:
+  StateMachine:
+    Rate: 10 # Hz
+    WaypointTimeout: 30 # seconds - default max time to wait for arrival at a single waypoint
+    WaypointTimeoutToleranceScale: 2.0 # multiplier on arrival tolerance checked when a waypoint timeout fires
+
+Navigation:
+  Interface: optitrack
+  Rate: 25 # Hz
+  RigidBodyName: ABV1
+  MaxDeadReckonDuration: 0.5 # seconds - EKF free-run bound before output is frozen and marked invalid
+  SimulateDropout: false # autobot_simulator only - enables synthetic burst nav dropouts for testing
+
+  Network:
+    Local:
+      Ip: 192.168.1.15
+
+    Server:
+      Ip: 127.0.0.1
+
+Control:
+  StateMachine:
+    Rate: 10 # hz
+
+  Arrival:
+    Tolerance: [0.05, 0.05, 0.05] # [m, m, rad]
+    Duration: 3 # seconds
+
+  NavDataTimeout: 1.0 # seconds - max time since last abv/state message before nav is considered stale
+
+  Dynamics:
+    Mass: 12.7 # kg
+    Inertia: 0.3 # kg-m^2
+    ThrusterForce: 0.1 # N
+    MomentArm: 0.1235 # m
+    PropagationMode: internal # "internal" (self-integrate) | "external" (Gazebo-sourced, via abv/sim/gazebo_state)
+    ExternalStateTopic: abv/sim/gazebo_state # autobot_msgs/State, published by autobot_bridge's GazeboStateConvertor
+    WrenchCommandTopic: mujoco/wrench_cmd # geometry_msgs/WrenchStamped, consumed by ptera_sim's WrenchApplicator
+    WrenchTargetLink: base_link # stamped as the wrench's frame_id
+
+# Consumed by autobot_control (and, in future, any other IControlLaw-hosting node).
+ControlLaw:
+  Law: PID # which IControlLaw autobot_control instantiates: PID today, room for LQR | MPC later
+
+  Pid:
+    Kp: [25.0, 25.0, 5.0]
+    Ki: [0, 0, 0]
+    Kd: [155.0, 155.0, 15.0]
+
+# Consumed by autobot_thrusters.
+Thrusters:
+  InputDiscretization:
+    On: [0.2, 0.2, 0.2]
+    Off: [0.09, 0.09, 0.09]
+
+  AllocationStrategy: LookupTable # LookupTable | Matrix
+
+  Allocation:
+    x: [0, 0, -1, -1, 0, 0, 1, 1]
+    y: [1, 1, 0, 0, -1, -1, 0, 0]
+    yaw: [-1, 1, -1, 1, -1, 1, -1, 1]
+
+    # firing cutoff on the pseudo-inverse solution; Matrix strategy only.
+    # Must stay below 0.125 (yaw-only commands solve to +-0.125 per thruster
+    # since all 8 thrusters carry a yaw term, vs +-0.25 for pure x/y) or
+    # pure-yaw commands silently produce zero thrust. Verified in sim;
+    # still needs a real hardware bench tuning pass before trusting it.
+    Threshold: 0.1
+
+  ThrusterDriver:
+    Type: JETGPIO
+    GPIO:
+      pins: [12, 7, 8, 24, 19, 22, 15, 13]
+
+  # mirrors Control.Dynamics.ThrusterForce/MomentArm above - duplicated here
+  # so autobot_thrusters doesn't need to read the Control section.
+  Force: 0.1 # N
+  MomentArm: 0.1235 # m
+
+Heartbeat:
+  Rate: 2 # Hz - per-node heartbeat publish rate
+  StaleAfter: 2.0 # seconds - GUI marks a node disconnected if no heartbeat arrives within this window
+  PingIntervalMs: 1000 # GUI-side: how often to ping the robot host for the Comms indicator
+
+TableView:
+  Width: 3.6 # meters - table X extent, GUI-side top-down view
+  Height: 1.8 # meters - table Y extent
+  RobotWidth: 0.35 # meters - footprint used to draw the robot glyph, tune to the real chassis
+  RobotLength: 0.35
+
+Scene:
+  XMin: 0.0 # meters - region the ABV must remain within (world frame, same convention as Vec3/State)
+  XMax: 3.6 # matches TableView.Width
+  YMin: 0.0
+  YMax: 1.8 # matches TableView.Height
+
+CollisionAvoid:
+  GridResolution: 0.1 # meters/cell - CollisionAvoidPathGenerator's A* search grid
+  ReplanRate: 5 # Hz - background A* re-solve rate
+
+# Consumed by autobot_obj_detection.
+ObjDetection:
+  Type: yolo11-seg # which IDetector implementation to instantiate
+  ModelPath: /home/sam/models/yolo11n-seg.onnx
+  InputSize: 640
+  ConfThresh: 0.25
+  IouThresh: 0.45
+  UseCuda: false
+
+  # must match the model's training/export classes in number and order -
+  # this is COCO-80, correct for the stock yolo11n-seg.pt export
+  ClassNames:
+    [
+      person,
+      bicycle,
+      car,
+      motorcycle,
+      airplane,
+      bus,
+      train,
+      truck,
+      boat,
+      traffic light,
+      fire hydrant,
+      stop sign,
+      parking meter,
+      bench,
+      bird,
+      cat,
+      dog,
+      horse,
+      sheep,
+      cow,
+      elephant,
+      bear,
+      zebra,
+      giraffe,
+      backpack,
+      umbrella,
+      handbag,
+      tie,
+      suitcase,
+      frisbee,
+      skis,
+      snowboard,
+      sports ball,
+      kite,
+      baseball bat,
+      baseball glove,
+      skateboard,
+      surfboard,
+      tennis racket,
+      bottle,
+      wine glass,
+      cup,
+      fork,
+      knife,
+      spoon,
+      bowl,
+      banana,
+      apple,
+      sandwich,
+      orange,
+      broccoli,
+      carrot,
+      hot dog,
+      pizza,
+      donut,
+      cake,
+      chair,
+      couch,
+      potted plant,
+      bed,
+      dining table,
+      toilet,
+      tv,
+      laptop,
+      mouse,
+      remote,
+      keyboard,
+      cell phone,
+      microwave,
+      oven,
+      toaster,
+      sink,
+      refrigerator,
+      book,
+      clock,
+      vase,
+      scissors,
+      teddy bear,
+      hair drier,
+      toothbrush,
+    ]

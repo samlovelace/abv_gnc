@@ -1,5 +1,5 @@
 #pragma once
-#include "abv_common/OrtModel.hpp"
+#include "autobot_common/OrtModel.hpp"
 #include "autobot_obj_detection/IDetector.hpp"
 
 class OrtDetector : public IDetector {
