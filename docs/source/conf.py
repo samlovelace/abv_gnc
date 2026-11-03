@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'abv_gnc'
+project = 'autobot'
 copyright = '2026, The Autonomy Lab'
 author = 'Sam Lovelace'
 
@@ -19,7 +19,7 @@ extensions = [
 
 # Auto-generates an #anchor for every heading (up to h3) so pages can
 # cross-reference a specific section of another page, e.g.
-# [AbvState](../interface/abv_msgs.md#abvstate).
+# [AbvState](../interface/autobot_msgs.md#abvstate).
 myst_heading_anchors = 3
 
 source_suffix = {

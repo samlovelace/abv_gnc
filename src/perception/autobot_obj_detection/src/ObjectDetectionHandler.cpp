@@ -2,11 +2,11 @@
 #include <opencv2/imgproc.hpp>
 #include <plog/Log.h>
 
-#include "abv_common/ConfigurationManager.h"
-#include "abv_common/RosTopicManager.h"
+#include "autobot_common/ConfigurationManager.h"
+#include "autobot_common/RosTopicManager.h"
 #include "autobot_obj_detection/DetectorFactory.hpp"
 #include "autobot_obj_detection/ObjectDetectionHandler.h"
-#include "abv_msgs/msg/detections2_d.hpp"
+#include "autobot_msgs/msg/detections2_d.hpp"
 
 namespace {
 
@@ -48,7 +48,7 @@ ObjectDetectionHandler::ObjectDetectionHandler()
     RosTopicManager::getInstance()->createSubscriber<sensor_msgs::msg::Image>("/camera/image_raw",
         std::bind(&ObjectDetectionHandler::frameCallback, this, std::placeholders::_1));
 
-    RosTopicManager::getInstance()->createPublisher<abv_msgs::msg::Detections2D>("/detections");
+    RosTopicManager::getInstance()->createPublisher<autobot_msgs::msg::Detections2D>("/detections");
 
     mRunning = true;
     mWorkerThread = std::thread(&ObjectDetectionHandler::run, this);
@@ -74,13 +74,13 @@ void ObjectDetectionHandler::run()
         std_msgs::msg::Header header;
         header.stamp = RosTopicManager::getInstance()->now();
 
-        abv_msgs::msg::Detections2D msg;
+        autobot_msgs::msg::Detections2D msg;
         msg.header = header;
         msg.detections.reserve(dets.size());
 
         for (const auto& d : dets)
         {
-            abv_msgs::msg::Detection2D out;
+            autobot_msgs::msg::Detection2D out;
             out.label = d.label;
             out.score = d.score;
             out.box = boxToRoiMsg(d.box);

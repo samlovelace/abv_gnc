@@ -1,6 +1,6 @@
 <div align="center">
 
-<h1> abv_gnc</h1>
+<h1> autobot</h1>
 
 <p>Guidance, Navigation and Control for the Air-Bearing Vehicles owned and operated by The Autonomy Lab</p>
 
@@ -31,71 +31,71 @@ The software suite is comprised of multiple ROS 2 packages, each implementing a 
   </thead>
   <tbody>
     <tr>
-        <td><code>abv_bridge</code></td>
-        <td>bridge node between abv_msgs and external</td>
+        <td><code>autobot_bridge</code></td>
+        <td>bridge node between autobot_msgs and external</td>
     </tr>
     <tr>
-        <td><code>abv_bringup</code></td>
+        <td><code>autobot_bringup</code></td>
         <td>configuration and launch files </td>
     </tr>
     <tr>
-        <td><code>abv_commander</code></td>
+        <td><code>autobot_commander</code></td>
         <td>command-line tool for sending commands</td>
     </tr>
     <tr>
-        <td><code>abv_common</code></td>
+        <td><code>autobot_common</code></td>
         <td>dummy pkg for common code</td>
     </tr>
     <tr>
-        <td><code>abv_control</code></td>
+        <td><code>autobot_control</code></td>
         <td>classical control laws (PID), the <code>control</code> policy</td>
     </tr>
     <tr>
-        <td><code>abv_description</code></td>
+        <td><code>autobot_description</code></td>
         <td> urdf description with rviz launch files </td>
     </tr>
     <tr>
-        <td><code>abv_goal_manager</code></td>
+        <td><code>autobot_goal_manager</code></td>
         <td>command intake, goal state machine, arrival detection</td>
     </tr>
     <tr>
-      <td><code>abv_gui</code></td>
+      <td><code>autobot_gui</code></td>
       <td>GUI for live telemetry and sending commands </td>
     </tr>
     <tr>
-      <td><code>abv_guidance</code></td>
+      <td><code>autobot_guidance</code></td>
       <td>waypoint sequencing and path following</td>
     </tr>
     <tr>
-      <td><code>abv_msgs</code></td>
+      <td><code>autobot_msgs</code></td>
       <td>custom ROS2 message definitions</td>
     </tr>
     <tr>
-      <td><code>abv_navigation</code></td>
+      <td><code>autobot_navigation</code></td>
       <td>state estimation via EKF, Optitrack integration</td>
     </tr>
     <tr>
-        <td><code>abv_policy_registry</code></td>
+        <td><code>autobot_policy_registry</code></td>
         <td>runtime discovery and switching of control policies</td>
     </tr>
     <tr>
-        <td><code>abv_rl</code></td>
+        <td><code>autobot_rl</code></td>
         <td>RL training code and ONNX export (Python)</td>
     </tr>
     <tr>
-        <td><code>abv_rl-cpp</code></td>
+        <td><code>autobot_rl-cpp</code></td>
         <td>experimental RL control policy (ONNX Runtime), the <code>rl</code> policy</td>
     </tr>
     <tr>
-        <td><code>abv_simulator</code></td>
+        <td><code>autobot_simulator</code></td>
         <td>numerical simulator for ABV dynamics</td>
     </tr>
     <tr>
-        <td><code>abv_teleop</code></td>
+        <td><code>autobot_teleop</code></td>
         <td>keyboard or game controller teleop of the ABV </td>
     </tr>
     <tr>
-        <td><code>abv_thrusters</code></td>
+        <td><code>autobot_thrusters</code></td>
         <td>thruster allocation, policy arbitration, GPIO/UDP drivers</td>
     </tr>
   </tbody>
@@ -106,19 +106,21 @@ After cloning the repo, run the setup script to install any missing dependencies
 <pre><code>./scripts/setup.sh
 </code></pre>
 
-Note: <code>abv_rl-cpp</code> requires ONNX Runtime, which the setup script does not install. Install it first, or build with <code>colcon build --packages-skip abv_rl-cpp</code>. See the <a href="https://abv-gnc.readthedocs.io/en/latest/getting_started/installation.html">installation docs</a>.
+Note: <code>autobot_rl-cpp</code> requires ONNX Runtime, which the setup script does not install. Install it first, or build with <code>colcon build --packages-skip autobot_rl-cpp</code>. See the <a href="https://abv-gnc.readthedocs.io/en/latest/getting_started/installation.html">installation docs</a>.
 
 After the script finishes, launch the core GNC nodes.
 
 <h4> Jetson Orin </h4>
-<pre><code>ros2 launch abv_bringup jetson.launch.py
+<pre><code>ros2 launch autobot_bringup jetson.launch.py
 </code></pre>
 
 <h4>General</h4>
-<pre><code>ros2 launch abv_bringup gnc.launch.py            # add sim:=true for the simulator, GUI and commander
+<pre><code>ros2 launch autobot_bringup gnc.launch.py            # add sim:=true for the simulator, GUI and commander
 </code></pre>
 
 No control policy is active at startup. Select one (<code>control</code> or <code>rl</code>) from the GUI's Control Policy panel, or with:
-<pre><code>ros2 service call /abv/policy/switch abv_msgs/srv/AbvPolicySwitch "{policy_name: control}"
+
+<pre><code>ros2 service call /abv/policy/switch autobot_msgs/srv/AbvPolicySwitch "{policy_name: control}"
 </code></pre>
+
 Until then, pose, velocity and path commands won't move the vehicle.

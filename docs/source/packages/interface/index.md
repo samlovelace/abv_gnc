@@ -5,6 +5,6 @@ Message and interface definitions.
 ```{toctree}
 :maxdepth: 1
 
-abv_msgs
-abv_bridge
+autobot_msgs
+autobot_bridge
 ```

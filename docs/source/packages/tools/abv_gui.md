@@ -1,4 +1,4 @@
-# abv_gui
+# autobot_gui
 
 Desktop ground-station GUI for live telemetry and commanding the ABV.
 
@@ -6,25 +6,25 @@ Desktop ground-station GUI for live telemetry and commanding the ABV.
 
 ## Purpose
 
-The `abv_gui` package is a native Qt6 desktop application ("ABV Ground Station") that gives an operator a single window for watching the vehicle's live state and sending it commands, without needing a terminal. It is the primary tool referenced in the [Quick Start](../../operation/index.md) guide.
+The `autobot_gui` package is a native Qt6 desktop application ("ABV Ground Station") that gives an operator a single window for watching the vehicle's live state and sending it commands, without needing a terminal. It is the primary tool referenced in the [Quick Start](../../operation/index.md) guide.
 
-Like `abv_commander` and `abv_teleop`, it is a command *source* with no special standing in the GNC pipeline: pose goals go to `abv_guidance` on `abv/guidance/command`, and velocity, thruster, direction, and stop commands go to `abv_goal_manager` on `abv/controller/command`. It is also where an operator places obstacles for collision avoidance and selects the active control policy.
+Like `autobot_commander` and `autobot_teleop`, it is a command _source_ with no special standing in the GNC pipeline: pose goals go to `autobot_guidance` on `abv/guidance/command`, and velocity, thruster, direction, and stop commands go to `autobot_goal_manager` on `abv/controller/command`. It is also where an operator places obstacles for collision avoidance and selects the active control policy.
 
 ## Usage
 
-Run it directly, or via `abv_bringup`'s `gnc.launch.py` (started automatically when launched with `sim:=true`):
+Run it directly, or via `autobot_bringup`'s `gnc.launch.py` (started automatically when launched with `sim:=true`):
 
 ```bash
-ros2 run abv_gui abv_gui
+ros2 run autobot_gui autobot_gui
 ```
 
 At startup no control policy is active:
 
-![abv_gui at startup with the "No Active Policy" banner](/_static/abv_gui_no_policy.png)
+![autobot_gui at startup with the "No Active Policy" banner](/_static/autobot_gui_no_policy.png)
 
 After switching to the `control` policy and sending a goal from the table view:
 
-![abv_gui with "Active Policy: CONTROL", a goal and planned path on the table view, and the vehicle in POSE_CONTROL](/_static/abv_gui_policy_with_goal.png)
+![autobot_gui with "Active Policy: CONTROL", a goal and planned path on the table view, and the vehicle in POSE_CONTROL](/_static/autobot_gui_policy_with_goal.png)
 
 ## Architecture
 
@@ -36,9 +36,9 @@ Core components:
   - **Right-click-drag-release** proposes a circular obstacle (drag distance sets the radius); confirming **Add Obstacle** adds it to the obstacle set and republishes the full set on `abv/scene/obstacles`.
   - **Right-click** (no drag) offers **Clear Obstacles**, which publishes an empty set.
 - `CommandPanel` — tabbed command panel with live spin boxes:
-  - **Pose** — sends the pose to `abv_guidance` as a `line` command, or `avoid` if any obstacles are placed (the same path as a table-view goal). Mirrors the vehicle's current pose into its fields (skipping any field the user is actively editing) so commands start from the current pose rather than zero.
-  - **Velocity** — sends a `vel` command to `abv_goal_manager`; the **Body Frame** checkbox sends it in the body frame instead of the world frame.
-  - **Path** — sends a `File` path with a duration to `abv_guidance` (runs `path.csv`).
+  - **Pose** — sends the pose to `autobot_guidance` as a `line` command, or `avoid` if any obstacles are placed (the same path as a table-view goal). Mirrors the vehicle's current pose into its fields (skipping any field the user is actively editing) so commands start from the current pose rather than zero.
+  - **Velocity** — sends a `vel` command to `autobot_goal_manager`; the **Body Frame** checkbox sends it in the body frame instead of the world frame.
+  - **Path** — sends a `File` path with a duration to `autobot_guidance` (runs `path.csv`).
   - **Thrusters** — per-thruster (`T1`–`T8`) and per-axis buttons that send `thruster` / `direction` commands at 10 Hz while held, and a zero command on release. These bypass the control policies, so they work without one selected.
 - **Stop** button — sends `STOP` on `abv/controller/command`.
 - `PolicySelectorPanel` ("Control Policy") — lists the policies on `abv/policy/registry`; **Switch** calls the `abv/policy/switch` service and shows the result.

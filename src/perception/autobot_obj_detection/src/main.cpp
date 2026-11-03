@@ -1,10 +1,10 @@
 
 #include <cstdio>
-#include "abv_common/RosTopicManager.h"
-#include "abv_common/DataLogger.h"
-#include "abv_common/SignalHandler.hpp"
-#include "abv_common/ConfigurationManager.h"
-#include "abv_common/HeartbeatPublisher.h"
+#include "autobot_common/RosTopicManager.h"
+#include "autobot_common/DataLogger.h"
+#include "autobot_common/SignalHandler.hpp"
+#include "autobot_common/ConfigurationManager.h"
+#include "autobot_common/HeartbeatPublisher.h"
 #include "autobot_obj_detection/ObjectDetectionHandler.h"
 
 int main()

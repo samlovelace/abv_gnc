@@ -22,8 +22,8 @@ if ! docker run --rm --platform linux/arm64 alpine uname -m 2>/dev/null | grep -
     docker run --privileged --rm tonistiigi/binfmt --install arm64
 fi
 
-docker build --platform linux/arm64 -t abv_gnc-arm64 -f docker/dockerfile .
+docker build --platform linux/arm64 -t autobot-arm64 -f docker/dockerfile .
 docker run --platform linux/arm64 -it \
-    -v "$REPO_ROOT":/abv_gnc \
-    abv_gnc-arm64 \
-    bash /abv_gnc/scripts/setup.sh
+    -v "$REPO_ROOT":/autobot \
+    autobot-arm64 \
+    bash /autobot/scripts/setup.sh

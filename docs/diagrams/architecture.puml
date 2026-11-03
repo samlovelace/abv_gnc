@@ -18,7 +18,7 @@ skinparam arrow {
 }
 
 package "Human operator (laptop)" as human_pkg {
-  component "abv_gui\nabv_commander\nabv_teleop" as human
+  component "autobot_gui\nautobot_commander\nautobot_teleop" as human
 }
 
 package "External autonomy module" as auto_pkg {
@@ -26,17 +26,17 @@ package "External autonomy module" as auto_pkg {
 }
 
 package "On board the ABV" as onboard {
-  component "abv_bridge" as bridge
-  component "abv_guidance\n(line / file / avoid)" as gdnc
-  component "abv_navigation\n(EKF)" as nav
-  component "abv_goal_manager" as gm
-  component "abv_control\n(PID)" as ctrl
-  component "abv_rl-cpp\n(RL, ONNX)" as rl
-  component "abv_policy_registry" as reg
-  component "abv_thrusters" as thr
+  component "autobot_bridge" as bridge
+  component "autobot_guidance\n(line / file / avoid)" as gdnc
+  component "autobot_navigation\n(EKF)" as nav
+  component "autobot_goal_manager" as gm
+  component "autobot_control\n(PID)" as ctrl
+  component "autobot_rl-cpp\n(RL, ONNX)" as rl
+  component "autobot_policy_registry" as reg
+  component "autobot_thrusters" as thr
 }
 
-component "Thruster hardware\n(or abv_simulator)" as hw
+component "Thruster hardware\n(or autobot_simulator)" as hw
 
 human -down-> gdnc : abv/guidance/command\nabv/scene/obstacles
 human -down-> gm : abv/controller/command

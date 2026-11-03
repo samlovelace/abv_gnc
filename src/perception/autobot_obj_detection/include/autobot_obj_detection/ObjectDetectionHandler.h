@@ -7,7 +7,7 @@
 #include <sensor_msgs/msg/image.hpp>
 #include <thread>
 
-#include "abv_common/BoundedQueue.hpp"
+#include "autobot_common/BoundedQueue.hpp"
 #include "autobot_obj_detection/IDetector.hpp"
 
 /**

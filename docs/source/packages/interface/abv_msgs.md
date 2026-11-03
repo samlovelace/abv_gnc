@@ -1,4 +1,4 @@
-# abv_msgs
+# autobot_msgs
 
 Custom ROS 2 message and service definitions for the Air Bearing Vehicle (ABV) platform.
 
@@ -6,7 +6,7 @@ Custom ROS 2 message and service definitions for the Air Bearing Vehicle (ABV) p
 
 ## Purpose
 
-The `abv_msgs` package defines all custom ROS 2 message and service types used across the ABV software stack.
+The `autobot_msgs` package defines all custom ROS 2 message and service types used across the ABV software stack.
 
 It serves as the interface layer between:
 
@@ -23,21 +23,21 @@ All inter-package communication within the ABV stack relies on these message def
 
 ## Role in the System
 
-`abv_msgs` sits at the foundation of the architecture.
+`autobot_msgs` sits at the foundation of the architecture.
 
-abv_msgs  
- ├── abv_navigation  
- ├── abv_guidance  
- ├── abv_goal_manager  
- ├── abv_control  
- ├── abv_thrusters  
- ├── abv_policy_registry  
- ├── abv_rl-cpp  
- ├── abv_bridge  
- ├── abv_simulator  
- ├── abv_teleop  
- ├── abv_commander  
- └── abv_gui
+autobot_msgs  
+ ├── autobot_navigation  
+ ├── autobot_guidance  
+ ├── autobot_goal_manager  
+ ├── autobot_control  
+ ├── autobot_thrusters  
+ ├── autobot_policy_registry  
+ ├── autobot_rl-cpp  
+ ├── autobot_bridge  
+ ├── autobot_simulator  
+ ├── autobot_teleop  
+ ├── autobot_commander  
+ └── autobot_gui
 
 This package contains no nodes and no runtime logic.  
 It defines shared data structures only.
@@ -77,7 +77,7 @@ Used to represent the 3 degrees of freedom of the ABV (planar x, y position or v
 
 A small, reusable status block embedded in other status messages (`AbvControllerStatus`, `AbvGuidanceStatus`) so any component can report which state machine state it is currently in without each message duplicating the same two fields.
 
-- Published by: `abv_goal_manager`, `abv_guidance` (as part of their respective status messages)
+- Published by: `autobot_goal_manager`, `autobot_guidance` (as part of their respective status messages)
 
 ---
 
@@ -91,12 +91,12 @@ A small, reusable status block embedded in other status messages (`AbvController
 
 A lightweight liveness signal, used on two topics:
 
-- **`abv/heartbeat`** — every long-running node constructs a `HeartbeatPublisher` (from `abv_common`) at startup, which publishes this message at `Heartbeat.Rate`. `abv_gui`'s `NodeHealthPanel` marks a node "Disconnected" if no heartbeat arrives within `Heartbeat.StaleAfter` seconds.
-  - Published by: `abv_goal_manager` (`goal_manager`), `abv_control` (`control`), `abv_thrusters` (`thrusters`), `abv_policy_registry` (`policy_registry`), `abv_navigation` (`navigation`), `abv_guidance` (`guidance`), `abv_bridge` (`bridge`)
-  - Subscribed by: `abv_gui`
-- **`abv/policy/status`** — control-policy nodes register themselves with `abv_policy_registry`; every `node_name` seen here is treated as a selectable policy.
-  - Published by: `abv_control` (`control`), `abv_rl-cpp` (`rl`)
-  - Subscribed by: `abv_policy_registry`
+- **`abv/heartbeat`** — every long-running node constructs a `HeartbeatPublisher` (from `autobot_common`) at startup, which publishes this message at `Heartbeat.Rate`. `autobot_gui`'s `NodeHealthPanel` marks a node "Disconnected" if no heartbeat arrives within `Heartbeat.StaleAfter` seconds.
+  - Published by: `autobot_goal_manager` (`goal_manager`), `autobot_control` (`control`), `autobot_thrusters` (`thrusters`), `autobot_policy_registry` (`policy_registry`), `autobot_navigation` (`navigation`), `autobot_guidance` (`guidance`), `autobot_bridge` (`bridge`)
+  - Subscribed by: `autobot_gui`
+- **`abv/policy/status`** — control-policy nodes register themselves with `autobot_policy_registry`; every `node_name` seen here is treated as a selectable policy.
+  - Published by: `autobot_control` (`control`), `autobot_rl-cpp` (`rl`)
+  - Subscribed by: `autobot_policy_registry`
 
 ---
 
@@ -112,19 +112,19 @@ A lightweight liveness signal, used on two topics:
 
 ### Description
 
-This message commands `abv_goal_manager`. Supported `type` values:
+This message commands `autobot_goal_manager`. Supported `type` values:
 
 - `"pose"` — drive to the pose in `data` (world frame).
 - `"vel"` / `"velocity"` — track the velocity in `data`.
-- `"direction"` — apply `data` directly as a control input (used by `abv_teleop` and the GUI's axis buttons). Must be refreshed at least every 250 ms or the goal manager stops.
+- `"direction"` — apply `data` directly as a control input (used by `autobot_teleop` and the GUI's axis buttons). Must be refreshed at least every 250 ms or the goal manager stops.
 - `"thruster"` — fire the `thrusters` pattern directly, bypassing feedback control.
 - `"STOP"` (also `"stop"`) — zero the thrusters and clear the goal.
-- `"clear"` — clear the goal without commanding the thrusters (sent by `abv_policy_registry` after a policy switch).
+- `"clear"` — clear the goal without commanding the thrusters (sent by `autobot_policy_registry` after a policy switch).
 
 `pose` and `vel` only move the vehicle while a control policy is active; `direction`, `thruster`, and `STOP` always reach the thrusters.
 
-- Published by: `abv_commander`, `abv_teleop`, `abv_gui`, `abv_guidance`, `abv_policy_registry`
-- Subscribed by: `abv_goal_manager`
+- Published by: `autobot_commander`, `autobot_teleop`, `autobot_gui`, `autobot_guidance`, `autobot_policy_registry`
+- Subscribed by: `autobot_goal_manager`
 
 ---
 
@@ -138,10 +138,10 @@ This message commands `abv_goal_manager`. Supported `type` values:
 
 ### Description
 
-This message informs other components of the goal-tracking state inside `abv_goal_manager`. `abv_guidance` uses the arrival state to determine when to send the next waypoint. (The applied force/torque formerly carried here now lives in `AbvThrusterStatus`.)
+This message informs other components of the goal-tracking state inside `autobot_goal_manager`. `autobot_guidance` uses the arrival state to determine when to send the next waypoint. (The applied force/torque formerly carried here now lives in `AbvThrusterStatus`.)
 
-- Published by: `abv_goal_manager`
-- Subscribed by: `abv_guidance`, `abv_gui`, `abv_bridge`
+- Published by: `autobot_goal_manager`
+- Subscribed by: `autobot_guidance`, `autobot_gui`, `autobot_bridge`
 
 ---
 
@@ -157,10 +157,10 @@ This message informs other components of the goal-tracking state inside `abv_goa
 
 ### Description
 
-Published by `abv_goal_manager` once per state-machine tick while in `POSE_CONTROL` / `VELOCITY_CONTROL`, so any control-policy node can compute a control input without the goal manager knowing which or how many policies are listening.
+Published by `autobot_goal_manager` once per state-machine tick while in `POSE_CONTROL` / `VELOCITY_CONTROL`, so any control-policy node can compute a control input without the goal manager knowing which or how many policies are listening.
 
-- Published by: `abv_goal_manager` (`abv/controller/context`)
-- Subscribed by: `abv_control`, `abv_rl-cpp`
+- Published by: `autobot_goal_manager` (`abv/controller/context`)
+- Subscribed by: `autobot_control`, `autobot_rl-cpp`
 
 ---
 
@@ -169,17 +169,17 @@ Published by `abv_goal_manager` once per state-machine tick while in `POSE_CONTR
 ### Message Definition (msg/AbvThrusterCommand.msg)
 
 - `type` - `"direction"` or `"thruster"`
-- `is_global` - true if `data` is in the world frame; `abv_thrusters` converts it to the body frame
+- `is_global` - true if `data` is in the world frame; `autobot_thrusters` converts it to the body frame
 - `data` (`AbvVec3`) - control effort (fx, fy, tz), for type `"direction"`
 - `thrusters` - 8-char `'0'`/`'1'` string, for type `"thruster"`
-- `policy_name` - the control policy that computed this command (`"control"`, `"rl"`), or empty for `abv_goal_manager`'s direct thruster/direction/stop writes
+- `policy_name` - the control policy that computed this command (`"control"`, `"rl"`), or empty for `autobot_goal_manager`'s direct thruster/direction/stop writes
 
 ### Description
 
-The input to `abv_thrusters`. Commands with a non-empty `policy_name` are dropped unless it matches `abv/policy/active`; commands with an empty `policy_name` always pass.
+The input to `autobot_thrusters`. Commands with a non-empty `policy_name` are dropped unless it matches `abv/policy/active`; commands with an empty `policy_name` always pass.
 
-- Published by: `abv_goal_manager`, `abv_control`, `abv_rl-cpp` (`abv/thrusters/command`)
-- Subscribed by: `abv_thrusters`
+- Published by: `autobot_goal_manager`, `autobot_control`, `autobot_rl-cpp` (`abv/thrusters/command`)
+- Subscribed by: `autobot_thrusters`
 
 ---
 
@@ -192,10 +192,10 @@ The input to `abv_thrusters`. Commands with a non-empty `policy_name` are droppe
 
 ### Description
 
-Reports which of the 8 thrusters are currently firing and the resulting applied force/torque. `abv_navigation` uses the force/torque as the EKF control input; `abv_gui` lights up the corresponding thruster glyphs and plots the control input.
+Reports which of the 8 thrusters are currently firing and the resulting applied force/torque. `autobot_navigation` uses the force/torque as the EKF control input; `autobot_gui` lights up the corresponding thruster glyphs and plots the control input.
 
-- Published by: `abv_thrusters` (`abv/thrusters/status`)
-- Subscribed by: `abv_navigation`, `abv_gui`
+- Published by: `autobot_thrusters` (`abv/thrusters/status`)
+- Subscribed by: `autobot_navigation`, `autobot_gui`
 
 ---
 
@@ -210,10 +210,10 @@ Reports which of the 8 thrusters are currently firing and the resulting applied 
 
 ### Description
 
-Provides a way of commanding the `abv_guidance` node to coordinate sending a sequence of waypoints to `abv_goal_manager`. See [`abv_guidance`](../gnc/abv_guidance.md#guidance-modes).
+Provides a way of commanding the `autobot_guidance` node to coordinate sending a sequence of waypoints to `autobot_goal_manager`. See [`autobot_guidance`](../gnc/autobot_guidance.md#guidance-modes).
 
-- Published by: `abv_gui` (pose goals and paths), `abv_commander` (`path` command), `abv_bridge` (external waypoints)
-- Subscribed by: `abv_guidance`
+- Published by: `autobot_gui` (pose goals and paths), `autobot_commander` (`path` command), `autobot_bridge` (external waypoints)
+- Subscribed by: `autobot_guidance`
 
 ---
 
@@ -225,10 +225,10 @@ Provides a way of commanding the `abv_guidance` node to coordinate sending a seq
 
 ### Description
 
-Reports the current state of the guidance state machine (e.g. idle, executing a trajectory) to observers such as `abv_gui`.
+Reports the current state of the guidance state machine (e.g. idle, executing a trajectory) to observers such as `autobot_gui`.
 
-- Published by: `abv_guidance`
-- Subscribed by: `abv_gui`
+- Published by: `autobot_guidance`
+- Subscribed by: `autobot_gui`
 
 ---
 
@@ -240,10 +240,10 @@ Reports the current state of the guidance state machine (e.g. idle, executing a 
 
 ### Description
 
-The upcoming portion of the path `abv_guidance` is executing, for visualization. Empty when guidance is idle. For `file` paths, the length is limited by the `# PreviewLength` header in `path.csv`.
+The upcoming portion of the path `autobot_guidance` is executing, for visualization. Empty when guidance is idle. For `file` paths, the length is limited by the `# PreviewLength` header in `path.csv`.
 
-- Published by: `abv_guidance` (`abv/guidance/path`)
-- Subscribed by: `abv_gui`
+- Published by: `autobot_guidance` (`abv/guidance/path`)
+- Subscribed by: `autobot_gui`
 
 ---
 
@@ -256,10 +256,10 @@ The upcoming portion of the path `abv_guidance` is executing, for visualization.
 
 ### Description
 
-The full set of obstacles on the table. Each message replaces the previous set entirely (there are no per-obstacle IDs); an empty array clears all obstacles. Used by `abv_guidance`'s `avoid` mode.
+The full set of obstacles on the table. Each message replaces the previous set entirely (there are no per-obstacle IDs); an empty array clears all obstacles. Used by `autobot_guidance`'s `avoid` mode.
 
-- Published by: `abv_gui` (`abv/scene/obstacles`)
-- Subscribed by: `abv_guidance`
+- Published by: `autobot_gui` (`abv/scene/obstacles`)
+- Subscribed by: `autobot_guidance`
 
 ---
 
@@ -273,8 +273,8 @@ The full set of obstacles on the table. Each message replaces the previous set e
 
 The single source of truth for which control policy may drive `abv/thrusters/command`. Re-published periodically.
 
-- Published by: `abv_policy_registry` (`abv/policy/active`)
-- Subscribed by: `abv_control`, `abv_rl-cpp`, `abv_thrusters`, `abv_gui`
+- Published by: `autobot_policy_registry` (`abv/policy/active`)
+- Subscribed by: `autobot_control`, `autobot_rl-cpp`, `autobot_thrusters`, `autobot_gui`
 
 ---
 
@@ -289,8 +289,8 @@ The single source of truth for which control policy may drive `abv/thrusters/com
 
 Every policy the registry has ever seen, with its current liveness. Re-published periodically.
 
-- Published by: `abv_policy_registry` (`abv/policy/registry`)
-- Subscribed by: `abv_gui` (policy selector)
+- Published by: `autobot_policy_registry` (`abv/policy/registry`)
+- Subscribed by: `autobot_gui` (policy selector)
 
 ---
 
@@ -318,10 +318,10 @@ A minimal two-field acknowledgement message used where a component needs to dist
 
 ### Description
 
-Used to represent the estimated position and velocity of the ABV in its 3 degrees of freedom, along with whether that estimate is currently trustworthy. This is the primary output of `abv_navigation` and the data type embedded in `AbvGuidanceCommand`'s goal/tolerance fields.
+Used to represent the estimated position and velocity of the ABV in its 3 degrees of freedom, along with whether that estimate is currently trustworthy. This is the primary output of `autobot_navigation` and the data type embedded in `AbvGuidanceCommand`'s goal/tolerance fields.
 
-- Published by: `abv_navigation` (`abv/state`), `abv_simulator` (`abv/sim/state`), `abv_bridge` (`abv/sim/gazebo_state`)
-- Subscribed by: `abv_guidance`, `abv_goal_manager`, `abv_thrusters`, `abv_gui`, `abv_bridge`, `abv_navigation` (sim), `abv_simulator` (external propagation)
+- Published by: `autobot_navigation` (`abv/state`), `autobot_simulator` (`abv/sim/state`), `autobot_bridge` (`abv/sim/gazebo_state`)
+- Subscribed by: `autobot_guidance`, `autobot_goal_manager`, `autobot_thrusters`, `autobot_gui`, `autobot_bridge`, `autobot_navigation` (sim), `autobot_simulator` (external propagation)
 
 ---
 
@@ -342,10 +342,10 @@ Response:
 
 ### Description
 
-Asks `abv_policy_registry` to switch the active control policy. Rejected if the policy isn't registered or has gone stale. On success, the registry publishes the new `abv/policy/active` and clears the current goal.
+Asks `autobot_policy_registry` to switch the active control policy. Rejected if the policy isn't registered or has gone stale. On success, the registry publishes the new `abv/policy/active` and clears the current goal.
 
-- Called by: `abv_gui` (`PolicySelectorPanel`), or `ros2 service call /abv/policy/switch abv_msgs/srv/AbvPolicySwitch "{policy_name: control}"`
-- Served by: `abv_policy_registry` (`abv/policy/switch`)
+- Called by: `autobot_gui` (`PolicySelectorPanel`), or `ros2 service call /abv/policy/switch autobot_msgs/srv/AbvPolicySwitch "{policy_name: control}"`
+- Served by: `autobot_policy_registry` (`abv/policy/switch`)
 
 ---
 

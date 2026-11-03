@@ -1,4 +1,4 @@
-# abv_control
+# autobot_control
 
 Classical feedback control laws for the Air Bearing Vehicle (ABV) platform.
 
@@ -6,17 +6,17 @@ Classical feedback control laws for the Air Bearing Vehicle (ABV) platform.
 
 ## Purpose
 
-The `abv_control` package hosts the on-board classical control law (PID today). It is one of the selectable control policies — registered as `control` — alongside the RL policy in `abv_rl-cpp`. Only the policy currently activated by [`abv_policy_registry`](abv_policy_registry.md) computes and publishes control input.
+The `autobot_control` package hosts the on-board classical control law (PID today). It is one of the selectable control policies — registered as `control` — alongside the RL policy in `autobot_rl-cpp`. Only the policy currently activated by [`autobot_policy_registry`](autobot_policy_registry.md) computes and publishes control input.
 
 ---
 
 ## Role in the GNC Pipeline
 
-`abv_control` sits between [`abv_goal_manager`](abv_goal_manager.md) and [`abv_thrusters`](abv_thrusters.md).
+`autobot_control` sits between [`autobot_goal_manager`](autobot_goal_manager.md) and [`autobot_thrusters`](autobot_thrusters.md).
 
 It:
 
-- Receives `AbvControlContext` (current state, goal, error) from `abv_goal_manager`
+- Receives `AbvControlContext` (current state, goal, error) from `autobot_goal_manager`
 - Ignores it unless `abv/policy/active` names `control`
 - Computes a control input with the configured `IControlLaw`
 - Publishes it as a world-frame `direction` command on `abv/thrusters/command`, tagged `policy_name: control`
@@ -48,11 +48,11 @@ Any other value also falls back to PID.
 
 ### Subscribed
 
-- `/abv/controller/context` — from `abv_goal_manager`
-- `/abv/policy/active` — from `abv_policy_registry`
+- `/abv/controller/context` — from `autobot_goal_manager`
+- `/abv/policy/active` — from `autobot_policy_registry`
 
 ### Published
 
-- `/abv/thrusters/command` — control input for `abv_thrusters`
+- `/abv/thrusters/command` — control input for `autobot_thrusters`
 - `/abv/heartbeat` — liveness, as `control`
 - `/abv/policy/status` — policy registration heartbeat, as `control`
