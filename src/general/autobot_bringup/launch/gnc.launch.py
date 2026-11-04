@@ -1,15 +1,18 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, GroupAction
+from launch.actions import (
+    DeclareLaunchArgument,
+    ExecuteProcess,
+    GroupAction,
+    IncludeLaunchDescription,
+)
+from launch.launch_description_sources import AnyLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch.conditions import IfCondition
 from launch_ros.actions import Node
-from launch_ros.substitutions import FindPackagePrefix
+from launch_ros.substitutions import FindPackagePrefix, FindPackageShare
+
 
 def generate_launch_description():
-
-    autobot_rl_script = PathJoinSubstitution([
-        FindPackagePrefix('autobot_rl'), 'lib', 'autobot_rl', 'autobot_rl_venv.sh'
-    ])
 
     return LaunchDescription([
         DeclareLaunchArgument('sim', default_value='false'),
@@ -71,12 +74,55 @@ def generate_launch_description():
             emulate_tty=True,
         ),
 
+        # ROSBridge WebSocket Server
+        IncludeLaunchDescription(
+            AnyLaunchDescriptionSource(
+                PathJoinSubstitution([
+                    FindPackageShare('rosbridge_server'),
+                    'launch',
+                    'rosbridge_websocket_launch.xml'
+                ])
+            )
+        ),
+        
+        # Web GUI Server
+        ExecuteProcess(
+            cmd=[
+                'python3',
+                '-m',
+                'http.server',
+                '8080',
+                '--bind',
+                '0.0.0.0',
+                '--directory',
+                PathJoinSubstitution([
+                    FindPackageShare('autobot_bringup'),
+                    'web'
+                ]),
+            ],
+            output='screen',
+            emulate_tty=True,
+        ),
+
+        # Simulation-only nodes
         GroupAction(
             condition=IfCondition(LaunchConfiguration('sim')),
             actions=[
-                Node(package='autobot_simulator', executable='autobot_simulator'),
-                Node(package='autobot_gui', executable='autobot_gui'),
-                Node(package='autobot_commander', executable='autobot_commander'),
+                Node(
+                    package='autobot_simulator',
+                    executable='autobot_simulator',
+                    output='screen',
+                ),
+                Node(
+                    package='autobot_gui',
+                    executable='autobot_gui',
+                    output='screen',
+                ),
+                Node(
+                    package='autobot_commander',
+                    executable='autobot_commander',
+                    output='screen',
+                ),
             ]
         )
     ])

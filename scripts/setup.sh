@@ -1,9 +1,9 @@
 #!/bin/bash
 ##########################################################################
-# ABV GNC - Environment Setup
+# Autobot - Environment Setup
 #
-# Installs ROS2 Humble, system dependencies, and third-party libraries
-# required to build and run the ABV GNC stack.
+# Installs ROS2 Humble, system dependencies, Node.js, and third-party
+# libraries required to build and run the Autobot robotics stack.
 #
 # Usage:
 #   chmod +x setup.sh
@@ -17,25 +17,30 @@
 # What this script does:
 #   1. Installs ROS2 Humble Desktop
 #   2. Installs system dependencies via apt
-#   3. Builds and installs third-party libs from source (plog, libmotioncapture, JETGPIO)
-#   4. Installs librealsense2 (apt on x86_64, source+RSUSB on Jetson/aarch64)
-#      and clones realsense-ros into the workspace so colcon builds it
-#   5. Builds the ABV ROS2 packages via colcon
+#   3. Installs Node.js 22 LTS and npm for the Vite web GUI
+#   4. Builds and installs third-party libraries from source
+#   5. Installs librealsense2 (apt on x86_64, source+RSUSB on Jetson)
+#   6. Clones realsense-ros into the workspace
+#   7. Builds the ROS2 packages via colcon (including the web GUI)
 #
-# Third-party libs are cloned to ~/libs by default (see LIBS_DIR)
+# Third-party libraries are cloned to ~/libs by default.
 ##########################################################################
 
-# where to clone libs that need built from source
+# Fail on the first error so callers (e.g. docker/test_arm64.sh) see it.
+# No -u: ROS setup.bash reads unset variables.
+set -eo pipefail
+
+# Where to clone libraries that need to be built from source
 LIBS_DIR=~/libs
 
-# verify these against https://github.com/IntelRealSense/librealsense/releases
-# and https://github.com/IntelRealSense/realsense-ros/releases before relying
-# on them long-term - pinned here for a reproducible install, not guaranteed
-# to stay the right choice as new releases come out
+# Pinned RealSense versions
 REALSENSE_SDK_TAG=v2.59.1
 REALSENSE_ROS_TAG=4.59.1
 
-# List of required system packages
+# Node.js major version
+NODEJS_MAJOR=22
+
+# Required system packages
 DEPENDENCIES=(
     build-essential
     cmake
@@ -51,7 +56,10 @@ DEPENDENCIES=(
     libqt6charts6-dev
 )
 
-# Function to check and install a package
+###########################################################################
+## Package Installation
+###########################################################################
+
 check_and_install() {
     PKG="$1"
     CUSTOM_INSTALL_FUNC="$2"
@@ -71,6 +79,47 @@ check_and_install() {
     fi
 }
 
+###########################################################################
+## Node.js Installation
+###########################################################################
+
+install_nodejs() {
+    echo "[Node.js] Checking Node.js installation..."
+
+    local CURRENT_MAJOR=0
+
+    if command -v node >/dev/null 2>&1; then
+        CURRENT_MAJOR=$(node -p "process.versions.node.split('.')[0]")
+    fi
+
+    if [ "$CURRENT_MAJOR" -ge "$NODEJS_MAJOR" ] && command -v npm >/dev/null 2>&1; then
+        echo "[✔] Node.js $(node --version) already installed."
+        echo "[✔] npm $(npm --version) already installed."
+        return
+    fi
+
+    echo "[Node.js] Installing Node.js ${NODEJS_MAJOR}..."
+
+    # Configure NodeSource repository
+    curl -fsSL "https://deb.nodesource.com/setup_${NODEJS_MAJOR}.x" | sudo -E bash -
+
+    # Install Node.js (includes npm)
+    sudo apt install -y nodejs
+
+    # Verify installation
+    if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
+        echo "[✘] Node.js/npm installation failed."
+        exit 1
+    fi
+
+    echo "[✔] Node.js $(node --version)"
+    echo "[✔] npm $(npm --version)"
+}
+
+###########################################################################
+## Source Library Installation
+###########################################################################
+
 clone_and_checkout() {
     LIB="$1"
     URL="$2"
@@ -79,7 +128,7 @@ clone_and_checkout() {
 
     # Clone if missing
     if [ ! -d "$DIR/$LIB" ]; then
-        git clone https://github.com/"$URL".git "$DIR/$LIB"
+        git clone "https://github.com/$URL.git" "$DIR/$LIB"
     fi
 
     cd "$DIR/$LIB"
@@ -92,11 +141,12 @@ install_from_source() {
     TAG="$3"
     DIR="$4"
     shift 4
+
     CMAKE_ARGS=("$@")
 
-    clone_and_checkout $LIB $URL $TAG $DIR
+    clone_and_checkout "$LIB" "$URL" "$TAG" "$DIR"
 
-    # Always update submodules (safe even if none exist)
+    # Update submodules
     echo "[↪] Updating submodules for $LIB..."
     git submodule update --init --recursive
 
@@ -110,145 +160,282 @@ install_from_source() {
     sudo make install
 }
 
+###########################################################################
+## RealSense Installation
+###########################################################################
+
 install_librealsense() {
     ARCH="$(uname -m)"
 
     if [ "$ARCH" = "aarch64" ]; then
-        # Jetson's L4T kernel isn't one of the Ubuntu HWE kernels
-        # librealsense2-dkms supports, so the prebuilt kernel module fails to
-        # build there. The documented workaround is the RSUSB backend, which
-        # talks to the camera over USB directly instead of a kernel module -
-        # this skips the dkms apt package entirely and builds librealsense2
-        # from source with that backend forced on.
-        echo "[realsense] aarch64 (Jetson) detected - building librealsense2 from source with RSUSB backend..."
-        install_from_source librealsense IntelRealSense/librealsense "$REALSENSE_SDK_TAG" "$LIBS_DIR" \
+
+        # Jetson L4T kernels are not supported by librealsense2-dkms.
+        # Build from source using the RSUSB backend instead.
+
+        echo "[RealSense] ARM64 detected - building with RSUSB backend..."
+
+        install_from_source \
+            librealsense \
+            IntelRealSense/librealsense \
+            "$REALSENSE_SDK_TAG" \
+            "$LIBS_DIR" \
             "-DFORCE_RSUSB_BACKEND=ON" \
             "-DBUILD_EXAMPLES=OFF" \
             "-DBUILD_GRAPHICAL_EXAMPLES=OFF"
+
     else
-        echo "[realsense] Installing librealsense2 via apt..."
+
+        echo "[RealSense] Installing librealsense2 via apt..."
+
         sudo mkdir -p /etc/apt/keyrings
+
         curl -sSf https://librealsense.realsenseai.com/Debian/librealsenseai.asc \
-            | gpg --dearmor | sudo tee /etc/apt/keyrings/librealsenseai.gpg >/dev/null
+            | gpg --dearmor \
+            | sudo tee /etc/apt/keyrings/librealsenseai.gpg >/dev/null
+
         sudo apt-get install -y apt-transport-https
+
         echo "deb [signed-by=/etc/apt/keyrings/librealsenseai.gpg] https://librealsense.realsenseai.com/Debian/apt-repo $(lsb_release -cs) main" \
             | sudo tee /etc/apt/sources.list.d/librealsense.list
+
         sudo apt update
-        sudo apt-get install -y librealsense2-dkms librealsense2-utils librealsense2-dev
+
+        sudo apt-get install -y \
+            librealsense2-dkms \
+            librealsense2-utils \
+            librealsense2-dev
     fi
 }
+
+###########################################################################
+## ROS 2 Installation
+###########################################################################
 
 install_ros() {
     echo "[ROS] Starting installation of ROS 2 Humble..."
 
-    # --- Configure UTF-8 Locale ---
+    # Configure UTF-8 locale
     if ! locale | grep -q "UTF-8"; then
         echo "[ROS] Configuring UTF-8 locale..."
+
         sudo apt install -y locales
-        locale-gen en_US en_US.UTF-8
-        update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+        sudo locale-gen en_US en_US.UTF-8
+        sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+
         export LANG=en_US.UTF-8
     fi
 
-    # --- Set Timezone Non-Interactively ---
+    # Configure timezone
     echo "[ROS] Setting timezone to America/New_York..."
-    ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
+
+    sudo ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
+
     DEBIAN_FRONTEND=noninteractive sudo apt install -y tzdata
-    dpkg-reconfigure -f noninteractive tzdata
+    sudo dpkg-reconfigure -f noninteractive tzdata
 
-    # --- Add Required Tools ---
-    DEBIAN_FRONTEND=noninteractive sudo apt install -y software-properties-common curl gnupg lsb-release
+    # Install repository tools
+    DEBIAN_FRONTEND=noninteractive sudo apt install -y \
+        software-properties-common \
+        curl \
+        gnupg \
+        lsb-release
 
-    # --- Add Universe Repo (auto-confirm) ---
+    # Enable Universe repository
     echo "[ROS] Adding universe repository..."
-    add-apt-repository -y universe
+    sudo add-apt-repository -y universe
 
-    # --- Add ROS 2 GPG Key ---
-    echo "[ROS] Adding ROS 2 GPG key..."
-    curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
-        -o /usr/share/keyrings/ros-archive-keyring.gpg
+    # Add ROS 2 GPG key and repository, unless already configured.
+    # A second entry with a different Signed-By (e.g. alongside the
+    # ros2-apt-source package) makes apt refuse to read its sources.
+    if grep -Rqs "packages.ros.org/ros2" /etc/apt/sources.list /etc/apt/sources.list.d/; then
+        echo "[ROS] ROS 2 repository already configured."
+    else
+        echo "[ROS] Adding ROS 2 GPG key..."
 
-    # --- Add ROS 2 Repository ---
-    echo "[ROS] Adding ROS 2 repository..."
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
-          http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" \
-          > /etc/apt/sources.list.d/ros2.list
+        curl -sSL \
+            https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
+            | sudo tee /usr/share/keyrings/ros-archive-keyring.gpg >/dev/null
 
-    # --- Install ROS 2 Humble and Tools ---
+        echo "[ROS] Adding ROS 2 repository..."
+
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
+http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" \
+            | sudo tee /etc/apt/sources.list.d/ros2.list
+    fi
+
+    # Install ROS 2 and development tools
     echo "[ROS] Installing ROS 2 Humble and tools..."
+
     sudo apt update
-    DEBIAN_FRONTEND=noninteractive sudo apt install -y ros-humble-desktop \
-        ros-humble-xacro
+
+    DEBIAN_FRONTEND=noninteractive sudo apt install -y \
+        ros-humble-desktop \
+        ros-humble-xacro \
+        ros-humble-rosbridge-suite \
         python3-colcon-common-extensions \
         python3-rosdep \
         python3-vcstool
 
-    # --- Source ROS Environment ---
-    echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+    # Configure shell environment
+    if ! grep -Fxq "source /opt/ros/humble/setup.bash" ~/.bashrc; then
+        echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+    fi
+
     source /opt/ros/humble/setup.bash
-    echo "[✔] ROS 2 Humble installed and environment sourced."
+
+    echo "[✔] ROS 2 Humble installed."
 }
 
 ###########################################################################
-## Script run logic
+## Main Setup
 ###########################################################################
 
-# get current dir so we can come back at the end to build the packages
+# Determine repository root
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# make sure things are updated
+echo "========================================"
+echo "       Autobot Environment Setup"
+echo "========================================"
+echo "Repository: $REPO_ROOT"
+echo
+
+# Update package lists
 sudo apt update
 
-# treat ros2 install special
+###########################################################################
+## Install ROS 2
+###########################################################################
+
 check_and_install "ros-humble-desktop" "install_ros"
 
-# install system deps
+###########################################################################
+## Install System Dependencies
+###########################################################################
+
+echo "[System] Installing dependencies..."
+
 for pkg in "${DEPENDENCIES[@]}"; do
-    check_and_install "$pkg"
+    check_and_install "$pkg" ""
 done
 
-# install deps from source
-install_from_source plog SergiusTheBest/plog 1.1.10 $LIBS_DIR
-install_from_source libmotioncapture samlovelace/libmotioncapture main "$LIBS_DIR" \
+###########################################################################
+## Install Node.js and npm
+###########################################################################
+
+# Must be installed before colcon builds autobot_bringup,
+# which invokes npm to compile the Vite frontend.
+
+install_nodejs
+
+###########################################################################
+## Install Third-Party Libraries
+###########################################################################
+
+echo "[Libraries] Installing third-party libraries..."
+
+install_from_source \
+    plog \
+    SergiusTheBest/plog \
+    1.1.10 \
+    "$LIBS_DIR"
+
+install_from_source \
+    libmotioncapture \
+    samlovelace/libmotioncapture \
+    main \
+    "$LIBS_DIR" \
     "-DCMAKE_INSTALL_PREFIX=/usr/local"
 
-# librealsense2 SDK - apt on x86_64, source+RSUSB on Jetson/aarch64 (see
-# install_librealsense). Not gated behind check_and_install: the source-build
-# path doesn't register as a dpkg package, so that guard would never
-# recognize it as installed on Jetson - same reasoning as plog/
-# libmotioncapture above, which are unconditionally re-run every time too.
+###########################################################################
+## Install RealSense
+###########################################################################
+
 install_librealsense
 
-# custom steps for JETGPIO
-clone_and_checkout JETGPIO Rubberazer/JETGPIO v1.2 "$LIBS_DIR"
+###########################################################################
+## Install JETGPIO
+###########################################################################
+
+clone_and_checkout \
+    JETGPIO \
+    Rubberazer/JETGPIO \
+    v1.2 \
+    "$LIBS_DIR"
+
 echo "orinagx" > hardware
-make && sudo make install
-# end JETGPIO custom
 
-# robot_ws setup
+make -j"$(nproc)"
+sudo make install
+
+###########################################################################
+## Set Up Supporting ROS 2 Workspace
+###########################################################################
+
 ROBOT_WS=~/robot_ws
-mkdir -p "$ROBOT_WS"/src
-clone_and_checkout ptera samlovelace/ptera main "$ROBOT_WS"/src
 
-# realsense-ros (the realsense2_camera node that autobot_camera_realsense's
-# launch/camera.launch.py wraps) - cloned as source rather than apt-installed
-# so it builds the same way on both x86_64 and Jetson/aarch64, since Intel
-# only publishes prebuilt ros-humble-realsense2-camera debs for x86_64
-clone_and_checkout realsense-ros IntelRealSense/realsense-ros "$REALSENSE_ROS_TAG" "$ROBOT_WS"/src
+mkdir -p "$ROBOT_WS/src"
 
-# resolve ROS package.xml dependencies (realsense-ros needs cv_bridge,
-# diagnostic_updater, etc.) for everything now sitting in ROBOT_WS/src
+# Ptera
+clone_and_checkout \
+    ptera \
+    samlovelace/ptera \
+    main \
+    "$ROBOT_WS/src"
+
+# RealSense ROS 2 wrapper
+clone_and_checkout \
+    realsense-ros \
+    IntelRealSense/realsense-ros \
+    "$REALSENSE_ROS_TAG" \
+    "$ROBOT_WS/src"
+
+###########################################################################
+## Resolve ROS Dependencies
+###########################################################################
+
 source /opt/ros/humble/setup.bash
+
 if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then
     sudo rosdep init
 fi
+
 rosdep update
-rosdep install --from-paths "$ROBOT_WS"/src --ignore-src -r -y
 
-cd "$ROBOT_WS" && colcon build --packages-skip ptera_sim
+rosdep install \
+    --from-paths "$ROBOT_WS/src" \
+    --ignore-src \
+    -r \
+    -y
 
-# build the main workspace
+###########################################################################
+## Build Supporting Workspace
+###########################################################################
+
+echo "[ROS] Building supporting workspace..."
+
+cd "$ROBOT_WS"
+
+colcon build --packages-skip ptera_sim
+
+###########################################################################
+## Build Autobot Workspace
+###########################################################################
+
+echo "[Autobot] Building main workspace..."
+
 cd "$REPO_ROOT"
+
 source /opt/ros/humble/setup.bash
-source "$ROBOT_WS"/install/setup.bash
+source "$ROBOT_WS/install/setup.bash"
+
+# autobot_bringup CMake handles npm ci and npm run build.
 colcon build
+
+echo
+echo "========================================"
+echo "       Autobot Setup Complete!"
+echo "========================================"
+echo
+echo "Node.js: $(node --version)"
+echo "npm:     $(npm --version)"
+echo

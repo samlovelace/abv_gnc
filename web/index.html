@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="./src/style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>web</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+
+    <header class="topbar">
+      <div class="left"><span id="conn">● connecting</span></div>
+      <div class="center">
+        <span class="label"></span>
+        <span id="active-policy" class="active-policy">—</span>
+      </div>
+      <div class="right"><button id="stop-btn">STOP</button></div>
+    </header>
+
+    <div class="policy-row">
+      <label for="policy-registry">Active Policy:</label>
+      <select name="policy-select" id="policy-select">
+        <option value="none">None</option>
+      </select>
+      <button id="policy-switch-btn">Select</button>
+    </div>
+
+    <main class="main-layout">
+      <section class="topdown">
+        <svg id="topdown-svg" viewBox="0 0 1.8 3.6">
+          <defs>
+            <pattern
+              id="minor"
+              width="0.25"
+              height="0.25"
+              patternUnits="userSpaceOnUse"
+            >
+              <path
+                d="M 0.25 0 H 0 V 0.25"
+                fill="none"
+                stroke="#333"
+                stroke-width="0.0075"
+              />
+            </pattern>
+          </defs>
+
+          <g id="world" transform="translate(1.8 3.6) rotate(-90) scale(1 -1)">
+            <rect
+              width="3.6"
+              height="1.8"
+              fill="url(#minor)"
+              stroke="#888"
+              stroke-width="0.01"
+            />
+
+            <g id="vehicle">
+              <!-- thrusters (x8) and the camera housing/FOV wedge are built
+              in vehicle-glyph.ts from halfLength/halfWidth, mirroring
+              abv_gui's TableTopView::drawRobot - see that file for the
+              reference geometry this is ported from -->
+              <rect
+                x="-0.175"
+                y="-0.175"
+                width="0.35"
+                height="0.35"
+                fill="#999"
+              />
+            </g>
+          </g>
+        </svg>
+      </section>
+
+      <section class="telemetry-plots">
+        <div id="plot-pos"></div>
+        <div id="plot-vel"></div>
+        <div id="plot-input"></div>
+      </section>
+
+      <section class="command-panel">
+        <label>Command</label>
+        <div class="command-mode-row">
+          <select id="command-mode-select">
+            <option value="pose">Pose</option>
+            <option value="velocity">Velocity</option>
+            <option value="path">Path</option>
+            <option value="thruster">Thruster</option>
+          </select>
+          <label class="body-frame-label">
+            <input type="checkbox" id="body-frame-checkbox" />
+            Body Frame
+          </label>
+        </div>
+
+        <section class="pose-command-panel" data-mode-panel="pose">
+          <div class="pose-cmd-x-row">
+            <label for="pose-cmd-x">x:</label
+            ><input
+              id="pose-cmd-x"
+              type="number"
+              value="0"
+              min="-100"
+              max="100"
+              step="0.05"
+            />
+          </div>
+          <div class="pose-cmd-y-row">
+            <label for="pose-cmd-y">y: </label>
+            <input
+              id="pose-cmd-y"
+              type="number"
+              value="0"
+              min="-100"
+              max="100"
+              step="0.05"
+            />
+          </div>
+          <div class="pose-cmd-yaw-row">
+            <label for="pose-cmd-yaw">yaw: </label>
+            <input
+              id="pose-cmd-yaw"
+              type="number"
+              value="0"
+              min="-100"
+              max="100"
+              step="0.05"
+            />
+          </div>
+          <button id="pose-cmd-btn">Send</button>
+        </section>
+
+        <section class="velocity-command-panel" data-mode-panel="velocity">
+          <div class="vel-cmd-x-row">
+            <label for="vel-cmd-x">x:</label>
+            <input
+              id="vel-cmd-x"
+              type="number"
+              value="0"
+              min="-10"
+              max="10"
+              step="0.05"
+            />
+          </div>
+          <div class="vel-cmd-y-row">
+            <label for="vel-cmd-y">y:</label>
+            <input
+              id="vel-cmd-y"
+              type="number"
+              value="0"
+              min="-10"
+              max="10"
+              step="0.05"
+            />
+          </div>
+          <div class="vel-cmd-yaw-row">
+            <label for="vel-cmd-yaw">yaw:</label>
+            <input
+              id="vel-cmd-yaw"
+              type="number"
+              value="0"
+              min="-10"
+              max="10"
+              step="0.05"
+            />
+          </div>
+          <button id="vel-cmd-btn">Send</button>
+        </section>
+
+        <section class="path-command-panel" data-mode-panel="path">
+          <div class="path-type-row">
+            <label>Path Type: </label>
+            <select id="path-type-select">
+              <option value="File">File</option>
+            </select>
+          </div>
+          <div class="path-duration-row">
+            <label>Duration (s): </label
+            ><input
+              id="path-duration"
+              type="number"
+              value="0"
+              min="0"
+              max="1000"
+              step="1"
+            />
+          </div>
+          <button id="path-cmd-btn">Send</button>
+        </section>
+
+        <section class="thruster-command-panel" data-mode-panel="thruster">
+          <label>Thrusters</label>
+          <div id="thruster-grid" class="thruster-grid"></div>
+          <label>Axes</label>
+          <div id="axis-grid" class="axis-grid"></div>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>
