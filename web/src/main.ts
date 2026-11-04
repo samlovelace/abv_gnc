@@ -5,8 +5,9 @@ import { TelemetryHandler } from "./telemetry-handler";
 import { TableInteractionHandler } from "./table-interaction-handler";
 import { CommandPanelHandler } from "./command-panel-handler";
 
-// TODO: get ip from the abv config
-const ros = new RosClient(`ws://192.168.1.242:9090`);
+const hostname = window.location.hostname;
+const ros = new RosClient(`ws://${hostname}:9090`);
+
 const handlers: Handler[] = [
   new PolicyHandler(ros, document.body),
   new TelemetryHandler(ros, document.body),

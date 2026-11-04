@@ -12,4 +12,19 @@ find_package(ament_cmake REQUIRED)
 install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 
+set(WEB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../web")
+find_program(NPM_EXECUTABLE npm REQUIRED)
+
+add_custom_target(build_web ALL
+    COMMAND ${NPM_EXECUTABLE} ci
+    COMMAND ${NPM_EXECUTABLE} run build
+    WORKING_DIRECTORY "${WEB_DIR}"
+    COMMENT "Building autobot web frontend"
+)
+
+install(
+    DIRECTORY "${WEB_DIR}/dist/"
+    DESTINATION share/${PROJECT_NAME}/web
+)
+
 ament_package()

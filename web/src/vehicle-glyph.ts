@@ -21,7 +21,7 @@ interface ThrusterSpec {
 
 // one thruster per corner (not per side) - mirrors thrusterLocal in
 // TableTopView.cpp exactly, so index i here lines up with
-// AbvThrusterCommand/AbvThrusterStatus.thrusters[i] (T1..T8)
+// ThrusterCommand/ThrusterStatus.thrusters[i] (T1..T8)
 function thrusterLayout(halfLength: number, halfWidth: number): ThrusterSpec[] {
   const leftRightOffset = halfLength * 0.6;
   const frontBackOffset = halfWidth * 0.6;

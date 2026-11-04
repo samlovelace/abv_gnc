@@ -13,7 +13,7 @@
 
 import type { Handler } from "./handler";
 import type { RosClient } from "./ros";
-import type { AbvObstacle, AbvObstacleArray } from "./messages";
+import type { Obstacle, ObstacleArray } from "./messages";
 import { must } from "./dom";
 import { showConfirmPopup } from "./confirm-popup";
 import { ROBOT_HALF_LENGTH, ROBOT_HALF_WIDTH } from "./telemetry-handler";
@@ -27,7 +27,7 @@ import { setObstaclesPresent } from "./obstacle-state";
 const MIN_DRAG_PIXELS = 18;
 
 const OBSTACLES_TOPIC = "abv/scene/obstacles";
-const OBSTACLES_TYPE = "abv_msgs/msg/AbvObstacleArray";
+const OBSTACLES_TYPE = "autobot_msgs/msg/ObstacleArray";
 
 // ghost/obstacle colors, ported from TableTopView.cpp's
 // drawGoalGhost/drawObstacleGhost/drawObstacles QColor literals
@@ -58,7 +58,7 @@ export class TableInteractionHandler implements Handler {
   // locally-tracked committed obstacles - this client is the source of
   // truth for what IT has placed, same single-writer assumption abv_gui's
   // own main.cpp makes (not synced from the topic)
-  #obstacles: AbvObstacle[] = [];
+  #obstacles: Obstacle[] = [];
 
   // ghost/committed-obstacle elements, built once inside #world (after
   // #vehicle, so they paint on top - same order as TableTopView.cpp's
@@ -292,7 +292,7 @@ export class TableInteractionHandler implements Handler {
 
   #publishObstacles(): void {
     setObstaclesPresent(this.#obstacles.length > 0);
-    const msg: AbvObstacleArray = { obstacles: this.#obstacles };
+    const msg: ObstacleArray = { obstacles: this.#obstacles };
     this.#ros.publish(OBSTACLES_TOPIC, OBSTACLES_TYPE, msg);
   }
 }

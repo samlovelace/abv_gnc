@@ -1,16 +1,16 @@
-// Shared AbvGuidanceCommand helpers, used by both TableInteractionHandler's
+// Shared GuidanceCommand helpers, used by both TableInteractionHandler's
 // drag-to-set-goal flow and CommandPanelHandler's Pose mode, so there's one
 // place that decides the "line" vs "avoid" type and the zeroed defaults -
 // mirrors CommandPanel::sendPoseCommand in abv_gui.
 
 import type { RosClient } from "./ros";
-import type { AbvState, AbvGuidanceCommand } from "./messages";
+import type { State, GuidanceCommand } from "./messages";
 import { getObstaclesPresent } from "./obstacle-state";
 
 const GUIDANCE_COMMAND_TOPIC = "abv/guidance/command";
-const GUIDANCE_COMMAND_TYPE = "abv_msgs/msg/AbvGuidanceCommand";
+const GUIDANCE_COMMAND_TYPE = "autobot_msgs/msg/GuidanceCommand";
 
-export function zeroState(): AbvState {
+export function zeroState(): State {
   return {
     valid: true,
     position: { x: 0, y: 0, yaw: 0 },
@@ -27,7 +27,7 @@ export function publishPoseGoal(
   const goalState = zeroState();
   goalState.position = { x, y, yaw };
 
-  const cmd: AbvGuidanceCommand = {
+  const cmd: GuidanceCommand = {
     type: getObstaclesPresent() ? "avoid" : "line",
     duration: -1,
     goal_state: goalState,
@@ -41,7 +41,7 @@ export function publishPathCommand(
   type: string,
   duration: number,
 ): void {
-  const cmd: AbvGuidanceCommand = {
+  const cmd: GuidanceCommand = {
     type,
     duration,
     goal_state: zeroState(),

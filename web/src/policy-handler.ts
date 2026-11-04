@@ -4,17 +4,17 @@ import type { Handler } from "./handler";
 import type { RosClient } from "./ros";
 import {
   type SwitchPolicyRequest,
-  type AbvPolicyActive,
-  type AbvPolicyEntry,
-  type AbvPolicyRegistry,
+  type PolicyActive,
+  type PolicyEntry,
+  type PolicyRegistry,
   type SwitchPolicyResponse,
 } from "./messages";
 
 const POLICY_ACTIVE_TOPIC = "abv/policy/active";
-const POLICY_ACTIVE_TYPE = "abv_msgs/msg/AbvPolicyActive";
+const POLICY_ACTIVE_TYPE = "autobot_msgs/msg/PolicyActive";
 const POLICY_REGISTRY_TOPIC = "abv/policy/registry";
-const POLICY_REGISTRY_TYPE = "abv_msgs/msg/AbvPolicyRegistry";
-const POLICY_SWITCH_TYPE = "abv_msgs/srv/AbvPolicySwitch.srv";
+const POLICY_REGISTRY_TYPE = "autobot_msgs/msg/PolicyRegistry";
+const POLICY_SWITCH_TYPE = "autobot_msgs/srv/PolicySwitch.srv";
 const POLICY_SWITCH_TOPIC = "abv/policy/switch";
 
 // @brief handles
@@ -22,7 +22,7 @@ const POLICY_SWITCH_TOPIC = "abv/policy/switch";
 //    * updating policy registry selections
 //    * sending active policy switch command
 export class PolicyHandler implements Handler {
-  private registry = new Map<string, AbvPolicyEntry>();
+  private registry = new Map<string, PolicyEntry>();
   private lastKey = "";
 
   private activeEl: HTMLElement;
@@ -49,14 +49,14 @@ export class PolicyHandler implements Handler {
   }
 
   private updateActive() {
-    const policy = this.ros.latest<AbvPolicyActive>(POLICY_ACTIVE_TOPIC);
+    const policy = this.ros.latest<PolicyActive>(POLICY_ACTIVE_TOPIC);
     const name = policy?.policy_name;
     if (this.activeEl) this.activeEl.textContent = name ?? "--";
   }
 
   private updateRegistry() {
     // update the policy registry
-    const policyReg = this.ros.latest<AbvPolicyRegistry>(POLICY_REGISTRY_TOPIC);
+    const policyReg = this.ros.latest<PolicyRegistry>(POLICY_REGISTRY_TOPIC);
     for (const p of policyReg?.policies ?? []) {
       this.registry.set(p.policy_name, p);
     }

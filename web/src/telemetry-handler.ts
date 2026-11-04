@@ -1,5 +1,5 @@
 import type { Handler } from "./handler";
-import type { AbvState, AbvThrusterStatus, AbvPath } from "./messages";
+import type { State, ThrusterStatus, Path } from "./messages";
 import type { RosClient } from "./ros";
 import { XYZPlot } from "./xyz-plot";
 import { must } from "./dom";
@@ -28,7 +28,7 @@ const THRUSTER_ON_COLOR = "#f19346";
 
 export class TelemetryHandler implements Handler {
   #plots: XYZPlot[];
-  #pending?: AbvState;
+  #pending?: State;
   #vehicle: SVGGElement;
   #thrusters: VehicleGlyph;
   #pathWaypoints: { x: number; y: number }[] = [];
@@ -41,7 +41,7 @@ export class TelemetryHandler implements Handler {
     const inp = new XYZPlot(must(root, "#plot-input"), "Control Input");
     this.#plots = [pos, vel, inp];
 
-    ros.watch<AbvState>("abv/state", "abv_msgs/msg/AbvState", (m) => {
+    ros.watch<State>("abv/state", "autobot_msgs/msg/State", (m) => {
       const t = performance.now() / 1000;
       pos.push(t, m.position.x, m.position.y, m.position.yaw);
       vel.push(t, m.velocity.x, m.velocity.y, m.velocity.yaw);
@@ -72,7 +72,7 @@ export class TelemetryHandler implements Handler {
     world.insertBefore(this.#pathGlow, this.#vehicle);
     world.insertBefore(this.#pathLine, this.#vehicle);
 
-    ros.watch<AbvPath>("abv/guidance/path", "abv_msgs/msg/AbvPath", (p) => {
+    ros.watch<Path>("abv/guidance/path", "autobot_msgs/msg/Path", (p) => {
       this.#pathWaypoints = p.waypoints.map((wp) => ({ x: wp.x, y: wp.y }));
     });
 
@@ -82,9 +82,9 @@ export class TelemetryHandler implements Handler {
       ROBOT_HALF_WIDTH,
     );
 
-    ros.watch<AbvThrusterStatus>(
+    ros.watch<ThrusterStatus>(
       "abv/thrusters/status",
-      "abv_msgs/msg/AbvThrusterStatus",
+      "autobot_msgs/msg/ThrusterStatus",
       (s) => {
         inp.push(performance.now() / 1000, s.fx, s.fy, s.fz);
 

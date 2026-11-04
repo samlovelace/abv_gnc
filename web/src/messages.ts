@@ -1,19 +1,19 @@
-export interface AbvState {
+export interface State {
   valid: boolean;
   position: { x: number; y: number; yaw: number };
   velocity: { x: number; y: number; yaw: number };
 }
 
-export interface AbvPolicyEntry {
+export interface PolicyEntry {
   policy_name: string;
   alive: boolean;
 }
 
-export interface AbvPolicyRegistry {
-  policies: AbvPolicyEntry[];
+export interface PolicyRegistry {
+  policies: PolicyEntry[];
 }
 
-export interface AbvPolicyActive {
+export interface PolicyActive {
   policy_name: string;
 }
 
@@ -26,7 +26,7 @@ export interface SwitchPolicyResponse {
   message: string;
 }
 
-export interface AbvThrusterStatus {
+export interface ThrusterStatus {
   thrusters: string;
 
   fx: number;
@@ -34,37 +34,37 @@ export interface AbvThrusterStatus {
   fz: number;
 }
 
-export interface AbvObstacle {
+export interface Obstacle {
   x: number;
   y: number;
   radius: number;
 }
 
-export interface AbvObstacleArray {
-  obstacles: AbvObstacle[];
+export interface ObstacleArray {
+  obstacles: Obstacle[];
 }
 
-export interface AbvGuidanceCommand {
+export interface GuidanceCommand {
   type: string;
   duration: number;
-  goal_state: AbvState;
-  arrival_tolerance: AbvState;
+  goal_state: State;
+  arrival_tolerance: State;
 }
 
-export interface AbvVec3 {
+export interface Vec3 {
   x: number;
   y: number;
   yaw: number;
 }
 
-export interface AbvPath {
-  waypoints: AbvVec3[];
+export interface Path {
+  waypoints: Vec3[];
 }
 
-export interface AbvControllerCommand {
+export interface ControllerCommand {
   type: string;
   is_global: boolean;
-  data: AbvVec3;
-  tolerance: AbvVec3;
+  data: Vec3;
+  tolerance: Vec3;
   thrusters: string;
 }

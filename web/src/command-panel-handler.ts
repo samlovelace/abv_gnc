@@ -7,18 +7,18 @@
 
 import type { Handler } from "./handler";
 import type { RosClient } from "./ros";
-import type { AbvState, AbvControllerCommand, AbvVec3 } from "./messages";
+import type { State, ControllerCommand, Vec3 } from "./messages";
 import { must } from "./dom";
 import { publishPoseGoal, publishPathCommand } from "./guidance";
 
 const CONTROLLER_COMMAND_TOPIC = "abv/controller/command";
-const CONTROLLER_COMMAND_TYPE = "abv_msgs/msg/AbvControllerCommand";
+const CONTROLLER_COMMAND_TYPE = "autobot_msgs/msg/ControllerCommand";
 
 const THRUSTER_COUNT = 8;
 
 // +X, -X, +Y, -Y, +Yaw, -Yaw - same labels/order as
 // CommandPanel.cpp's makeAxisButton loop
-const AXIS_SPECS: { label: string; vec: AbvVec3 }[] = [
+const AXIS_SPECS: { label: string; vec: Vec3 }[] = [
   { label: "+X", vec: { x: 1, y: 0, yaw: 0 } },
   { label: "-X", vec: { x: -1, y: 0, yaw: 0 } },
   { label: "+Y", vec: { x: 0, y: 1, yaw: 0 } },
@@ -27,7 +27,7 @@ const AXIS_SPECS: { label: string; vec: AbvVec3 }[] = [
   { label: "-Yaw", vec: { x: 0, y: 0, yaw: -1 } },
 ];
 
-function zeroVec(): AbvVec3 {
+function zeroVec(): Vec3 {
   return { x: 0, y: 0, yaw: 0 };
 }
 
@@ -41,7 +41,7 @@ type Axis3 = "x" | "y" | "yaw";
 
 // A trio of x/y/yaw input boxes that double as both a command input (user
 // types a value, Send reads it) and a live readout (tracks the latest
-// AbvState field) - matches CommandPanel::onPoseSync's rule: skip the live
+// State field) - matches CommandPanel::onPoseSync's rule: skip the live
 // update for a field that's currently focused or has an edit that hasn't
 // been sent yet, so typing never gets clobbered by telemetry.
 class SyncedVec3Fields {
@@ -63,7 +63,7 @@ class SyncedVec3Fields {
     }
   }
 
-  sync(value: AbvVec3): void {
+  sync(value: Vec3): void {
     this.#syncOne(this.#x, "x", value.x);
     this.#syncOne(this.#y, "y", value.y);
     this.#syncOne(this.#yaw, "yaw", value.yaw);
@@ -74,7 +74,7 @@ class SyncedVec3Fields {
     el.value = value.toFixed(3);
   }
 
-  read(): AbvVec3 {
+  read(): Vec3 {
     return {
       x: this.#x.valueAsNumber,
       y: this.#y.valueAsNumber,
@@ -103,7 +103,7 @@ export class CommandPanelHandler implements Handler {
   // press-and-hold "fire" state, shared by every thruster/axis button -
   // only one can be active at a time (see #startFiring)
   #fireHandle: ReturnType<typeof setInterval> | null = null;
-  #pendingZero: (() => AbvControllerCommand) | null = null;
+  #pendingZero: (() => ControllerCommand) | null = null;
 
   constructor(ros: RosClient, root: ParentNode) {
     this.#ros = ros;
@@ -152,14 +152,14 @@ export class CommandPanelHandler implements Handler {
     // Pose and Velocity fields track the live vehicle state unless focused
     // or edited but not yet sent - matches CommandPanel::onPoseSync exactly,
     // extended here to Velocity too
-    ros.watch<AbvState>("abv/state", "abv_msgs/msg/AbvState", (m) => {
+    ros.watch<State>("abv/state", "autobot_msgs/msg/State", (m) => {
       this.#poseFields.sync(m.position);
       this.#velFields.sync(m.velocity);
     });
 
     let stopBtn = must<HTMLButtonElement>(root, "#stop-btn");
     stopBtn.addEventListener("click", () => {
-      const cmd: AbvControllerCommand = {
+      const cmd: ControllerCommand = {
         type: "STOP",
         is_global: !this.#bodyFrameCheckbox.checked,
         data: this.#velFields.read(),
@@ -190,7 +190,7 @@ export class CommandPanelHandler implements Handler {
   };
 
   #onSendVelocity = (): void => {
-    const cmd: AbvControllerCommand = {
+    const cmd: ControllerCommand = {
       type: "vel",
       is_global: !this.#bodyFrameCheckbox.checked,
       data: this.#velFields.read(),
@@ -258,8 +258,8 @@ export class CommandPanelHandler implements Handler {
 
   #makeFireButton(
     label: string,
-    cmd: () => AbvControllerCommand,
-    zero: () => AbvControllerCommand,
+    cmd: () => ControllerCommand,
+    zero: () => ControllerCommand,
   ): HTMLButtonElement {
     const button = document.createElement("button");
     button.className = "btn-warning";
@@ -277,8 +277,8 @@ export class CommandPanelHandler implements Handler {
   }
 
   #startFiring(
-    cmd: () => AbvControllerCommand,
-    zero: () => AbvControllerCommand,
+    cmd: () => ControllerCommand,
+    zero: () => ControllerCommand,
   ): void {
     // mutual exclusion - only one button fires at a time, even if a
     // previous press's release was somehow missed
@@ -296,7 +296,7 @@ export class CommandPanelHandler implements Handler {
     if (zero) this.#publishController(zero());
   }
 
-  #publishController(cmd: AbvControllerCommand): void {
+  #publishController(cmd: ControllerCommand): void {
     this.#ros.publish(CONTROLLER_COMMAND_TOPIC, CONTROLLER_COMMAND_TYPE, cmd);
   }
 }
