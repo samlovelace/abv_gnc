@@ -1,0 +1,74 @@
+cmake_minimum_required(VERSION 3.8)
+project(autobot_manip_hardware)
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+
+find_package(autobot_common REQUIRED)
+find_package(autobot_manip_common REQUIRED)
+find_package(autobot_msgs REQUIRED)
+find_package(ptera_msgs REQUIRED)
+
+find_package(Eigen3 REQUIRED)
+find_package(kdl_parser REQUIRED)
+find_package(urdf REQUIRED)
+find_package(plog REQUIRED)
+
+set(DYNAMIXEL_LIB /usr/local/lib/libdxl_x64_cpp.so)
+
+set(SOURCES
+    src/DynamixelManipComms.cpp
+    src/RosManipComms.cpp
+    src/HardwareManager.cpp
+    src/main.cpp
+    src/ManipulatorFactory.cpp
+)
+
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/include
+    /usr/local/include # for dynamixel lib install
+)
+
+ament_target_dependencies(${PROJECT_NAME}
+    rclcpp
+    std_msgs
+    sensor_msgs
+    autobot_common
+    autobot_manip_common
+    autobot_msgs
+    ptera_msgs
+    Eigen3
+    kdl_parser
+)
+
+target_link_libraries(${PROJECT_NAME} ${DYNAMIXEL_LIB} plog::plog)
+
+# Standalone 6-DOF mobile base simulator (publishes robot/state)
+add_executable(base_sim src/BaseSimNode.cpp)
+
+target_include_directories(base_sim PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/include
+)
+
+ament_target_dependencies(base_sim
+    rclcpp
+    sensor_msgs
+    geometry_msgs
+    autobot_common
+    autobot_manip_common
+    ptera_msgs
+)
+
+install(TARGETS ${PROJECT_NAME} base_sim DESTINATION lib/${PROJECT_NAME})
+
+ament_package()

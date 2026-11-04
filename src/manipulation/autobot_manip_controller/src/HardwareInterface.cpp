@@ -18,7 +18,7 @@ HardwareInterface::~HardwareInterface()
 
 bool HardwareInterface::init()
 {
-    // Create publishers and subscribers to interface with arm_hardware
+    // Create publishers and subscribers to interface with autobot_manip_hardware
     RosTopicManager::getInstance()->createSubscriber<autobot_msgs::msg::ManipHardwareTelemetry>("arm/hardware/telemetry",
                                                                  std::bind(&HardwareInterface::stateCallback,
                                                                            this,
@@ -27,7 +27,7 @@ bool HardwareInterface::init()
     RosTopicManager::getInstance()->createPublisher<autobot_msgs::msg::ManipHardwareGoal>("arm/hardware/goal");
 
     // Parallel gripper channel — unconditionally created; harmless if no
-    // gripper is configured (arm_hardware simply never publishes state on it).
+    // gripper is configured (autobot_manip_hardware simply never publishes state on it).
     RosTopicManager::getInstance()->createSubscriber<autobot_msgs::msg::ManipHardwareTelemetry>("arm/hardware/gripper_telemetry",
                                                                  std::bind(&HardwareInterface::gripperStateCallback,
                                                                            this,
