@@ -108,8 +108,8 @@ ObjDetection:
   Type: yolo11-seg # which IDetector implementation to instantiate
   ModelPath: /home/sam/models/yolo11n-seg.onnx
   InputSize: 640
-  ConfThresh: 0.25
-  IouThresh: 0.45
+  ConfThresh: 0.1
+  IouThresh: 0.15
   UseCuda: false
 
   # must match the model's training/export classes in number and order -

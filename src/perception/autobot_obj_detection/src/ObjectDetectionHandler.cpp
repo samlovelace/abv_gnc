@@ -45,7 +45,7 @@ ObjectDetectionHandler::ObjectDetectionHandler()
 
     mDetector = makeDetector(detectorCfg);
 
-    RosTopicManager::getInstance()->createSubscriber<sensor_msgs::msg::Image>("/camera/image_raw",
+    RosTopicManager::getInstance()->createSubscriber<sensor_msgs::msg::Image>("/camera/camera/color/image_raw",
         std::bind(&ObjectDetectionHandler::frameCallback, this, std::placeholders::_1));
 
     RosTopicManager::getInstance()->createPublisher<autobot_msgs::msg::Detections2D>("/detections");

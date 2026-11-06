@@ -4,7 +4,9 @@ import time
 import mujoco
 import mujoco.viewer
 from cv_bridge import CvBridge
-from sensor_msgs.msg import CameraInfo, Image, JointState
+import cv2 
+import numpy as np
+from sensor_msgs.msg import CameraInfo, Image, CompressedImage, JointState
 
 
 # ---------- framework ----------
@@ -148,6 +150,7 @@ class CameraPublisher(SimModule):
         self.renderer = None
         self.bridge = CvBridge()
         self.image_pub = None
+        self.comp_image_pub = None
         self.info_pub = None
         self.camera_info = None
 
@@ -157,14 +160,14 @@ class CameraPublisher(SimModule):
 
         if self.node is not None:
             self.image_pub = self.node.create_publisher(Image, self.topic, 10)
-            self.info_pub = self.node.create_publisher(CameraInfo, self._info_topic(), 10)
+            self.info_pub = self.node.create_publisher(CameraInfo, self._sibling_topic("camera_info"), 10)
+            self.comp_image_pub = self.node.create_publisher(CompressedImage, self._sibling_topic("compressed_image"), 10)
 
-    def _info_topic(self):
-        # sibling "camera_info" next to the image topic - standard convention
+    def _sibling_topic(self, key): 
         if "/" in self.topic:
             base, _ = self.topic.rsplit("/", 1)
-            return f"{base}/camera_info"
-        return "camera_info"
+            return f"{base}/" + key
+        return key
 
     def _build_camera_info(self, model):
         cam_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_CAMERA, self.camera_name)
@@ -183,6 +186,31 @@ class CameraPublisher(SimModule):
         info.r = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
         info.p = [fx, 0.0, cx, 0.0, 0.0, fy, cy, 0.0, 0.0, 0.0, 1.0, 0.0]
         return info
+    
+    def _build_compressed_image(self, rgb_image: np.ndarray):
+        # MuJoCo typically produces RGB images.
+        # OpenCV expects BGR.
+        bgr_image = cv2.cvtColor(
+            rgb_image,
+            cv2.COLOR_RGB2BGR
+        )
+
+        # Encode image as JPEG.
+        success, encoded = cv2.imencode(
+            ".jpg",
+            bgr_image,
+            [cv2.IMWRITE_JPEG_QUALITY, 80]
+        )
+
+        if not success:
+            return
+
+        msg = CompressedImage()
+        msg.header.frame_id = "camera_optical_frame"
+
+        msg.format = "jpeg"
+        msg.data = encoded.tobytes()
+        return msg
 
     def post_step(self, model, data):
         self.renderer.update_scene(data, camera=self.camera_name)
@@ -200,6 +228,11 @@ class CameraPublisher(SimModule):
 
         self.camera_info.header.stamp = stamp
         self.info_pub.publish(self.camera_info)
+        
+        comp_img_msg = self._build_compressed_image(rgb)
+        comp_img_msg.header.stamp = stamp
+        self.comp_image_pub.publish(comp_img_msg)
+        
 
     def on_stop(self):
         if self.renderer is not None:
