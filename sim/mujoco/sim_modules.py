@@ -141,11 +141,12 @@ class CameraPublisher(SimModule):
     rate_hz = 30
 
     def __init__(self, camera_name="overhead", width=640, height=480,
-                 topic="camera/image_raw", frame_id="camera", node=None):
+                 topic="camera/image_raw", depth_topic=None, frame_id="camera", node=None):
         super().__init__(node=node)
         self.camera_name = camera_name
         self.w, self.h = width, height
         self.topic = topic
+        self.depth_topic = depth_topic
         self.frame_id = frame_id
         self.renderer = None
         self.bridge = CvBridge()
@@ -153,6 +154,8 @@ class CameraPublisher(SimModule):
         self.comp_image_pub = None
         self.info_pub = None
         self.camera_info = None
+        self.depth_pub = None
+        self.depth_info_pub = None
 
     def on_start(self, model, data):
         self.renderer = mujoco.Renderer(model, height=self.h, width=self.w)
@@ -163,9 +166,23 @@ class CameraPublisher(SimModule):
             self.info_pub = self.node.create_publisher(CameraInfo, self._sibling_topic("camera_info"), 10)
             self.comp_image_pub = self.node.create_publisher(CompressedImage, self._sibling_topic("compressed_image"), 10)
 
-    def _sibling_topic(self, key): 
+            if self.depth_topic is not None:
+                self.depth_pub = self.node.create_publisher(Image, self.depth_topic, 10)
+                self.depth_info_pub = self.node.create_publisher(
+                    CameraInfo, self._depth_sibling_topic("camera_info"), 10)
+
+    def _sibling_topic(self, key):
         if "/" in self.topic:
             base, _ = self.topic.rsplit("/", 1)
+            return f"{base}/" + key
+        return key
+
+    def _depth_sibling_topic(self, key):
+        # self.depth_topic ("aligned_depth_to_color/...") isn't a sibling of
+        # self.topic ("color/...") - different second-to-last path segment -
+        # so this needs its own base, not _sibling_topic's.
+        if "/" in self.depth_topic:
+            base, _ = self.depth_topic.rsplit("/", 1)
             return f"{base}/" + key
         return key
 
@@ -232,7 +249,24 @@ class CameraPublisher(SimModule):
         comp_img_msg = self._build_compressed_image(rgb)
         comp_img_msg.header.stamp = stamp
         self.comp_image_pub.publish(comp_img_msg)
-        
+
+        if self.depth_pub is not None:
+            # MuJoCo's Renderer toggles RGB/depth mode on one instance - a
+            # single render() call can't return both, so this is a second
+            # update_scene+render pass (doubles per-frame render cost at
+            # rate_hz, acceptable for sim testing).
+            self.renderer.enable_depth_rendering()
+            self.renderer.update_scene(data, camera=self.camera_name)
+            depth = self.renderer.render()  # float32, meters
+            self.renderer.disable_depth_rendering()
+
+            depth_msg = self.bridge.cv2_to_imgmsg(depth, encoding="32FC1")
+            depth_msg.header.stamp = stamp
+            depth_msg.header.frame_id = self.frame_id
+            self.depth_pub.publish(depth_msg)
+
+            self.camera_info.header.stamp = stamp
+            self.depth_info_pub.publish(self.camera_info)  # same intrinsics as color - that's what "aligned" means
 
     def on_stop(self):
         if self.renderer is not None:

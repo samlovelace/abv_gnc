@@ -66,13 +66,12 @@ void ObjectDetectionHandler::run()
 
     while (mRunning && rclcpp::ok())
     {
-        cv::Mat frame;
-        if (!mFrameQueue.waitPop(frame, std::chrono::milliseconds(100))) continue;
+        StampedFrame stamped;
+        if (!mFrameQueue.waitPop(stamped, std::chrono::milliseconds(100))) continue;
 
-        Detections dets = mDetector->detect(frame);
+        Detections dets = mDetector->detect(stamped.frame);
 
-        std_msgs::msg::Header header;
-        header.stamp = RosTopicManager::getInstance()->now();
+        const std_msgs::msg::Header& header = stamped.header;
 
         autobot_msgs::msg::Detections2D msg;
         msg.header = header;
@@ -113,5 +112,5 @@ void ObjectDetectionHandler::frameCallback(const sensor_msgs::msg::Image::Shared
     }
 
     // clone so we own the data - view may just be wrapping aFrame's buffer
-    mFrameQueue.push(view.clone());
+    mFrameQueue.push(StampedFrame{view.clone(), aFrame->header});
 }

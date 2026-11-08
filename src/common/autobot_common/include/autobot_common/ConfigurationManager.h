@@ -42,6 +42,7 @@ public:
     SceneConfig& getSceneConfig() { return mSceneConfig; }
     CollisionAvoidConfig& getCollisionAvoidConfig() { return mCollisionAvoidConfig; }
     ObjDetectionConfig& getObjDetectionConfig() { return mObjDetectionConfig; }
+    ObjSegmentationConfig& getObjSegmentationConfig() { return mObjSegmentationConfig; }
 
 private: 
     /**
@@ -63,6 +64,7 @@ private:
     void parseSceneConfig(const YAML::Node& aNode);
     void parseCollisionAvoidConfig(const YAML::Node& aNode);
     void parseObjDetectionConfig(const YAML::Node& aNode);
+    void parseObjSegmentationConfig(const YAML::Node& aNode);
 
 private:
 
@@ -76,6 +78,7 @@ private:
     SceneConfig mSceneConfig;
     CollisionAvoidConfig mCollisionAvoidConfig;
     ObjDetectionConfig mObjDetectionConfig;
+    ObjSegmentationConfig mObjSegmentationConfig;
 };
 
 #endif

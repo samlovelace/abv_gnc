@@ -108,7 +108,7 @@ ObjDetection:
   Type: yolo11-seg # which IDetector implementation to instantiate
   ModelPath: /home/sam/models/yolo11n-seg.onnx
   InputSize: 640
-  ConfThresh: 0.1
+  ConfThresh: 0.45
   IouThresh: 0.15
   UseCuda: false
 
@@ -197,3 +197,9 @@ ObjDetection:
       hair drier,
       toothbrush,
     ]
+
+# Consumed by autobot_obj_segmentation.
+ObjSegmentation:
+  SyncSlopSec: 0.05
+  MinPointsPerObject: 20
+  MaxPointsPerObject: 0

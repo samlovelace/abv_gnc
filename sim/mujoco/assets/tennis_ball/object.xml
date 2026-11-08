@@ -1,0 +1,35 @@
+<mujoco>
+  <compiler meshdir="" />
+
+  <!-- "grab"/"object_col" default classes (childclass below, and
+       tennis_ball_collision's class="object_col") live in common.xml -
+       previously pulled in transitively via banana/object.xml's own
+       include, which no longer exists in this scene now that the banana
+       was swapped out, so this needs its own include. -->
+  <include file="../assets/common.xml" />
+  <include file="../assets/tennis_ball/assets.xml" />
+  <worldbody>
+    <!-- pos: resting on table.xml's tabletop (surface z=0.775) plus the
+         ball's own radius (0.0335m, matches a real tennis ball). freejoint
+         since a sphere is trivially stable at rest (unlike the cylinder
+         distractor, which needed to be made static to stop jittering). -->
+    <body name="tennis_ball" pos="0 0 0.8085" childclass="grab">
+      <freejoint/>
+      <!-- Visual mesh centered on the body origin: the raw YCB scan's own
+           local origin isn't at its geometric center (bbox center is at
+           roughly 0 0.006 0.037 in the mesh's own coords), so this offset
+           re-centers it to coincide with the body origin, which is where
+           the collision sphere below is implicitly centered (pos defaults
+           to 0 0 0). Derived from the mesh's own bounding box. -->
+      <geom name="tennis_ball_visual" mesh="tennis_ball_ycb" material="tennis_ball_ycb_mat"
+            pos="0.0006 -0.006 -0.0368" contype="0" conaffinity="0" group="2"/>
+      <!-- condim=6 (up from object_col's default of 4) activates rolling
+           friction, not just sliding/torsional - without it a sphere has
+           nothing to dissipate rolling motion and rolls/rocks indefinitely
+           once perturbed by settling onto the table. object_col's friction
+           vector ("1 0.5 0.01") already has a rolling coefficient (0.01),
+           it just wasn't being used at condim=4. -->
+      <geom name="tennis_ball_collision" type="sphere" size="0.0335" class="object_col" condim="6"/>
+    </body>
+  </worldbody>
+</mujoco>

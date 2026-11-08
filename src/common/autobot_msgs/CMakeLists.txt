@@ -6,6 +6,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
@@ -32,9 +33,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Vec3.msg"
   "msg/Detection2D.msg"
   "msg/Detections2D.msg"
+  "msg/ObjectObservation.msg"
+  "msg/ObjectObservations.msg"
   "srv/PolicySwitch.srv"
-  DEPENDENCIES std_msgs sensor_msgs
+  DEPENDENCIES std_msgs sensor_msgs geometry_msgs
 )
 
-ament_export_dependencies(rosidl_default_generators std_msgs sensor_msgs)
+ament_export_dependencies(rosidl_default_generators std_msgs sensor_msgs geometry_msgs)
 ament_package()

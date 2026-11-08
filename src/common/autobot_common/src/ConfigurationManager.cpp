@@ -70,6 +70,9 @@ void ConfigurationManager::loadConfiguration()
 
     YAML::Node objDetectionNode = config["ObjDetection"];
     parseObjDetectionConfig(objDetectionNode);
+
+    YAML::Node objSegmentationNode = config["ObjSegmentation"];
+    parseObjSegmentationConfig(objSegmentationNode);
 }
 
 void ConfigurationManager::parseGuidanceConfig(const YAML::Node& aNode)
@@ -182,6 +185,13 @@ void ConfigurationManager::parseObjDetectionConfig(const YAML::Node& aNode)
     mObjDetectionConfig.mConfThresh = aNode["ConfThresh"].as<double>(0.25);
     mObjDetectionConfig.mIouThresh = aNode["IouThresh"].as<double>(0.45);
     mObjDetectionConfig.mUseCuda = aNode["UseCuda"].as<bool>(false);
+}
+
+void ConfigurationManager::parseObjSegmentationConfig(const YAML::Node& aNode)
+{
+    mObjSegmentationConfig.mSyncSlopSec = aNode["SyncSlopSec"].as<double>(0.05);
+    mObjSegmentationConfig.mMinPointsPerObject = aNode["MinPointsPerObject"].as<int>(20);
+    mObjSegmentationConfig.mMaxPointsPerObject = aNode["MaxPointsPerObject"].as<int>(0);
 }
 
 

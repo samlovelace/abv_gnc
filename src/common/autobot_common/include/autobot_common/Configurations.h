@@ -153,6 +153,13 @@ struct ObjDetectionConfig
     bool mUseCuda;
 };
 
+struct ObjSegmentationConfig
+{
+    double mSyncSlopSec;      // ApproximateTimeSynchronizer max interval duration
+    int mMinPointsPerObject;  // skip + warn if a detection's valid point count is below this
+    int mMaxPointsPerObject;  // 0 = unbounded; else caps PointCloud2 size / PCA cost for huge masks
+};
+
 namespace ConfigUtils
 {
     static Eigen::Vector3d parseVector3d(const YAML::Node& node) 
