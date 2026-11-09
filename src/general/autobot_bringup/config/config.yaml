@@ -203,3 +203,6 @@ ObjSegmentation:
   SyncSlopSec: 0.05
   MinPointsPerObject: 20
   MaxPointsPerObject: 0
+  MaskErosionKernelSize: 5
+  OutlierMeanK: 8
+  OutlierStdDevMultiplier: 1.0

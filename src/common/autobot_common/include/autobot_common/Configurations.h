@@ -158,6 +158,10 @@ struct ObjSegmentationConfig
     double mSyncSlopSec;      // ApproximateTimeSynchronizer max interval duration
     int mMinPointsPerObject;  // skip + warn if a detection's valid point count is below this
     int mMaxPointsPerObject;  // 0 = unbounded; else caps PointCloud2 size / PCA cost for huge masks
+
+    int mMaskErosionKernelSize;      // pixels, elliptical kernel; <=1 disables erosion
+    int mOutlierMeanK;                // neighbors per point for outlier stats; <=0 disables
+    double mOutlierStdDevMultiplier;  // reject if meanNeighborDist > mean + this*stddev; <=0 disables
 };
 
 namespace ConfigUtils

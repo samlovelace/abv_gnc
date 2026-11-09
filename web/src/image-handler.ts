@@ -32,7 +32,7 @@ export class ImageHandler implements Handler {
     );
 
     ros.watch<Detections2D>(
-      "/detections",
+      "/percep/detections",
       "autobot_msgs/msg/Detections2D",
       (msg) => {
         this.onDetections(msg);

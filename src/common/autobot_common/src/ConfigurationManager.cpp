@@ -192,6 +192,10 @@ void ConfigurationManager::parseObjSegmentationConfig(const YAML::Node& aNode)
     mObjSegmentationConfig.mSyncSlopSec = aNode["SyncSlopSec"].as<double>(0.05);
     mObjSegmentationConfig.mMinPointsPerObject = aNode["MinPointsPerObject"].as<int>(20);
     mObjSegmentationConfig.mMaxPointsPerObject = aNode["MaxPointsPerObject"].as<int>(0);
+
+    mObjSegmentationConfig.mMaskErosionKernelSize = aNode["MaskErosionKernelSize"].as<int>(5);
+    mObjSegmentationConfig.mOutlierMeanK = aNode["OutlierMeanK"].as<int>(8);
+    mObjSegmentationConfig.mOutlierStdDevMultiplier = aNode["OutlierStdDevMultiplier"].as<double>(1.0);
 }
 
 

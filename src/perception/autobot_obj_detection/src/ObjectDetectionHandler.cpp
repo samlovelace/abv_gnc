@@ -48,7 +48,7 @@ ObjectDetectionHandler::ObjectDetectionHandler()
     RosTopicManager::getInstance()->createSubscriber<sensor_msgs::msg::Image>("/camera/camera/color/image_raw",
         std::bind(&ObjectDetectionHandler::frameCallback, this, std::placeholders::_1));
 
-    RosTopicManager::getInstance()->createPublisher<autobot_msgs::msg::Detections2D>("/detections");
+    RosTopicManager::getInstance()->createPublisher<autobot_msgs::msg::Detections2D>("percep/detections");
 
     mRunning = true;
     mWorkerThread = std::thread(&ObjectDetectionHandler::run, this);
@@ -87,7 +87,7 @@ void ObjectDetectionHandler::run()
             msg.detections.push_back(std::move(out));
         }
 
-        RosTopicManager::getInstance()->publishMessage("/detections", msg);
+        RosTopicManager::getInstance()->publishMessage("percep/detections", msg);
     }
 }
 

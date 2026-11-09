@@ -3,9 +3,14 @@
 #include <array>
 #include <Eigen/Dense>
 #include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <plog/Log.h>
-#include <sensor_msgs/point_cloud2_iterator.hpp>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/common/centroid.h>
+#include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 #include "autobot_common/ConfigurationManager.h"
 #include "autobot_common/RosTopicManager.h"
@@ -15,17 +20,31 @@ namespace {
 
 constexpr const char* kDepthTopic = "/camera/camera/aligned_depth_to_color/image_raw";
 constexpr const char* kCameraInfoTopic = "/camera/camera/aligned_depth_to_color/camera_info";
-constexpr const char* kDetectionsTopic = "/detections";
+constexpr const char* kDetectionsTopic = "percep/detections";
 constexpr const char* kOutputTopic = "/percep/object_observations";
+
+// Shrinks the mask inward before back-projection so only confidently-interior
+// pixels are used - the thresholded YOLO-seg mask boundary is imprecise by a
+// few pixels (upsampled from a low-resolution prototype), and those boundary
+// pixels often sample background depth rather than object depth. Elliptical
+// kernel to avoid a directional/blocky bias against round objects.
+cv::Mat erodeMask(const cv::Mat& mask, int kernelSize)
+{
+    if (kernelSize <= 1) return mask;
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(kernelSize, kernelSize));
+    cv::Mat eroded;
+    cv::erode(mask, eroded, kernel);
+    return eroded;
+}
 
 // Mask is already full original-image size (same as depth), NOT cropped to
 // the box - confirmed via Detection.hpp / YoloSegDetector::postprocess. So
 // mask pixel (u,v) maps directly to depth pixel (u,v), no box offset needed.
 bool backProject(const cv::Mat& mask, const cv::Mat& depth, const std::string& depthEncoding,
                   float fx, float fy, float cx, float cy, int maxPoints,
-                  std::vector<Eigen::Vector3f>& outPoints)
+                  pcl::PointCloud<pcl::PointXYZ>& outCloud)
 {
-    outPoints.clear();
+    outCloud.clear();
     for (int v = 0; v < mask.rows; ++v)
     {
         const uint8_t* maskRow = mask.ptr<uint8_t>(v);
@@ -47,44 +66,57 @@ bool backProject(const cv::Mat& mask, const cv::Mat& depth, const std::string& d
                 z = raw;
             }
 
-            outPoints.emplace_back((u - cx) * z / fx, (v - cy) * z / fy, z);
-            if (maxPoints > 0 && static_cast<int>(outPoints.size()) >= maxPoints) return true;
+            outCloud.emplace_back((u - cx) * z / fx, (v - cy) * z / fy, z);
+            if (maxPoints > 0 && static_cast<int>(outCloud.size()) >= maxPoints) return true;
         }
     }
     return true;
 }
 
+// General-purpose statistical outlier removal (PCL): for each point, mean
+// distance to its K nearest neighbors; reject points whose mean neighbor
+// distance is more than stdDevMultiplier standard deviations above the
+// cloud's own mean. Only the upper tail is rejected - points closer together
+// than average are never removed, since density alone isn't evidence of
+// being wrong. Filters in place.
+void rejectStatisticalOutliers(pcl::PointCloud<pcl::PointXYZ>& cloud, int meanK, double stdDevMultiplier)
+{
+    if (meanK <= 0 || stdDevMultiplier <= 0.0 || static_cast<int>(cloud.size()) <= meanK) return;
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr input(new pcl::PointCloud<pcl::PointXYZ>(cloud));
+    pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+    sor.setInputCloud(input);
+    sor.setMeanK(meanK);
+    sor.setStddevMulThresh(stdDevMultiplier);
+    sor.filter(cloud);
+}
+
 // Centroid + covariance eigendecomposition -> dimensions (extent along each
-// principal axis) + the principal axes themselves
-void computePca(const std::vector<Eigen::Vector3f>& points,
+// principal axis) + the principal axes themselves. Centroid/covariance come
+// from PCL; the eigenvalue-sorted-axis + extent-projection logic has no PCL
+// equivalent (specific to what this message needs), so it stays hand-rolled.
+void computePca(const pcl::PointCloud<pcl::PointXYZ>& cloud,
                  geometry_msgs::msg::Point& centroidOut,
                  geometry_msgs::msg::Vector3& dimsOut,
                  std::array<geometry_msgs::msg::Vector3, 3>& axesOut)
 {
-    Eigen::Vector3d centroid = Eigen::Vector3d::Zero();
-    for (const auto& p : points) centroid += p.cast<double>();
-    centroid /= static_cast<double>(points.size());
+    Eigen::Vector4f centroid4;
+    Eigen::Matrix3f covariance;
+    pcl::computeMeanAndCovarianceMatrix(cloud, covariance, centroid4);
+    const Eigen::Vector3d centroid = centroid4.head<3>().cast<double>();
 
-    Eigen::Matrix3d cov = Eigen::Matrix3d::Zero();
-    for (const auto& p : points)
-    {
-        const Eigen::Vector3d d = p.cast<double>() - centroid;
-        cov += d * d.transpose();
-    }
-    cov /= static_cast<double>(points.size());
-
-    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(cov);
-    Eigen::Matrix3d axes = solver.eigenvectors();  // ascending eigenvalue order
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> solver(covariance);
+    const Eigen::Matrix3f axes = solver.eigenvectors();  // ascending eigenvalue order
     Eigen::Matrix3d sortedAxes;
-    sortedAxes.col(0) = axes.col(2);  // largest-extent axis first
-    sortedAxes.col(1) = axes.col(1);
-    sortedAxes.col(2) = axes.col(0);
+    sortedAxes.col(0) = axes.col(2).cast<double>();  // largest-extent axis first
+    sortedAxes.col(1) = axes.col(1).cast<double>();
+    sortedAxes.col(2) = axes.col(0).cast<double>();
 
     Eigen::Vector3d minProj = Eigen::Vector3d::Constant(std::numeric_limits<double>::max());
     Eigen::Vector3d maxProj = Eigen::Vector3d::Constant(std::numeric_limits<double>::lowest());
-    for (const auto& p : points)
+    for (const auto& p : cloud)
     {
-        const Eigen::Vector3d local = sortedAxes.transpose() * (p.cast<double>() - centroid);
+        const Eigen::Vector3d local = sortedAxes.transpose() * (Eigen::Vector3d(p.x, p.y, p.z) - centroid);
         minProj = minProj.cwiseMin(local);
         maxProj = maxProj.cwiseMax(local);
     }
@@ -100,29 +132,13 @@ void computePca(const std::vector<Eigen::Vector3f>& points,
     }
 }
 
-sensor_msgs::msg::PointCloud2 buildPointCloud(const std::vector<Eigen::Vector3f>& points,
+sensor_msgs::msg::PointCloud2 buildPointCloud(const pcl::PointCloud<pcl::PointXYZ>& cloud,
                                                const std_msgs::msg::Header& header)
 {
-    sensor_msgs::msg::PointCloud2 cloud;
-    cloud.header = header;
-    cloud.height = 1;
-    cloud.width = static_cast<uint32_t>(points.size());
-    cloud.is_dense = true;
-    cloud.is_bigendian = false;
-
-    sensor_msgs::PointCloud2Modifier modifier(cloud);
-    modifier.setPointCloud2FieldsByString(1, "xyz");
-    modifier.resize(points.size());
-
-    sensor_msgs::PointCloud2Iterator<float> ix(cloud, "x");
-    sensor_msgs::PointCloud2Iterator<float> iy(cloud, "y");
-    sensor_msgs::PointCloud2Iterator<float> iz(cloud, "z");
-    for (const auto& p : points)
-    {
-        *ix = p.x(); *iy = p.y(); *iz = p.z();
-        ++ix; ++iy; ++iz;
-    }
-    return cloud;
+    sensor_msgs::msg::PointCloud2 msg;
+    pcl::toROSMsg(cloud, msg);
+    msg.header = header;
+    return msg;
 }
 
 cv::Mat depthMsgToMat(const sensor_msgs::msg::Image& msg)
@@ -211,12 +227,16 @@ void SegmentationHandler::onSynced(const sensor_msgs::msg::Image::ConstSharedPtr
             continue;
         }
 
-        std::vector<Eigen::Vector3f> points;
-        backProject(maskMat, depthMat, aDepth->encoding, fx, fy, cx, cy, cfg.mMaxPointsPerObject, points);
+        cv::Mat erodedMask = erodeMask(maskMat, cfg.mMaskErosionKernelSize);
 
-        if (static_cast<int>(points.size()) < cfg.mMinPointsPerObject)
+        pcl::PointCloud<pcl::PointXYZ> cloud;
+        backProject(erodedMask, depthMat, aDepth->encoding, fx, fy, cx, cy, cfg.mMaxPointsPerObject, cloud);
+
+        rejectStatisticalOutliers(cloud, cfg.mOutlierMeanK, cfg.mOutlierStdDevMultiplier);
+
+        if (static_cast<int>(cloud.size()) < cfg.mMinPointsPerObject)
         {
-            LOGW << "Detection '" << det.label << "' has only " << points.size()
+            LOGW << "Detection '" << det.label << "' has only " << cloud.size()
                  << " valid points (< " << cfg.mMinPointsPerObject << "), skipping";
             continue;
         }
@@ -225,8 +245,8 @@ void SegmentationHandler::onSynced(const sensor_msgs::msg::Image::ConstSharedPtr
         obs.label = det.label;
         obs.class_id = -1;  // no numeric class id available yet (Detection2D only carries label)
         obs.confidence = det.score;
-        computePca(points, obs.centroid, obs.dimensions, obs.principal_axes);
-        obs.points = buildPointCloud(points, aDetections->header);
+        computePca(cloud, obs.centroid, obs.dimensions, obs.principal_axes);
+        obs.points = buildPointCloud(cloud, aDetections->header);
         outMsg.observations.push_back(std::move(obs));
     }
 

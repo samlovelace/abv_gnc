@@ -21,6 +21,8 @@
   <depend>libopencv-dev</depend>
   <depend>eigen</depend>
   <depend>message_filters</depend>
+  <depend>libpcl-all-dev</depend>
+  <depend>pcl_conversions</depend>
   <export>
     <build_type>ament_cmake</build_type>
   </export>
