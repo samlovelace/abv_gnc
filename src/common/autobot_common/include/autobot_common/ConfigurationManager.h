@@ -43,6 +43,7 @@ public:
     CollisionAvoidConfig& getCollisionAvoidConfig() { return mCollisionAvoidConfig; }
     ObjDetectionConfig& getObjDetectionConfig() { return mObjDetectionConfig; }
     ObjSegmentationConfig& getObjSegmentationConfig() { return mObjSegmentationConfig; }
+    ObjRegistryConfig& getObjRegistryConfig() { return mObjRegistryConfig; }
 
 private: 
     /**
@@ -65,6 +66,7 @@ private:
     void parseCollisionAvoidConfig(const YAML::Node& aNode);
     void parseObjDetectionConfig(const YAML::Node& aNode);
     void parseObjSegmentationConfig(const YAML::Node& aNode);
+    void parseObjRegistryConfig(const YAML::Node& aNode);
 
 private:
 
@@ -79,6 +81,7 @@ private:
     CollisionAvoidConfig mCollisionAvoidConfig;
     ObjDetectionConfig mObjDetectionConfig;
     ObjSegmentationConfig mObjSegmentationConfig;
+    ObjRegistryConfig mObjRegistryConfig;
 };
 
 #endif

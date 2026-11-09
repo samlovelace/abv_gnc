@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>autobot_obj_registry</name>
+  <version>0.0.0</version>
+  <description>consolidates/deduplicates percep/object_observations into a persistent registry of unique tracked objects, keyed by label + spatial centroid proximity, exposed via the percep/get_tracked_objects service</description>
+  <maintainer email="samlovelace12@gmail.com">sam</maintainer>
+  <license>TODO: License declaration</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>autobot_common</depend>
+  <depend>autobot_msgs</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

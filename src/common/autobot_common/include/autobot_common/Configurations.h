@@ -164,6 +164,13 @@ struct ObjSegmentationConfig
     double mOutlierStdDevMultiplier;  // reject if meanNeighborDist > mean + this*stddev; <=0 disables
 };
 
+struct ObjRegistryConfig
+{
+    double mMatchDistanceThresholdM;  // meters; max centroid distance to same-label existing track to count as a match
+    double mStalenessTimeoutSec;      // seconds since last_seen before a tracked object is pruned (erased)
+    double mPruneRateHz;              // rate of the prune/staleness-check wall timer
+};
+
 namespace ConfigUtils
 {
     static Eigen::Vector3d parseVector3d(const YAML::Node& node) 

@@ -1,0 +1,10 @@
+# id <= 0 (including the default-initialized 0) means "no filter": return every
+# currently tracked object. A specific positive id returns just that one tracked
+# object, or an empty `objects` array if no tracked object currently has that id.
+#
+# Deliberately a single optional numeric filter field + an array response, so a
+# future label filter (explicitly deferred - not implemented here) can be added
+# as one more optional request field without changing the response shape.
+int32 id
+---
+TrackedObject[] objects

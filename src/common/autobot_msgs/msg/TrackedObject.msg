@@ -1,0 +1,3 @@
+int32 id
+ObjectObservation observation
+builtin_interfaces/Time last_seen

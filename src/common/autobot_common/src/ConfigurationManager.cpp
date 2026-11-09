@@ -73,6 +73,9 @@ void ConfigurationManager::loadConfiguration()
 
     YAML::Node objSegmentationNode = config["ObjSegmentation"];
     parseObjSegmentationConfig(objSegmentationNode);
+
+    YAML::Node objRegistryNode = config["ObjRegistry"];
+    parseObjRegistryConfig(objRegistryNode);
 }
 
 void ConfigurationManager::parseGuidanceConfig(const YAML::Node& aNode)
@@ -196,6 +199,13 @@ void ConfigurationManager::parseObjSegmentationConfig(const YAML::Node& aNode)
     mObjSegmentationConfig.mMaskErosionKernelSize = aNode["MaskErosionKernelSize"].as<int>(5);
     mObjSegmentationConfig.mOutlierMeanK = aNode["OutlierMeanK"].as<int>(8);
     mObjSegmentationConfig.mOutlierStdDevMultiplier = aNode["OutlierStdDevMultiplier"].as<double>(1.0);
+}
+
+void ConfigurationManager::parseObjRegistryConfig(const YAML::Node& aNode)
+{
+    mObjRegistryConfig.mMatchDistanceThresholdM = aNode["MatchDistanceThresholdM"].as<double>(0.5);
+    mObjRegistryConfig.mStalenessTimeoutSec = aNode["StalenessTimeoutSec"].as<double>(10.0);
+    mObjRegistryConfig.mPruneRateHz = aNode["PruneRateHz"].as<double>(1.0);
 }
 
 

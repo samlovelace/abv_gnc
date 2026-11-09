@@ -206,3 +206,9 @@ ObjSegmentation:
   MaskErosionKernelSize: 5
   OutlierMeanK: 8
   OutlierStdDevMultiplier: 1.0
+
+# Consumed by autobot_obj_registry.
+ObjRegistry:
+  MatchDistanceThresholdM: 0.5
+  StalenessTimeoutSec: 10.0
+  PruneRateHz: 1.0
