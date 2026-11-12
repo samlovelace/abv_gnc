@@ -75,6 +75,13 @@ public:
         std::optional<std::vector<double>> closedPos;
     };
 
+    struct PlannerConfig
+    {
+        double approachDistanceM = 0.05;            // pre-grasp backoff distance, meters
+        double planningTimeS = 2.0;                 // OMPL time budget, seconds
+        double stateValidityResolutionFrac = 0.01;  // OMPL setLongestValidSegmentFraction
+    };
+
     struct Config
     {
         // Top-level
@@ -90,6 +97,7 @@ public:
         std::optional<MobileBaseConfig> mobileBase;
         ManipulatorConfig                manipulator;
         std::optional<GripperConfig>     gripper;
+        PlannerConfig                    planner;  // defaults apply if config.yaml's Planner: block is absent
 
         // Combined flat vectors — ordered [mobile base joints..., arm joints...]
         // (or arm joints only, if there's no mobile base).
@@ -256,6 +264,7 @@ private:
     void loadManipulatorSection(const std::filesystem::path& manipDir);
     void loadGripperSection    ();
     void loadMountSection      ();
+    void loadPlannerSection    (const YAML::Node& aTopConfig);
     void mergeJointData        ();
 
     // -----------------------------------------------------------------------

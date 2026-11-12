@@ -36,8 +36,12 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ObjectObservation.msg"
   "msg/ObjectObservations.msg"
   "msg/TrackedObject.msg"
+  "msg/PickWaypoint.msg"
+  "msg/PickPlan.msg"
   "srv/PolicySwitch.srv"
   "srv/GetTrackedObjects.srv"
+  "srv/PlanGrasp.srv"
+  "srv/PlanPick.srv"
   DEPENDENCIES std_msgs sensor_msgs geometry_msgs
 )
 

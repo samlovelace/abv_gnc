@@ -30,4 +30,11 @@ def generate_launch_description():
             output='screen',
             emulate_tty=True,
         ),
+        Node(
+            package='autobot_camera_tf',
+            executable='autobot_camera_tf',
+            name='autobot_camera_tf',
+            output='screen',
+            emulate_tty=True,
+        )
     ])

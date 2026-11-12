@@ -212,3 +212,15 @@ ObjRegistry:
   MatchDistanceThresholdM: 0.5
   StalenessTimeoutSec: 10.0
   PruneRateHz: 1.0
+
+# Consumed by autobot_camera_tf (broadcasts this as a static TF) and
+# autobot_obj_segmentation (looks it up to express observations in WorldFrame).
+# Translation/rotation default to the MuJoCo tabletop sim's overhead camera
+# (sim/mujoco/worlds/rebot-tabletop.xml: pos="0 0 1.65", looking straight down,
+# no additional rotation) - verify/tune against real centroid/height values
+# before trusting this on hardware.
+CameraExtrinsics:
+  CameraFrame: overhead_camera
+  WorldFrame: world
+  TranslationXYZ: [0.0, 0.0, 1.65]
+  RotationQuaternionXYZW: [1.0, 0.0, 0.0, 0.0]

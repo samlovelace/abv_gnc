@@ -26,10 +26,10 @@ deploy:
 stow:
   pos: [0, 0, 0, 0, 0, 0]
 
-# NOTE: placeholder — set to the actual rebot base mount location on top of the abv
+# rebot base mount location on the tabletop (matches sim/mujoco/config/rebot_tabletop.yaml's mounts: entry)
 mount:
-  position: [-0.2, 0, 0.3] # xyz
-  quaternion: [0, 0, 0, 1] # xyz w
+  position: [0, -0.30, 0.775] # xyz
+  quaternion: [0, 0, 0.707, 0.707] # xyz w
 
 # parallel gripper fingers — excluded from FK/IK and trajectory generation,
 # commanded directly via the arm/gripper_position_waypoint topic.

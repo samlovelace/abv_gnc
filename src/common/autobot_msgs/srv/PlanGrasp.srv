@@ -1,0 +1,7 @@
+# id must be a valid id previously returned by GetTrackedObjects - the
+# tracked object to compute a grasp pose for.
+int32 id
+---
+bool success
+string message
+geometry_msgs/PoseStamped grasp_pose

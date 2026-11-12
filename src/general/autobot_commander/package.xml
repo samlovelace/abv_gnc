@@ -9,6 +9,8 @@
 
   <depend>autobot_msgs</depend>
   <depend>autobot_common</depend>
+  <depend>geometry_msgs</depend>
+  <depend>ptera_msgs</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

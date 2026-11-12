@@ -10,7 +10,9 @@
 #include <pcl/point_types.h>
 #include <pcl/common/centroid.h>
 #include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl/common/transforms.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <tf2/exceptions.h>
 
 #include "autobot_common/ConfigurationManager.h"
 #include "autobot_common/RosTopicManager.h"
@@ -132,6 +134,15 @@ void computePca(const pcl::PointCloud<pcl::PointXYZ>& cloud,
     }
 }
 
+Eigen::Affine3f transformToEigenAffine(const geometry_msgs::msg::Transform& t)
+{
+    const Eigen::Quaternionf q(static_cast<float>(t.rotation.w), static_cast<float>(t.rotation.x),
+                                static_cast<float>(t.rotation.y), static_cast<float>(t.rotation.z));
+    const Eigen::Translation3f translation(static_cast<float>(t.translation.x), static_cast<float>(t.translation.y),
+                                             static_cast<float>(t.translation.z));
+    return translation * q;
+}
+
 sensor_msgs::msg::PointCloud2 buildPointCloud(const pcl::PointCloud<pcl::PointXYZ>& cloud,
                                                const std_msgs::msg::Header& header)
 {
@@ -159,6 +170,8 @@ cv::Mat maskMsgToMat(const sensor_msgs::msg::Image& msg)
 }  // namespace
 
 SegmentationHandler::SegmentationHandler()
+    : mTfBuffer(RosTopicManager::getInstance()->get_clock())
+    , mTfListener(mTfBuffer)
 {
     RosTopicManager::getInstance()->createSubscriber<sensor_msgs::msg::CameraInfo>(
         kCameraInfoTopic, std::bind(&SegmentationHandler::onCameraInfo, this, std::placeholders::_1));
@@ -198,6 +211,7 @@ void SegmentationHandler::onSynced(const sensor_msgs::msg::Image::ConstSharedPtr
     }
 
     const auto& cfg = ConfigurationManager::getInstance()->getObjSegmentationConfig();
+    const auto& extrinsicsCfg = ConfigurationManager::getInstance()->getCameraExtrinsicsConfig();
     const float fx = static_cast<float>(info->k[0]);
     const float fy = static_cast<float>(info->k[4]);
     const float cx = static_cast<float>(info->k[2]);
@@ -214,8 +228,23 @@ void SegmentationHandler::onSynced(const sensor_msgs::msg::Image::ConstSharedPtr
         return;
     }
 
+    Eigen::Affine3f cameraToWorld;
+    try
+    {
+        const auto transform = mTfBuffer.lookupTransform(
+            extrinsicsCfg.mWorldFrame, aDetections->header.frame_id, aDetections->header.stamp);
+        cameraToWorld = transformToEigenAffine(transform.transform);
+    }
+    catch (const tf2::TransformException& e)
+    {
+        LOGW << "Could not look up " << extrinsicsCfg.mWorldFrame << " -> " << aDetections->header.frame_id
+             << " (" << e.what() << "), dropping synced frame";
+        return;
+    }
+
     autobot_msgs::msg::ObjectObservations outMsg;
     outMsg.header = aDetections->header;
+    outMsg.header.frame_id = extrinsicsCfg.mWorldFrame;
 
     for (const auto& det : aDetections->detections)
     {
@@ -241,12 +270,14 @@ void SegmentationHandler::onSynced(const sensor_msgs::msg::Image::ConstSharedPtr
             continue;
         }
 
+        pcl::transformPointCloud(cloud, cloud, cameraToWorld);
+
         autobot_msgs::msg::ObjectObservation obs;
         obs.label = det.label;
         obs.class_id = -1;  // no numeric class id available yet (Detection2D only carries label)
         obs.confidence = det.score;
         computePca(cloud, obs.centroid, obs.dimensions, obs.principal_axes);
-        obs.points = buildPointCloud(cloud, aDetections->header);
+        obs.points = buildPointCloud(cloud, outMsg.header);
         outMsg.observations.push_back(std::move(obs));
     }
 

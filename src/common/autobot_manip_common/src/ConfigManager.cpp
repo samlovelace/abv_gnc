@@ -52,6 +52,7 @@ void ConfigManager::loadConfig()
     loadManipulatorSection(manipDir);
     loadGripperSection    ();
     loadMountSection      ();
+    loadPlannerSection    (topConfig);
 
     // Mobile base is optional — a manipulator with no MobileBase entry is standalone
     if (topConfig["MobileBase"] && !topConfig["MobileBase"].IsNull())
@@ -189,6 +190,22 @@ void ConfigManager::loadMountSection()
     const KDL::Vector   p(xyz[0], xyz[1], xyz[2]);
     const KDL::Rotation r = KDL::Rotation::Quaternion(q[0], q[1], q[2], q[3]);
     mConfig.T_V_B = KDL::Frame(r, p);
+}
+
+// ---------------------------------------------------------------------------
+// Planner: (optional top-level block) — defaults in PlannerConfig{} apply
+// if absent.
+// ---------------------------------------------------------------------------
+void ConfigManager::loadPlannerSection(const YAML::Node& aTopConfig)
+{
+    if (!aTopConfig["Planner"] || aTopConfig["Planner"].IsNull())
+        return;
+
+    const YAML::Node& p = aTopConfig["Planner"];
+    mConfig.planner.approachDistanceM = optionalScalar<double>(p, "ApproachDistanceM", mConfig.planner.approachDistanceM);
+    mConfig.planner.planningTimeS     = optionalScalar<double>(p, "PlanningTimeS",     mConfig.planner.planningTimeS);
+    mConfig.planner.stateValidityResolutionFrac =
+        optionalScalar<double>(p, "StateValidityResolutionFrac", mConfig.planner.stateValidityResolutionFrac);
 }
 
 // ---------------------------------------------------------------------------

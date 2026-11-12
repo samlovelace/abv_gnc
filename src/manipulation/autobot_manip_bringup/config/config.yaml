@@ -2,7 +2,7 @@ Manipulator:
   name: abv_rebot
 
 # MobileBase:
-#   name: # omit this whole key (or leave name blank/null) for a standalone manipulator
+#   name: tabletop # omit this whole key (or leave name blank/null) for a standalone manipulator
 #   controllable: false # true: base joints are planned/commanded; false: base is measured-only (default)
 
 StateMachine:
@@ -17,3 +17,8 @@ Engine:
   GraspPlanning:
     type: pca
     visualize: false
+
+Planner:
+  ApproachDistanceM: 0.08
+  PlanningTimeS: 2.0
+  StateValidityResolutionFrac: 0.01

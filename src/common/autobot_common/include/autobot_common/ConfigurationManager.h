@@ -44,6 +44,7 @@ public:
     ObjDetectionConfig& getObjDetectionConfig() { return mObjDetectionConfig; }
     ObjSegmentationConfig& getObjSegmentationConfig() { return mObjSegmentationConfig; }
     ObjRegistryConfig& getObjRegistryConfig() { return mObjRegistryConfig; }
+    CameraExtrinsicsConfig& getCameraExtrinsicsConfig() { return mCameraExtrinsicsConfig; }
 
 private: 
     /**
@@ -67,6 +68,7 @@ private:
     void parseObjDetectionConfig(const YAML::Node& aNode);
     void parseObjSegmentationConfig(const YAML::Node& aNode);
     void parseObjRegistryConfig(const YAML::Node& aNode);
+    void parseCameraExtrinsicsConfig(const YAML::Node& aNode);
 
 private:
 
@@ -82,6 +84,7 @@ private:
     ObjDetectionConfig mObjDetectionConfig;
     ObjSegmentationConfig mObjSegmentationConfig;
     ObjRegistryConfig mObjRegistryConfig;
+    CameraExtrinsicsConfig mCameraExtrinsicsConfig;
 };
 
 #endif

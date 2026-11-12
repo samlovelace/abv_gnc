@@ -6,6 +6,11 @@ def generate_launch_description():
     return LaunchDescription(
         [
             Node(
+                package="autobot_grasp_planner",
+                executable="autobot_grasp_planner",
+                output="screen",
+            ),
+            Node(
                 package="autobot_manip_hardware",
                 executable="autobot_manip_hardware",
                 output="screen",
@@ -19,6 +24,11 @@ def generate_launch_description():
             Node(
                 package="autobot_manip_controller",
                 executable="autobot_manip_controller",
+                output="screen",
+            ),
+            Node(
+                package="autobot_manip_planner",
+                executable="autobot_manip_planner",
                 output="screen",
             ),
         ]

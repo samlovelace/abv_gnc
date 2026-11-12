@@ -69,9 +69,36 @@ bool KinematicsHandler::init(const ConfigManager::Config& aConfig)
     }
     else
     {
-        if(!kdl_parser::treeFromFile(aConfig.manipulator.urdfPath, mTree))
+        // No mobile base - still apply the mount transform (T_V_B) by grafting
+        // the arm onto a synthetic world root via a fixed segment, same idiom
+        // as the with-base branch above. Loading the arm urdf directly as the
+        // tree root (the old behavior here) silently dropped T_V_B.
+        KDL::Tree manip;
+        if(!kdl_parser::treeFromFile(aConfig.manipulator.urdfPath, manip))
         {
             LOGE << "Failed to parse manipulator urdf to KDL::Tree";
+            return false;
+        }
+
+        const std::string& manipBaseLink = aConfig.manipulator.baseLink;
+        if(manip.getRootSegment()->first != manipBaseLink)
+        {
+            LOGE << "Manipulator urdf root link '" << manip.getRootSegment()->first
+                 << "' does not match configured base_link '" << manipBaseLink << "'";
+            return false;
+        }
+
+        mTree = KDL::Tree("world");
+        const KDL::Segment mount(manipBaseLink, KDL::Joint(manipBaseLink + "_mount_joint", KDL::Joint::Fixed), aConfig.T_V_B);
+        if(!mTree.addSegment(mount, mTree.getRootSegment()->first))
+        {
+            LOGE << "Failed to attach manip mount to world root";
+            return false;
+        }
+
+        if(!mTree.addTree(manip, manipBaseLink))
+        {
+            LOGE << "Failed to attach manip tree at link: " << manipBaseLink;
             return false;
         }
 
@@ -300,19 +327,6 @@ bool KinematicsHandler::solveFk(const KDL::JntArray& anInitPos, KDL::Frame& aFra
     }
 
     int fkResult = mFkSolver->JntToCart(anInitPos, aFrameOut, segName);
-
-    // // Position
-    // double x = aFrameOut.p.x();
-    // double y = aFrameOut.p.y();
-    // double z = aFrameOut.p.z();
-
-    // // Orientation (Quaternion)
-    // double qx, qy, qz, qw;
-    // aFrameOut.M.GetQuaternion(qx, qy, qz, qw);
-
-    // LOGD << "Frame Position: x=" << x << ", y=" << y << ", z=" << z;
-    // LOGD << "Frame Orientation (quaternion): qw=" << qw
-    //     << ", qx=" << qx << ", qy=" << qy << ", qz=" << qz;
 
     if(0 > fkResult)
     {

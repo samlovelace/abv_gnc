@@ -8,6 +8,8 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include <sensor_msgs/msg/image.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
 #include "autobot_msgs/msg/detections2_d.hpp"
 #include "autobot_msgs/msg/object_observations.hpp"
 
@@ -32,5 +34,10 @@ private:
 
     std::mutex mCameraInfoMutex;
     sensor_msgs::msg::CameraInfo::SharedPtr mLatestCameraInfo;  // nullptr until first msg
+
+    // Looks up the static camera->world transform (broadcast by autobot_camera_tf)
+    // so observations can be expressed in a stable world frame before publishing.
+    tf2_ros::Buffer mTfBuffer;
+    tf2_ros::TransformListener mTfListener;
 };
 #endif // SEGMENTATION_HANDLER_H

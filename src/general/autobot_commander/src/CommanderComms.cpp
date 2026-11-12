@@ -17,7 +17,8 @@ bool CommanderComms::start()
     auto topicManager = RosTopicManager::getInstance(); 
 
     topicManager->createPublisher<autobot_msgs::msg::ControllerCommand>("abv/controller/command");
-    topicManager->createPublisher<autobot_msgs::msg::GuidanceCommand>("abv/guidance/command"); 
+    topicManager->createPublisher<autobot_msgs::msg::GuidanceCommand>("abv/guidance/command");
+    topicManager->createPublisher<ptera_msgs::msg::JointPositionWaypoint>("arm/gripper_position_waypoint");
     
     topicManager->spinNode(); 
 

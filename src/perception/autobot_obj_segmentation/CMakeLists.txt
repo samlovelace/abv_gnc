@@ -21,6 +21,7 @@ find_package(Eigen3 REQUIRED)
 find_package(message_filters REQUIRED)
 find_package(PCL REQUIRED COMPONENTS common filters)
 find_package(pcl_conversions REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 set(SOURCES
   src/main.cpp
@@ -57,6 +58,7 @@ ament_target_dependencies(${PROJECT_NAME}
   Eigen3
   message_filters
   pcl_conversions
+  tf2_ros
 )
 
 install(TARGETS ${PROJECT_NAME}
