@@ -61,6 +61,19 @@ const KDL::JntArray& JointPositionWaypoint::tol()  const noexcept { return mTol;
 std::string JointPositionWaypoint::describe() const
 {
     std::ostringstream oss;
-    oss << "JointPositionWaypoint(n=" << mGoal.rows() << ")";
+    oss << std::fixed << std::setprecision(4);
+    oss << "JointPositionWaypoint(n=" << mGoal.rows() << ") goal=[";
+    for (unsigned i = 0; i < mGoal.rows(); ++i)
+    {
+        oss << mGoal(i);
+        if (i + 1 < mGoal.rows()) oss << ", ";
+    }
+    oss << "] tol=[";
+    for (unsigned i = 0; i < mTol.rows(); ++i)
+    {
+        oss << mTol(i);
+        if (i + 1 < mTol.rows()) oss << ", ";
+    }
+    oss << "]";
     return oss.str();
 }

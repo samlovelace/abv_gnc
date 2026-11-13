@@ -1,5 +1,7 @@
 #include "autobot_manip_executor/PickExecutorStateMachine.h"
 
+#include <cmath>
+
 #include <plog/Log.h>
 
 #include "autobot_msgs/msg/pick_waypoint.hpp"
@@ -37,6 +39,33 @@ void PickExecutorStateMachine::setLatestArmState(const autobot_msgs::msg::Manipu
 void PickExecutorStateMachine::setState(State aState)
 {
     mState = aState;
+}
+
+bool PickExecutorStateMachine::withinInflatedTolerance(const autobot_msgs::msg::PickWaypoint& wp) const
+{
+    if (wp.type != autobot_msgs::msg::PickWaypoint::JOINT_TRAJECTORY || !mHasArmState)
+    {
+        return false;
+    }
+
+    // Standalone-arm deployments (no MobileBase) have mLatestArmState.position
+    // and wp.joint_positions both ordered over the same ctrlJointNames, so they
+    // line up 1:1 with no offset. If a mobile base is ever added, this size
+    // check safely refuses the fallback rather than silently misaligning indices.
+    if (mLatestArmState.position.size() != wp.joint_positions.size())
+    {
+        return false;
+    }
+
+    const double inflatedTol = mConfig.jointTolerance * mConfig.inflatedToleranceFactor;
+    for (size_t i = 0; i < wp.joint_positions.size(); ++i)
+    {
+        if (std::fabs(mLatestArmState.position[i] - wp.joint_positions[i]) > inflatedTol)
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool PickExecutorStateMachine::tick()
@@ -109,9 +138,35 @@ bool PickExecutorStateMachine::tick()
                 const double elapsed = std::chrono::duration<double>(std::chrono::steady_clock::now() - mDispatchTime).count();
                 if (elapsed > mConfig.armArrivalTimeoutSec)
                 {
-                    mMessage = "Timed out waiting for arm arrival at waypoint " + std::to_string(mWaypointIndex);
-                    LOGW << mMessage;
-                    setState(State::FAILED);
+                    const auto& wp = mPlan.waypoints[mWaypointIndex];
+                    bool acceptedByInflatedTolerance = false;
+                    {
+                        std::lock_guard<std::mutex> lk(mArmStateMutex);
+                        acceptedByInflatedTolerance = withinInflatedTolerance(wp);
+                    }
+
+                    if (acceptedByInflatedTolerance)
+                    {
+                        mMessage = "Accepted waypoint " + std::to_string(mWaypointIndex) +
+                                   " via inflated joint tolerance after arrival timeout";
+                        LOGW << mMessage;
+
+                        if (!wp.gripper_positions.empty())
+                        {
+                            setState(State::DISPATCH_GRIPPER);
+                        }
+                        else
+                        {
+                            ++mWaypointIndex;
+                            setState(State::DISPATCH_WAYPOINT);
+                        }
+                    }
+                    else
+                    {
+                        mMessage = "Timed out waiting for arm arrival at waypoint " + std::to_string(mWaypointIndex);
+                        LOGW << mMessage;
+                        setState(State::FAILED);
+                    }
                 }
             }
             break;

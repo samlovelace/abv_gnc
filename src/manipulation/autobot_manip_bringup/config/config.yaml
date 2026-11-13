@@ -24,9 +24,10 @@ Planner:
   StateValidityResolutionFrac: 0.01
 
 Executor:
-  ArmArrivalTimeoutSec: 30.0
+  ArmArrivalTimeoutSec: 15.0
   GripperDwellSec: 1.0
   TickRateHz: 20.0
-  JointTolerance: 0.01
+  JointTolerance: 0.05
+  InflatedToleranceFactor: 3.0
   TaskPositionToleranceM: 0.01
   TaskOrientationToleranceRad: 0.05

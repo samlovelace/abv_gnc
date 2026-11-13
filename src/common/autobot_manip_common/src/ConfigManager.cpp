@@ -223,6 +223,8 @@ void ConfigManager::loadExecutorSection(const YAML::Node& aTopConfig)
     mConfig.executor.gripperDwellSec      = optionalScalar<double>(e, "GripperDwellSec",      mConfig.executor.gripperDwellSec);
     mConfig.executor.tickRateHz           = optionalScalar<double>(e, "TickRateHz",           mConfig.executor.tickRateHz);
     mConfig.executor.jointTolerance       = optionalScalar<double>(e, "JointTolerance",       mConfig.executor.jointTolerance);
+    mConfig.executor.inflatedToleranceFactor =
+        optionalScalar<double>(e, "InflatedToleranceFactor", mConfig.executor.inflatedToleranceFactor);
     mConfig.executor.taskPositionToleranceM = optionalScalar<double>(e, "TaskPositionToleranceM", mConfig.executor.taskPositionToleranceM);
     mConfig.executor.taskOrientationToleranceRad =
         optionalScalar<double>(e, "TaskOrientationToleranceRad", mConfig.executor.taskOrientationToleranceRad);

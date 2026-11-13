@@ -80,7 +80,14 @@ const TaskPositionWaypoint::Tol6& TaskPositionWaypoint::tol() const noexcept { r
 
 std::string TaskPositionWaypoint::describe() const
 {
+    double roll, pitch, yaw;
+    mGoal.M.GetRPY(roll, pitch, yaw);
+
     std::ostringstream oss;
-    oss << "TaskPositionWaypoint";
+    oss << std::fixed << std::setprecision(4);
+    oss << "TaskPositionWaypoint goal_pos=[" << mGoal.p.x() << ", " << mGoal.p.y() << ", " << mGoal.p.z() << "]"
+        << " goal_rpy=[" << roll << ", " << pitch << ", " << yaw << "]"
+        << " tol=[" << mTol[0] << ", " << mTol[1] << ", " << mTol[2] << ", "
+                    << mTol[3] << ", " << mTol[4] << ", " << mTol[5] << "]";
     return oss.str();
 }

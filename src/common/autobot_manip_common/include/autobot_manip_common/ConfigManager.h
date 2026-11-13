@@ -88,6 +88,9 @@ public:
         double gripperDwellSec = 1.0;               // fixed settle time after a gripper command (no arrival signal exists)
         double tickRateHz = 20.0;                   // state-machine tick rate
         double jointTolerance = 0.01;                // rad, applied uniformly to every dispatched joint waypoint
+        double inflatedToleranceFactor = 3.0;        // multiplier on jointTolerance: on a JOINT_TRAJECTORY
+                                                      // waypoint arrival timeout, accept if every joint is within
+                                                      // jointTolerance * this instead of failing outright
         double taskPositionToleranceM = 0.01;        // m, xyz
         double taskOrientationToleranceRad = 0.05;   // rad, rpy
     };
@@ -104,7 +107,7 @@ public:
         // joints independently (e.g. IK solvers, named presets).
         // mobileBase is nullopt for a standalone manipulator (not mounted on
         // anything selectable — e.g. a fixed-base arm).
-        std::optional<MobileBaseConfig> mobileBase;
+        std::optional<MobileBaseConfig>  mobileBase;
         ManipulatorConfig                manipulator;
         std::optional<GripperConfig>     gripper;
         PlannerConfig                    planner;  // defaults apply if config.yaml's Planner: block is absent

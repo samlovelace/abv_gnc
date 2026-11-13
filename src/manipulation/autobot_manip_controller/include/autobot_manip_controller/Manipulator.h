@@ -1,6 +1,7 @@
 #ifndef MANIPULATOR_H
 #define MANIPULATOR_H
 
+#include <chrono>
 #include <memory>
 #include <kdl/jntarray.hpp>
 #include <kdl/frames.hpp>
@@ -87,6 +88,15 @@ private:
     KDL::JntArray mLastTaskSolution; // full-size IK seed for task position refreshes (guarded by mGoalMutex)
     bool mExecutorReady; // executor initialized for mGoalWaypoint (guarded by mGoalMutex)
 
+    // Local (controller-side) arrival-timeout diagnostic, independent of the
+    // executor's own ArmArrivalTimeoutSec: this just logs the error state
+    // from this process's own log once the same timeout elapses, so the
+    // per-joint/task error is visible here even when it's the executor that
+    // ultimately decides to fail (or accept via inflated tolerance) the
+    // waypoint. Both guarded by mGoalMutex (set alongside mGoalWaypoint).
+    std::chrono::steady_clock::time_point mGoalDispatchTime;
+    bool mTimeoutLogged{false};
+
     std::map<POSE, KDL::JntArray> mArmPoseMap;
 
     std::thread mControlThread;
@@ -114,12 +124,29 @@ private:
     // Route a controlled-joint command to the base (when controllable) and arm
     void sendCommand(const KDL::JntArray& aCtrlCmd);
 
+    // Shared by printArrivedState()/logWaypointError() - aReason prefixes the
+    // log ("Arrived" / "Timed out") so the two call sites are distinguishable.
+    void logErrorState(const std::string& aReason);
     void logWaypointError();
 
     void setArrivalState(bool aFlag);
 
+    // Resets the sustained-arrival tracking window (mArrivalWindowStart/
+    // mArrivalAcknowledged) in addition to mIsArrived. Must be called
+    // whenever a new waypoint is dispatched (not just when checkArrival()
+    // dips to false) - otherwise a new waypoint whose error starts out
+    // already inside tolerance inherits the PREVIOUS waypoint's stale
+    // "already acknowledged" state and silently never re-arrives (confirmed
+    // empirically: a fine task-space correction waypoint right after an
+    // accepted joint waypoint timed out despite sitting well inside
+    // tolerance the entire time, because arrivalLoop() never saw
+    // checkArrival() go false even once to naturally reset that state).
+    void resetArrivalTracking();
+
     std::mutex mArrivalMutex;
     bool mIsArrived;
+    std::chrono::steady_clock::time_point mArrivalWindowStart; // guarded by mArrivalMutex
+    bool mArrivalAcknowledged{false};                          // guarded by mArrivalMutex
 
 };
 #endif //MANIPULATOR_H

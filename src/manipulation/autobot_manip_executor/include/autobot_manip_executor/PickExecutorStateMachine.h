@@ -11,6 +11,7 @@
 
 #include "autobot_manip_common/ConfigManager.h"
 #include "autobot_msgs/msg/pick_plan.hpp"
+#include "autobot_msgs/msg/pick_waypoint.hpp"
 #include "autobot_msgs/msg/manipulator_state.hpp"
 
 // Dispatches a PickPlan to autobot_manip_controller one waypoint at a time,
@@ -66,6 +67,12 @@ public:
 
 private:
     void setState(State aState);
+
+    // True if wp is a JOINT_TRAJECTORY waypoint and every measured joint
+    // position is within (jointTolerance * inflatedToleranceFactor) of the
+    // waypoint's target. Used only as a timeout fallback, never as the
+    // primary arrival check. Caller must already hold mArmStateMutex.
+    bool withinInflatedTolerance(const autobot_msgs::msg::PickWaypoint& wp) const;
 
     ConfigManager::ExecutorConfig mConfig;
     EnableFn mEnableFn;

@@ -125,6 +125,10 @@ bool Manipulator::setGoalWaypoint(std::shared_ptr<IWaypoint> aWp, bool aResetSta
     if(aResetState)
     {
         mGoalWaypoint = aWp;
+        resetArrivalTracking(); // if new waypoint, cant be arrived - and can't inherit the previous waypoint's arrival window either
+        LOGI << "Received waypoint: " << aWp->describe();
+        mGoalDispatchTime = std::chrono::steady_clock::now();
+        mTimeoutLogged = false;
     }
     else if(aWp != mGoalWaypoint)
     {
@@ -367,7 +371,15 @@ void Manipulator::setArrivalState(bool aFlag)
     mIsArrived = aFlag;
 }
 
-void Manipulator::printArrivedState()
+void Manipulator::resetArrivalTracking()
+{
+    std::lock_guard<std::mutex> lock(mArrivalMutex);
+    mIsArrived = false;
+    mArrivalWindowStart = std::chrono::time_point<std::chrono::steady_clock>();
+    mArrivalAcknowledged = false;
+}
+
+void Manipulator::logErrorState(const std::string& aReason)
 {
     KDL::JntArray state = getFullJointPositions();
     if(state.rows() == 0)
@@ -385,7 +397,7 @@ void Manipulator::printArrivedState()
 
         std::stringstream ss;
         ss << std::fixed << std::setprecision(3);
-        ss << "Error: " << "\n";
+        ss << aReason << " - Error: " << "\n";
         for(int i = 0; i < getNrCtrlJoints(); i++)
         {
             ss << "J" << i << " (deg): " << (180.0/M_PI) * (state(i) - goal(i)) << "\n";
@@ -411,9 +423,14 @@ void Manipulator::printArrivedState()
         // Linear error: err = goal * current^{-1}
         const KDL::Frame err = goal * s.T.Inverse();
 
+        KDL::Vector axis;
+        double angle = 0.0;
+        err.M.GetRotAngle(axis, angle);
+        const KDL::Vector rvec = axis * angle;
+
         std::stringstream ss;
         ss << std::fixed << std::setprecision(3);
-        ss << "Task Error: " << "\n";
+        ss << aReason << " - Task Error: " << "\n";
         std::vector<std::string> axes = {"x: ", "y: ", "z: "};
 
         for(int i = 0; i < 3; i++)
@@ -421,11 +438,26 @@ void Manipulator::printArrivedState()
             ss << axes[i] << " (m): " << err.p.data[i] << "\n";
         }
 
+        ss << "roll (rad): " << rvec[0] << "\n";
+        ss << "pitch (rad): " << rvec[1] << "\n";
+        ss << "yaw (rad): " << rvec[2] << "\n";
+
         LOGD << ss.str();
+        break;
     }
     default:
         break;
     }
+}
+
+void Manipulator::printArrivedState()
+{
+    logErrorState("Arrived");
+}
+
+void Manipulator::logWaypointError()
+{
+    logErrorState("Timed out");
 }
 
 void Manipulator::startControl()
@@ -499,10 +531,8 @@ void Manipulator::controlLoop()
 
 void Manipulator::arrivalLoop()
 {
-    RateController arrivalCheckRate(mConfig.controlRateHz);
-    std::chrono::time_point<std::chrono::steady_clock> arrivalTime;
+    RateController arrivalCheckRate(25);
     std::chrono::duration<double> arrivalThreshold = std::chrono::seconds(1);
-    bool arrivalAcknowledged = false;
 
     while(isEnabled())
     {
@@ -510,33 +540,73 @@ void Manipulator::arrivalLoop()
 
         if(checkArrival())
         {
-            if(arrivalTime.time_since_epoch().count() == 0)
+            // mArrivalWindowStart/mArrivalAcknowledged are shared with
+            // resetArrivalTracking() (see Manipulator.h) so a freshly
+            // dispatched waypoint - even one whose error starts out already
+            // inside tolerance - always gets its own full arrival window,
+            // rather than inheriting the previous waypoint's "already
+            // acknowledged" state.
+            std::lock_guard<std::mutex> lock(mArrivalMutex);
+            if(mArrivalWindowStart.time_since_epoch().count() == 0)
             {
-                arrivalTime = std::chrono::steady_clock::now();
+                mArrivalWindowStart = std::chrono::steady_clock::now();
             }
             else
             {
                 auto now = std::chrono::steady_clock::now();
-                if(now - arrivalTime >= arrivalThreshold && !arrivalAcknowledged)
+                if(now - mArrivalWindowStart >= arrivalThreshold && !mArrivalAcknowledged)
                 {
                     LOGD << "Waypoint arrived!";
-                    setArrivalState(true);
+                    mIsArrived = true;
+                    mArrivalAcknowledged = true;
                     printArrivedState();
-                    arrivalAcknowledged = true;
                 }
             }
         }
         else
         {
             // Manipulator moved away from goal
-            if (arrivalAcknowledged)
+            bool wasAcknowledged = false;
+            {
+                std::lock_guard<std::mutex> lock(mArrivalMutex);
+                wasAcknowledged = mArrivalAcknowledged;
+                if(wasAcknowledged)
+                {
+                    mIsArrived = false;
+                    mArrivalAcknowledged = false;
+                }
+                mArrivalWindowStart = std::chrono::time_point<std::chrono::steady_clock>();
+            }
+            if(wasAcknowledged)
             {
                 LOGW << "Manipulator deviated from goal!";
-                setArrivalState(false);
-                arrivalAcknowledged = false;
             }
 
-            arrivalTime = std::chrono::time_point<std::chrono::steady_clock>();
+            // Local (controller-side) arrival-timeout diagnostic - logs once
+            // per dispatched waypoint so the per-joint/task error is visible
+            // in this process's own log even when it's the executor that
+            // ultimately decides to fail (or accept via inflated tolerance)
+            // the waypoint. Reuses the executor's own configured timeout so
+            // this fires at roughly the same moment, for easy correlation.
+            bool shouldLogTimeout = false;
+            {
+                std::lock_guard<std::mutex> lock(mGoalMutex);
+                if(!mTimeoutLogged)
+                {
+                    const double elapsed = std::chrono::duration<double>(
+                        std::chrono::steady_clock::now() - mGoalDispatchTime).count();
+                    if(elapsed > mConfig.executor.armArrivalTimeoutSec)
+                    {
+                        mTimeoutLogged = true;
+                        shouldLogTimeout = true;
+                    }
+                }
+            }
+            if(shouldLogTimeout)
+            {
+                LOGW << "Waypoint arrival timed out after " << mConfig.executor.armArrivalTimeoutSec << "s";
+                logWaypointError();
+            }
         }
 
         arrivalCheckRate.block();

@@ -26,8 +26,8 @@ void WaypointExecutor::init(int aNumDof, int aOffset, KinematicsHandler& aKinema
     for(int i = 0; i < mNumDof; i++)
     {
         mVelocityLimits[i] = velLimits(aOffset + i);
-        mLowerPosLimits[i] = 0.95 * lowerPosLimits(aOffset + i);
-        mUpperPosLimits[i] = 0.95 * upperPosLimits(aOffset + i);
+        mLowerPosLimits[i] = 0.99 * lowerPosLimits(aOffset + i);
+        mUpperPosLimits[i] = 0.99 * upperPosLimits(aOffset + i);
     }
 
     mExecutor = std::make_unique<ruckig::Ruckig<0>>(mNumDof, 1/(float)mConfig.controlRateHz);
