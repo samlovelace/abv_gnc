@@ -37,7 +37,8 @@ modules:
     enabled: true
     args:
       camera_name: overhead
-      width: 640
-      height: 480
+      width: 1280
+      height: 720
       topic: camera/camera/color/image_raw
+      depth_topic: camera/camera/aligned_depth_to_color/image_raw
       frame_id: overhead_camera

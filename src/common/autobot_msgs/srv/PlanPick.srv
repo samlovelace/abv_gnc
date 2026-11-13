@@ -1,0 +1,6 @@
+# id must be a valid id previously returned by GetTrackedObjects.
+int32 id
+---
+bool success
+string message
+autobot_msgs/PickPlan plan

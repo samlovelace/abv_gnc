@@ -70,6 +70,15 @@ void ConfigurationManager::loadConfiguration()
 
     YAML::Node objDetectionNode = config["ObjDetection"];
     parseObjDetectionConfig(objDetectionNode);
+
+    YAML::Node objSegmentationNode = config["ObjSegmentation"];
+    parseObjSegmentationConfig(objSegmentationNode);
+
+    YAML::Node objRegistryNode = config["ObjRegistry"];
+    parseObjRegistryConfig(objRegistryNode);
+
+    YAML::Node cameraExtrinsicsNode = config["CameraExtrinsics"];
+    parseCameraExtrinsicsConfig(cameraExtrinsicsNode);
 }
 
 void ConfigurationManager::parseGuidanceConfig(const YAML::Node& aNode)
@@ -184,5 +193,40 @@ void ConfigurationManager::parseObjDetectionConfig(const YAML::Node& aNode)
     mObjDetectionConfig.mUseCuda = aNode["UseCuda"].as<bool>(false);
 }
 
+void ConfigurationManager::parseObjSegmentationConfig(const YAML::Node& aNode)
+{
+    mObjSegmentationConfig.mSyncSlopSec = aNode["SyncSlopSec"].as<double>(0.05);
+    mObjSegmentationConfig.mMinPointsPerObject = aNode["MinPointsPerObject"].as<int>(20);
+    mObjSegmentationConfig.mMaxPointsPerObject = aNode["MaxPointsPerObject"].as<int>(0);
+
+    mObjSegmentationConfig.mMaskErosionKernelSize = aNode["MaskErosionKernelSize"].as<int>(5);
+    mObjSegmentationConfig.mOutlierMeanK = aNode["OutlierMeanK"].as<int>(8);
+    mObjSegmentationConfig.mOutlierStdDevMultiplier = aNode["OutlierStdDevMultiplier"].as<double>(1.0);
+}
+
+void ConfigurationManager::parseObjRegistryConfig(const YAML::Node& aNode)
+{
+    mObjRegistryConfig.mMatchDistanceThresholdM = aNode["MatchDistanceThresholdM"].as<double>(0.5);
+    mObjRegistryConfig.mStalenessTimeoutSec = aNode["StalenessTimeoutSec"].as<double>(10.0);
+    mObjRegistryConfig.mPruneRateHz = aNode["PruneRateHz"].as<double>(1.0);
+}
+
+void ConfigurationManager::parseCameraExtrinsicsConfig(const YAML::Node& aNode)
+{
+    mCameraExtrinsicsConfig.mCameraFrame = aNode["CameraFrame"].as<std::string>("overhead_camera");
+    mCameraExtrinsicsConfig.mWorldFrame = aNode["WorldFrame"].as<std::string>("world");
+    mCameraExtrinsicsConfig.mTranslationXYZ = ConfigUtils::parseVector3d(aNode["TranslationXYZ"]);
+
+    const YAML::Node& quatNode = aNode["RotationQuaternionXYZW"];
+    if (quatNode && quatNode.IsSequence() && quatNode.size() == 4)
+    {
+        mCameraExtrinsicsConfig.mRotationQuaternionXYZW = {
+            quatNode[0].as<double>(), quatNode[1].as<double>(), quatNode[2].as<double>(), quatNode[3].as<double>()};
+    }
+    else
+    {
+        throw std::runtime_error("Invalid RotationQuaternionXYZW format in YAML.");
+    }
+}
 
 

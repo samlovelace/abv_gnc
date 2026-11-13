@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>autobot_manip_controller</name>
+  <version>0.0.0</version>
+  <description>modular manipulation control software</description>
+  <maintainer email="samlovelace12@gmail.com">sam</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>autobot_manip_bringup</depend>
+  <depend>autobot_msgs</depend>
+  <depend>autobot_common</depend>
+  <depend>autobot_manip_common</depend>
+  <depend>ptera_msgs</depend>
+
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>kdl_parser</depend>
+  <depend>urdfdom</depend>
+  <depend>eigen</depend>
+  <depend>yaml-cpp</depend>
+  <depend>pcl_msgs</depend>
+  <depend>pcl_conversions</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

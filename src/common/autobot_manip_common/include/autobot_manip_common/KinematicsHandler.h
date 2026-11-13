@@ -1,0 +1,111 @@
+#ifndef KINEMATICSHANDLER_H
+#define KINEMATICSHANDLER_H
+ 
+#include <memory>
+#include <unordered_map>
+
+#include <kdl/tree.hpp>
+#include <kdl/treejnttojacsolver.hpp>
+#include <kdl/treeiksolvervel_wdls.hpp>
+#include <kdl/treeiksolverpos_nr_jl.hpp>
+#include <kdl/treefksolverpos_recursive.hpp>
+#include <kdl/jntarray.hpp>
+#include <kdl_parser/kdl_parser.hpp>
+#include <kdl/frames.hpp>
+#include <urdf/model.h>
+
+#include "autobot_manip_common/ConfigManager.h"
+
+struct CollisionShape 
+{
+  enum Type { Box, Cylinder, Sphere, Mesh } type;
+
+  // Box
+  double bx=0, by=0, bz=0;
+  // Cylinder
+  double radius=0, length=0;
+  // Sphere
+  double sr=0;
+  // Mesh
+  std::string mesh_filename;
+  double mesh_scale_x=1, mesh_scale_y=1, mesh_scale_z=1;
+};
+
+struct CollisionShell
+{
+    KDL::Frame T_link_shell; // shell in link frame
+    KDL::Frame T_base_shell;   // shell in manipulator base frame 
+
+    CollisionShape shape; 
+};
+ 
+class KinematicsHandler 
+{ 
+public:
+    KinematicsHandler();
+    ~KinematicsHandler();
+
+    bool init(const ConfigManager::Config& aConfig); 
+    bool solveIK(const KDL::JntArray& anInitPos, const KDL::Frame& aGoalPose, KDL::JntArray& aResultOut);
+    bool solveIK(const KDL::JntArray& anInitPos, const KDL::Twist& aGoalVel, KDL::JntArray& aResultOut);
+    // aMeasuredVel: full joint velocities; the locked joints' (uncontrolled
+    // base) contribution to the EE twist is fed forward and compensated
+    bool solveIK(const KDL::JntArray& anInitPos, const KDL::JntArray& aMeasuredVel,
+                 const KDL::Twist& aGoalVel, KDL::JntArray& aResultOut);
+    bool solveFk(const KDL::JntArray& anInitPos, KDL::Frame& aFrameOut, const std::string& aSegmentName = ""); 
+
+    void updateCollisionShells(const KDL::JntArray& aCurrentJointState);
+    bool checkCollisions(const KDL::JntArray& aJntConfig);
+
+    double computeManipulability(const KDL::JntArray& aJntCfg);
+
+    // End link twist (ref point at the end link origin) in the root frame: J(q) * qdot
+    bool solveTaskVelocity(const KDL::JntArray& aJntCfg, const KDL::JntArray& aJntVel, KDL::Twist& aTwistOut);
+
+    // Root segment of the kinematic tree — the frame FK results are expressed in
+    std::string getRootFrame() const { return mTree.getRootSegment()->first; }
+
+    KDL::JntArray getJointLimits(const std::string& aLimitType); 
+    int getNrJoints() {return mTree.getNrOfJoints(); }
+
+private:
+    // Remove aJointNamesToRemove (and everything downstream of each) from
+    // aTree, producing aTreeOut. Used to keep gripper joints out of the
+    // joint space used for FK/IK/Jacobian solving and trajectory generation.
+    bool pruneJoints(const KDL::Tree& aTree,
+                      const std::vector<std::string>& aJointNamesToRemove,
+                      KDL::Tree& aTreeOut);
+
+    bool parseManipCollisionGeometry();
+    bool parseRobotCollisionGeometry();     
+    void parseLinkCollisions(urdf::LinkConstSharedPtr& aLink, std::vector<CollisionShell>& aLinkShellsOut);
+
+    bool collides(const CollisionShell& aFirstShell, const CollisionShell& aSecondShell); 
+    void shellToPoints(const CollisionShell& aShell, std::vector<KDL::Vector>& aPoints);
+    double segmentDistance(const KDL::Vector& p1, const KDL::Vector& q1, const KDL::Vector& p2, const KDL::Vector& q2); 
+    double segmentBoxDistance(const KDL::Vector& p1_world,
+                              const KDL::Vector& p2_world,
+                              const KDL::Frame& box_frame,
+                              double bx, double by, double bz);
+private:
+
+    KDL::Tree mTree; 
+    std::shared_ptr<urdf::Model> mModel; 
+    std::shared_ptr<urdf::Model> mRobotModel; 
+
+    std::vector<std::string> mJointNames; 
+    std::string mManipEndLink; 
+    std::vector<unsigned int> mLockedJoints; // q_nr of joints held fixed by IK (uncontrolled base)
+    
+    std::map<std::string, KDL::JntArray> mLimitsMap; 
+    std::map<std::string, unsigned int> mSegmentNameMap; 
+    std::vector<std::vector<CollisionShell>> mCollisionShells; 
+    std::vector<std::vector<CollisionShell>> mRobotShells; 
+
+    std::shared_ptr<KDL::TreeFkSolverPos_recursive> mFkSolver; 
+    std::shared_ptr<KDL::TreeIkSolverVel_wdls> mVelSolver; 
+    std::shared_ptr<KDL::TreeIkSolverPos_NR_JL> mIkSolver; 
+    std::shared_ptr<KDL::TreeJntToJacSolver> mJacobianSolver;  
+
+};
+#endif //KINEMATICSHANDLER_H

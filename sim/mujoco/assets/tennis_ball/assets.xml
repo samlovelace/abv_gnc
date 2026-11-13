@@ -1,0 +1,10 @@
+<mujocoinclude>
+    <!-- YcbTennisBall model from eleramp/pybullet-object-models (LGPL-2.1),
+         a UV-textured repackaging of the YCB object dataset's tennis ball
+         scan. https://github.com/eleramp/pybullet-object-models -->
+    <asset>
+        <mesh name="tennis_ball_ycb" file="../assets/tennis_ball/ycb/textured_reoriented.obj"/>
+        <texture name="tennis_ball_tex" type="2d" file="../assets/tennis_ball/ycb/texture_map.png"/>
+        <material name="tennis_ball_ycb_mat" texture="tennis_ball_tex" specular="0.2" shininess="0.15"/>
+    </asset>
+</mujocoinclude>

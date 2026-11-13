@@ -17,8 +17,10 @@ bool CommanderComms::start()
     auto topicManager = RosTopicManager::getInstance(); 
 
     topicManager->createPublisher<autobot_msgs::msg::ControllerCommand>("abv/controller/command");
-    topicManager->createPublisher<autobot_msgs::msg::GuidanceCommand>("abv/guidance/command"); 
-    
+    topicManager->createPublisher<autobot_msgs::msg::GuidanceCommand>("abv/guidance/command");
+    topicManager->createPublisher<autobot_msgs::msg::JointPositionWaypoint>("arm/gripper_position_waypoint");
+    topicManager->createPublisher<autobot_msgs::msg::ExecutePickCommand>("manip/execute_pick_command");
+
     topicManager->spinNode(); 
 
     return true; 

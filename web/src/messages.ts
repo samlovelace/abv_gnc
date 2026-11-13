@@ -68,3 +68,54 @@ export interface ControllerCommand {
   tolerance: Vec3;
   thrusters: string;
 }
+export interface CompressedImage {
+  header: {
+    stamp: {
+      sec: number;
+      nanosec: number;
+    };
+    frame_id: string;
+  };
+  format: string;
+  data: string | number[];
+}
+
+export interface RegionOfInterest {
+  x_offset: number;
+  y_offset: number;
+  height: number;
+  width: number;
+
+  do_rectify: boolean;
+}
+
+export interface Time {
+  sec: number; // int32
+  nanosec: number; // uint32
+}
+
+export interface Header {
+  stamp: Time; // acquisition time of the image
+  frame_id: string; // optical frame of the camera
+}
+
+export interface Image {
+  header: Header;
+  height: number; // uint32, number of rows
+  width: number; // uint32, number of columns
+  encoding: string; // e.g. "rgb8", "bgr8", "mono8", "16UC1", "32FC1"
+  is_bigendian: number; // uint8
+  step: number; // uint32, full row length in bytes
+  data: Uint8Array; // uint8[], length = step * height
+}
+export interface Detection2D {
+  label: string;
+  score: number;
+  box: RegionOfInterest;
+  mask: Image;
+}
+
+export interface Detections2D {
+  header: Header;
+  detections: Detection2D[];
+}

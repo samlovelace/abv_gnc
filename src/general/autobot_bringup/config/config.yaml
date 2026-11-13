@@ -108,8 +108,8 @@ ObjDetection:
   Type: yolo11-seg # which IDetector implementation to instantiate
   ModelPath: /home/sam/models/yolo11n-seg.onnx
   InputSize: 640
-  ConfThresh: 0.25
-  IouThresh: 0.45
+  ConfThresh: 0.45
+  IouThresh: 0.15
   UseCuda: false
 
   # must match the model's training/export classes in number and order -
@@ -197,3 +197,30 @@ ObjDetection:
       hair drier,
       toothbrush,
     ]
+
+# Consumed by autobot_obj_segmentation.
+ObjSegmentation:
+  SyncSlopSec: 0.05
+  MinPointsPerObject: 20
+  MaxPointsPerObject: 0
+  MaskErosionKernelSize: 5
+  OutlierMeanK: 8
+  OutlierStdDevMultiplier: 1.0
+
+# Consumed by autobot_obj_registry.
+ObjRegistry:
+  MatchDistanceThresholdM: 0.5
+  StalenessTimeoutSec: 10.0
+  PruneRateHz: 1.0
+
+# Consumed by autobot_camera_tf (broadcasts this as a static TF) and
+# autobot_obj_segmentation (looks it up to express observations in WorldFrame).
+# Translation/rotation default to the MuJoCo tabletop sim's overhead camera
+# (sim/mujoco/worlds/rebot-tabletop.xml: pos="0 0 1.65", looking straight down,
+# no additional rotation) - verify/tune against real centroid/height values
+# before trusting this on hardware.
+CameraExtrinsics:
+  CameraFrame: overhead_camera
+  WorldFrame: world
+  TranslationXYZ: [0.0, 0.0, 1.65]
+  RotationQuaternionXYZW: [1.0, 0.0, 0.0, 0.0]

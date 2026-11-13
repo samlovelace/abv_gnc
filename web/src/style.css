@@ -246,3 +246,22 @@ body {
 .confirm-popup-button:hover {
   background: #3b82f6;
 }
+
+.camera-view {
+  position: relative;
+  display: inline-block; /* shrink-wrap to the image */
+}
+
+.camera-view img,
+.camera-view canvas {
+  display: block;
+  width: 100%; /* both scale identically */
+  height: auto;
+}
+
+.camera-view canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none; /* clicks pass through to the image */
+}

@@ -24,7 +24,7 @@ def generate_launch_description():
         DeclareLaunchArgument('enable_infra1', default_value='false'),
         DeclareLaunchArgument('enable_infra2', default_value='false'),
         DeclareLaunchArgument('pointcloud.enable', default_value='false'),
-        DeclareLaunchArgument('align_depth.enable', default_value='false'),
+        DeclareLaunchArgument('align_depth.enable', default_value='true'),
         # full param override file for anything not declared above (depth/rgb
         # resolution profiles, imu settings, etc.) - "''" means "use
         # realsense2_camera's own built-in defaults" (see comment above)

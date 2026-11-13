@@ -5,6 +5,7 @@
 #include <memory>
 #include <opencv2/core.hpp>
 #include <sensor_msgs/msg/image.hpp>
+#include <std_msgs/msg/header.hpp>
 #include <thread>
 
 #include "autobot_common/BoundedQueue.hpp"
@@ -20,10 +21,16 @@ public:
     ~ObjectDetectionHandler();
 
 private:
+    struct StampedFrame
+    {
+        cv::Mat frame;
+        std_msgs::msg::Header header;
+    };
+
     void run();
     void frameCallback(const sensor_msgs::msg::Image::SharedPtr aFrame);
 
-    BoundedQueue<cv::Mat> mFrameQueue;
+    BoundedQueue<StampedFrame> mFrameQueue;
     std::unique_ptr<IDetector> mDetector;
 
     std::thread mWorkerThread;

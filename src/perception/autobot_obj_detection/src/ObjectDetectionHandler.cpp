@@ -45,10 +45,10 @@ ObjectDetectionHandler::ObjectDetectionHandler()
 
     mDetector = makeDetector(detectorCfg);
 
-    RosTopicManager::getInstance()->createSubscriber<sensor_msgs::msg::Image>("/camera/image_raw",
+    RosTopicManager::getInstance()->createSubscriber<sensor_msgs::msg::Image>("/camera/camera/color/image_raw",
         std::bind(&ObjectDetectionHandler::frameCallback, this, std::placeholders::_1));
 
-    RosTopicManager::getInstance()->createPublisher<autobot_msgs::msg::Detections2D>("/detections");
+    RosTopicManager::getInstance()->createPublisher<autobot_msgs::msg::Detections2D>("percep/detections");
 
     mRunning = true;
     mWorkerThread = std::thread(&ObjectDetectionHandler::run, this);
@@ -66,13 +66,12 @@ void ObjectDetectionHandler::run()
 
     while (mRunning && rclcpp::ok())
     {
-        cv::Mat frame;
-        if (!mFrameQueue.waitPop(frame, std::chrono::milliseconds(100))) continue;
+        StampedFrame stamped;
+        if (!mFrameQueue.waitPop(stamped, std::chrono::milliseconds(100))) continue;
 
-        Detections dets = mDetector->detect(frame);
+        Detections dets = mDetector->detect(stamped.frame);
 
-        std_msgs::msg::Header header;
-        header.stamp = RosTopicManager::getInstance()->now();
+        const std_msgs::msg::Header& header = stamped.header;
 
         autobot_msgs::msg::Detections2D msg;
         msg.header = header;
@@ -88,7 +87,7 @@ void ObjectDetectionHandler::run()
             msg.detections.push_back(std::move(out));
         }
 
-        RosTopicManager::getInstance()->publishMessage("/detections", msg);
+        RosTopicManager::getInstance()->publishMessage("percep/detections", msg);
     }
 }
 
@@ -113,5 +112,5 @@ void ObjectDetectionHandler::frameCallback(const sensor_msgs::msg::Image::Shared
     }
 
     // clone so we own the data - view may just be wrapping aFrame's buffer
-    mFrameQueue.push(view.clone());
+    mFrameQueue.push(StampedFrame{view.clone(), aFrame->header});
 }

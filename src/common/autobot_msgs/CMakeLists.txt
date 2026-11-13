@@ -6,6 +6,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
@@ -15,6 +16,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/GuidanceCommand.msg"
   "msg/GuidanceStatus.msg"
   "msg/Heartbeat.msg"
+  "msg/ManipHardwareGoal.msg"
+  "msg/ManipHardwareState.msg"
+  "msg/ManipHardwareTelemetry.msg"
   "msg/NodeStatus.msg"
   "msg/Obstacle.msg"
   "msg/ObstacleArray.msg"
@@ -29,9 +33,25 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Vec3.msg"
   "msg/Detection2D.msg"
   "msg/Detections2D.msg"
+  "msg/ObjectObservation.msg"
+  "msg/ObjectObservations.msg"
+  "msg/TrackedObject.msg"
+  "msg/PickWaypoint.msg"
+  "msg/PickPlan.msg"
+  "msg/JointPositionWaypoint.msg"
+  "msg/JointVelocityWaypoint.msg"
+  "msg/TaskPositionWaypoint.msg"
+  "msg/TaskVelocityWaypoint.msg"
+  "msg/Enable.msg"
+  "msg/ManipulatorState.msg"
+  "msg/ExecutePickCommand.msg"
+  "msg/ExecutionStatus.msg"
   "srv/PolicySwitch.srv"
-  DEPENDENCIES std_msgs sensor_msgs
+  "srv/GetTrackedObjects.srv"
+  "srv/PlanGrasp.srv"
+  "srv/PlanPick.srv"
+  DEPENDENCIES std_msgs sensor_msgs geometry_msgs
 )
 
-ament_export_dependencies(rosidl_default_generators std_msgs sensor_msgs)
+ament_export_dependencies(rosidl_default_generators std_msgs sensor_msgs geometry_msgs)
 ament_package()

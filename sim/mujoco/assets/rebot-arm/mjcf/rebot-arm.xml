@@ -2,11 +2,11 @@
   <compiler angle="radian" coordinate="local" eulerseq="xyz"/>
   <option timestep="0.001" gravity="0 0 -9.81" iterations="100" noslip_iterations="20"/>
 
-  <visual>
-    <headlight diffuse="0.65 0.65 0.65" ambient="0.25 0.25 0.25" specular="0.2 0.2 0.2"/>
-    <rgba haze="0.15 0.18 0.20 1"/>
-    <global azimuth="135" elevation="-25"/>
-  </visual>
+  <!-- Visual/lighting consolidated into worlds/rebot-tabletop.xml (the only
+       world that includes this file) - this file's own <visual> and
+       "key_light" used to duplicate/collide with it (same name, would
+       otherwise be a duplicate-name compile error now that the world file
+       defines its own "key_light"). -->
 
   <asset>
     <mesh name="base_link_hardware_black_mesh" file="../assets/rebot-arm/meshes/visual/colored_base_link_hardware_black.stl"/>
@@ -120,8 +120,6 @@
   </default>
 
   <worldbody>
-    <light name="key_light" pos="0.45 -0.65 1.3" dir="-0.45 0.65 -1"/>
-
     <!-- pos="0 0 0": deliberately NOT a mount offset. MuJoCo's <frame> (and
          plain <body> nesting) can't correctly wrap an <include> whose
          top-level body has an <inertial> tag - confirmed empirically, it's
@@ -137,7 +135,7 @@
       <geom name="base_link_silver_trim_visual" type="mesh" mesh="base_link_silver_trim_mesh" material="silver_trim_mat"/>
       <geom name="base_link_collision" type="mesh" mesh="base_link_collision_mesh" rgba="0.18 0.22 0.21 0.12" contype="1" conaffinity="1" condim="6" friction="0.8 0.1 0.1" solref="0.002 1" solimp="0.98 0.995 0.0005"/>
 
-      <body name="link1" pos="-0.00008416 0 0.08465">
+      <body name="link1" pos="-0.00008416 0 0.08465" gravcomp="1">
         <joint name="joint1" type="hinge" axis="0 0 1" range="-2.8 2.8"/>
         <inertial pos="0.0001136146 -0.0006163195 0.0236476373" mass="0.1613" diaginertia="0.00025207 0.00015464 0.00023416"/>
         <geom name="link1_anodized_grey_visual" type="mesh" mesh="link1_anodized_grey_mesh" material="anodized_grey_mat"/>
@@ -145,7 +143,7 @@
         <geom name="link1_matte_black_visual" type="mesh" mesh="link1_matte_black_mesh" material="matte_black_mat"/>
         <geom name="link1_collision" type="mesh" mesh="link1_collision_mesh" rgba="0.18 0.22 0.21 0.12" contype="1" conaffinity="1" condim="6" friction="0.8 0.1 0.1" solref="0.002 1" solimp="0.98 0.995 0.0005"/>
 
-        <body name="link2" pos="0.020084 0.031625 0.05555" quat="0.7071054825 -0.7071080799 0 0">
+        <body name="link2" pos="0.020084 0.031625 0.05555" quat="0.7071054825 -0.7071080799 0 0" gravcomp="1">
           <joint name="joint2" type="hinge" axis="0 0 -1" range="-3.14 0"/>
           <inertial pos="-0.1322562231 -0.0030617036 -0.0308306967" mass="1.3266" diaginertia="0.00073374 0.01255987 0.01281387"/>
           <geom name="link2_anodized_grey_visual" type="mesh" mesh="link2_anodized_grey_mesh" material="anodized_grey_mat"/>
@@ -154,7 +152,7 @@
           <geom name="link2_seeed_yellow_visual" type="mesh" mesh="link2_seeed_yellow_mesh" material="seeed_yellow_mat"/>
           <geom name="link2_collision" type="mesh" mesh="link2_collision_mesh" rgba="0.18 0.22 0.21 0.12" contype="1" conaffinity="1" condim="6" friction="0.8 0.1 0.1" solref="0.002 1" solimp="0.98 0.995 0.0005"/>
 
-          <body name="link3" pos="-0.264 0 0">
+          <body name="link3" pos="-0.264 0 0" gravcomp="1">
             <joint name="joint3" type="hinge" axis="0 0 1" range="-3.14 0"/>
             <inertial pos="0.1210400358 -0.0536211077 -0.0310137855" mass="0.8353" diaginertia="0.00046807 0.00632695 0.00648221"/>
             <geom name="link3_anodized_grey_visual" type="mesh" mesh="link3_anodized_grey_mesh" material="anodized_grey_mat"/>
@@ -163,7 +161,7 @@
             <geom name="link3_seeed_yellow_visual" type="mesh" mesh="link3_seeed_yellow_mesh" material="seeed_yellow_mat"/>
             <geom name="link3_collision" type="mesh" mesh="link3_collision_mesh" rgba="0.18 0.22 0.21 0.12" contype="1" conaffinity="1" condim="6" friction="0.8 0.1 0.1" solref="0.002 1" solimp="0.98 0.995 0.0005"/>
 
-            <body name="link4" pos="0.2426 -0.054 -0.001625">
+            <body name="link4" pos="0.2426 -0.054 -0.001625" gravcomp="1">
               <joint name="joint4" type="hinge" axis="0 0 1" range="-1.87 1.57"/>
               <inertial pos="0.0608200956 -0.0511711907 -0.0302994586" mass="0.52" diaginertia="0.00045986 0.00075258 0.00066742"/>
               <geom name="link4_anodized_grey_visual" type="mesh" mesh="link4_anodized_grey_mesh" material="anodized_grey_mat"/>
@@ -172,7 +170,7 @@
               <geom name="link4_seeed_yellow_visual" type="mesh" mesh="link4_seeed_yellow_mesh" material="matte_black_mat"/>
               <geom name="link4_collision" type="mesh" mesh="link4_collision_mesh" rgba="0.18 0.22 0.21 0.12" contype="1" conaffinity="1" condim="6" friction="0.8 0.1 0.1" solref="0.002 1" solimp="0.98 0.995 0.0005"/>
 
-              <body name="link5" pos="0.078308 -0.0375 -0.03" quat="0.7071054825 -0.7071080799 0 0">
+              <body name="link5" pos="0.078308 -0.0375 -0.03" quat="0.7071054825 -0.7071080799 0 0" gravcomp="1">
                 <joint name="joint5" type="hinge" axis="0 0 1" range="-1.57 1.57"/>
                 <inertial pos="-0.0050280206 0.0000017387 0.0386233236" mass="0.383" diaginertia="0.00019772 0.00021737 0.00017191"/>
                 <geom name="link5_anodized_grey_visual" type="mesh" mesh="link5_anodized_grey_mesh" material="anodized_grey_mat"/>
@@ -180,14 +178,14 @@
                 <geom name="link5_matte_black_visual" type="mesh" mesh="link5_matte_black_mesh" material="matte_black_mat"/>
                 <geom name="link5_collision" type="mesh" mesh="link5_collision_mesh" rgba="0.18 0.22 0.21 0.12" contype="1" conaffinity="1" condim="6" friction="0.8 0.1 0.1" solref="0.002 1" solimp="0.98 0.995 0.0005"/>
 
-                <body name="link6" pos="0.028008 0 0.04" quat="0.7071054825 0 0.7071080799 0">
+                <body name="link6" pos="0.028008 0 0.04" quat="0.7071054825 0 0.7071080799 0" gravcomp="1">
                   <joint name="joint6" type="hinge" axis="0 0 1" range="-3.14 3.14"/>
                   <inertial pos="0.0000037642 -0.0001009088 0.0253308606" mass="0.3663" diaginertia="0.00015554 0.00015554 0.00013966"/>
                   <geom name="link6_hardware_black_visual" type="mesh" mesh="link6_hardware_black_mesh" material="hardware_black_mat"/>
                   <geom name="link6_matte_black_visual" type="mesh" mesh="link6_matte_black_mesh" material="matte_black_mat"/>
                   <geom name="link6_collision" type="mesh" mesh="link6_collision_mesh" rgba="0.18 0.22 0.21 0.12" contype="1" conaffinity="1" condim="6" friction="0.8 0.1 0.1" solref="0.002 1" solimp="0.98 0.995 0.0005"/>
 
-                  <body name="end_link" pos="0 0 0.15539" quat="0.0000327579 0.7071080791 -0.0000327581 0.7071054818">
+                  <body name="end_link" pos="0 0 0.15539" quat="0.0000327579 0.7071080791 -0.0000327581 0.7071054818" gravcomp="1">
                     <inertial pos="-0.0737654296 -0.0000095081 0.0000070433" mass="0.5" diaginertia="0.00037354 0.00015830 0.00045353"/>
                     <geom name="gripper_base_hardware_black_visual" type="mesh" mesh="gripper_base_hardware_black_mesh" material="gripper_hardware_black_mat"/>
                     <geom name="gripper_base_metal_visual" type="mesh" mesh="gripper_base_metal_mesh" material="gripper_base_metal_mat"/>
@@ -250,6 +248,16 @@
     <exclude body1="link5" body2="link6"/>
     <exclude body1="link6" body2="end_link"/>
 
+    <!-- link5 is a short link (joint5->joint6 offset is only a few cm), so
+         link4's and link6's convex collision hulls overlap at rest even
+         though they're two joints apart, not directly jointed - confirmed
+         empirically: without this, that contact's force exactly cancels
+         joint5/joint6's actuator torque and freezes both joints regardless
+         of commanded goal. Same false-seam issue as the adjacent-pair
+         excludes above, just one hop further out because of link5's length,
+         not genuine self-collision from the arm folding back on itself. -->
+    <exclude body1="link4" body2="link6"/>
+
     <!-- Adjacent convex pieces share X-cut planes.  Excluding contact between
          the two finger bodies prevents those internal seams from friction-locking
          the gripper while preserving finger-to-object contacts. -->
@@ -263,7 +271,17 @@
        kp/kv tuned loosely to hold each link's own weight without sagging or
        oscillating (link2 is the heaviest at ~1.3kg), not precision-tuned
        control theory. ctrlrange mirrors each joint's own range so a bad
-       commanded goal can't be driven past the physical limit. -->
+       commanded goal can't be driven past the physical limit.
+
+       Every arm body above also sets gravcomp="1": without it, these kp
+       values leave a pose-dependent steady-state gravity-sag error on
+       joint2/joint3 (the two heaviest links) of several times the
+       controller's 0.01 rad arrival tolerance (autobot_manip_controller
+       never converges, so the executor times out waiting for arrival) -
+       confirmed empirically across several commanded poses. gravcomp makes
+       the position actuators only responsible for dynamic tracking, not
+       holding the arm up against gravity too, which is what a real
+       actuator's own internal position loop effectively does. -->
   <actuator>
     <position joint="joint1" name="joint1_act" kp="200" kv="20" ctrlrange="-2.8 2.8"/>
     <position joint="joint2" name="joint2_act" kp="200" kv="20" ctrlrange="-3.14 0"/>
@@ -271,7 +289,7 @@
     <position joint="joint4" name="joint4_act" kp="200" kv="20" ctrlrange="-1.87 1.57"/>
     <position joint="joint5" name="joint5_act" kp="150" kv="15" ctrlrange="-1.57 1.57"/>
     <position joint="joint6" name="joint6_act" kp="100" kv="10" ctrlrange="-3.14 3.14"/>
-    <position joint="finger_left" name="finger_left_act" kp="50" kv="5" ctrlrange="0 0.05"/>
-    <position joint="finger_right" name="finger_right_act" kp="50" kv="5" ctrlrange="-0.05 0"/>
+    <position joint="finger_left" name="finger_left_act" kp="250" kv="5" ctrlrange="0 0.05"/>
+    <position joint="finger_right" name="finger_right_act" kp="250" kv="5" ctrlrange="-0.05 0"/>
   </actuator>
 </mujoco>
