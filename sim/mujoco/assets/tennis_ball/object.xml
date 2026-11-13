@@ -13,7 +13,7 @@
          ball's own radius (0.0335m, matches a real tennis ball). freejoint
          since a sphere is trivially stable at rest (unlike the cylinder
          distractor, which needed to be made static to stop jittering). -->
-    <body name="tennis_ball" pos="0 0 0.8085" childclass="grab">
+    <body name="tennis_ball" pos="0.1 0.1 0.8085" childclass="grab">
       <freejoint/>
       <!-- Visual mesh centered on the body origin: the raw YCB scan's own
            local origin isn't at its geometric center (bbox center is at

@@ -31,5 +31,10 @@ def generate_launch_description():
                 executable="autobot_manip_planner",
                 output="screen",
             ),
+            Node(
+                package="autobot_manip_executor",
+                executable="autobot_manip_executor",
+                output="screen",
+            ),
         ]
     )

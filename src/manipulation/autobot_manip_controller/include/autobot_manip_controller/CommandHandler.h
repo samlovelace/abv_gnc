@@ -7,11 +7,11 @@
 #include "Manipulator.h"
 #include "plog/Log.h"
 
-#include "ptera_msgs/msg/joint_position_waypoint.hpp"
-#include "ptera_msgs/msg/task_position_waypoint.hpp"
-#include "ptera_msgs/msg/task_velocity_waypoint.hpp"
-#include "ptera_msgs/msg/joint_velocity_waypoint.hpp"
-#include "ptera_msgs/msg/enable.hpp"
+#include "autobot_msgs/msg/joint_position_waypoint.hpp"
+#include "autobot_msgs/msg/task_position_waypoint.hpp"
+#include "autobot_msgs/msg/task_velocity_waypoint.hpp"
+#include "autobot_msgs/msg/joint_velocity_waypoint.hpp"
+#include "autobot_msgs/msg/enable.hpp"
 
 class CommandHandler 
 { 
@@ -23,12 +23,12 @@ private:
 
     void setNewActiveState(StateMachine::STATE aState); 
 
-    void jointPosWaypointCallback(const ptera_msgs::msg::JointPositionWaypoint::SharedPtr aMsg);
-    void gripperPosWaypointCallback(const ptera_msgs::msg::JointPositionWaypoint::SharedPtr aMsg);
-    void taskPosWaypointCallback(const ptera_msgs::msg::TaskPositionWaypoint::SharedPtr aMsg); 
-    void taskVelWaypointCallback(const ptera_msgs::msg::TaskVelocityWaypoint::SharedPtr aMsg); 
-    void jointVelWaypointCallback(const ptera_msgs::msg::JointVelocityWaypoint::SharedPtr aMsg); 
-    void enableCallback(const ptera_msgs::msg::Enable::SharedPtr anEnabledCmd); 
+    void jointPosWaypointCallback(const autobot_msgs::msg::JointPositionWaypoint::SharedPtr aMsg);
+    void gripperPosWaypointCallback(const autobot_msgs::msg::JointPositionWaypoint::SharedPtr aMsg);
+    void taskPosWaypointCallback(const autobot_msgs::msg::TaskPositionWaypoint::SharedPtr aMsg); 
+    void taskVelWaypointCallback(const autobot_msgs::msg::TaskVelocityWaypoint::SharedPtr aMsg); 
+    void jointVelWaypointCallback(const autobot_msgs::msg::JointVelocityWaypoint::SharedPtr aMsg); 
+    void enableCallback(const autobot_msgs::msg::Enable::SharedPtr anEnabledCmd); 
 
     std::shared_ptr<StateMachine> mStateMachine;
     std::shared_ptr<Manipulator> mManip;  

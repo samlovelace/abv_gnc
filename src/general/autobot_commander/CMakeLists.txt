@@ -11,7 +11,6 @@ find_package(rclcpp REQUIRED)
 find_package(autobot_msgs REQUIRED)
 find_package(autobot_common REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(ptera_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 set(SOURCES
@@ -34,7 +33,6 @@ ament_target_dependencies(${PROJECT_NAME}
   rclcpp
   autobot_msgs
   geometry_msgs
-  ptera_msgs
   Eigen3
 )
 

@@ -88,8 +88,6 @@ bool WaypointExecutor::setGoalState(KDL::JntArray aGoalWaypoint, ruckig::Control
                 mInput->target_position = goalPos;
                 mInput->target_velocity = goalVel;
                 mInput->target_acceleration = goalAccel;
-
-                LOGV << "Setting Goal Joint Pos: " << mInput->target_position;
             }
         break;
     case ruckig::ControlInterface::Velocity:
@@ -103,8 +101,6 @@ bool WaypointExecutor::setGoalState(KDL::JntArray aGoalWaypoint, ruckig::Control
             // target
             mInput->target_velocity = goalVel;
             mInput->target_acceleration = goalAccel;
-
-            LOGV << "Setting Goal Joint Vel: " << mInput->target_velocity;
         }
         break;
     default:

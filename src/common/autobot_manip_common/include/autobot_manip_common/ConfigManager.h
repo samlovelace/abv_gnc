@@ -82,6 +82,16 @@ public:
         double stateValidityResolutionFrac = 0.01;  // OMPL setLongestValidSegmentFraction
     };
 
+    struct ExecutorConfig
+    {
+        double armArrivalTimeoutSec = 30.0;         // per-waypoint timeout waiting for arm/state == ARRIVED
+        double gripperDwellSec = 1.0;               // fixed settle time after a gripper command (no arrival signal exists)
+        double tickRateHz = 20.0;                   // state-machine tick rate
+        double jointTolerance = 0.01;                // rad, applied uniformly to every dispatched joint waypoint
+        double taskPositionToleranceM = 0.01;        // m, xyz
+        double taskOrientationToleranceRad = 0.05;   // rad, rpy
+    };
+
     struct Config
     {
         // Top-level
@@ -98,6 +108,7 @@ public:
         ManipulatorConfig                manipulator;
         std::optional<GripperConfig>     gripper;
         PlannerConfig                    planner;  // defaults apply if config.yaml's Planner: block is absent
+        ExecutorConfig                   executor; // defaults apply if config.yaml's Executor: block is absent
 
         // Combined flat vectors — ordered [mobile base joints..., arm joints...]
         // (or arm joints only, if there's no mobile base).
@@ -265,6 +276,7 @@ private:
     void loadGripperSection    ();
     void loadMountSection      ();
     void loadPlannerSection    (const YAML::Node& aTopConfig);
+    void loadExecutorSection   (const YAML::Node& aTopConfig);
     void mergeJointData        ();
 
     // -----------------------------------------------------------------------

@@ -97,8 +97,10 @@ bool MotionPlanner::plan(const KDL::JntArray& aStart, const KDL::JntArray& aGoal
     }
 
     mSetup->simplifySolution();
-    mSetup->getSolutionPath().interpolate();
-
+    // Deliberately not interpolated - autobot_manip_executor dispatches each
+    // joint-space waypoint and waits for arrival before sending the next, so
+    // a densified path would mean dozens of small stop-start motions instead
+    // of a few smooth controller-generated (Ruckig) segments.
     const auto& path = mSetup->getSolutionPath();
     aPathOut.clear();
     aPathOut.reserve(path.getStateCount());

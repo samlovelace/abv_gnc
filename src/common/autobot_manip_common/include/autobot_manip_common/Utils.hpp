@@ -9,9 +9,6 @@
 #include "geometry_msgs/msg/pose.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 
-#include "ptera_msgs/msg/plan_command.hpp"
-#include "ptera_msgs/msg/plan_response.hpp"
-
 namespace utils
 {
     inline void logFrame(const KDL::Frame& frame)
@@ -88,7 +85,6 @@ namespace utils
         KDL::JntArray jntArr(v.size()); 
         for(int i = 0; i < v.size(); i++)
         {
-            LOGV << "Converting to JntArray: " << v[i];
             jntArr(i) = v[i];
         }
 

@@ -19,6 +19,14 @@ Engine:
     visualize: false
 
 Planner:
-  ApproachDistanceM: 0.08
+  ApproachDistanceM: 0.15
   PlanningTimeS: 2.0
   StateValidityResolutionFrac: 0.01
+
+Executor:
+  ArmArrivalTimeoutSec: 30.0
+  GripperDwellSec: 1.0
+  TickRateHz: 20.0
+  JointTolerance: 0.01
+  TaskPositionToleranceM: 0.01
+  TaskOrientationToleranceRad: 0.05

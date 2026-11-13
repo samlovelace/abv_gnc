@@ -17,31 +17,31 @@ CommandHandler::CommandHandler(std::shared_ptr<StateMachine> msm, std::shared_pt
     mStateMachine(msm), mManip(manip)
 {
     auto topicManager = RosTopicManager::getInstance();
-    topicManager->createSubscriber<ptera_msgs::msg::JointPositionWaypoint>("arm/joint_position_waypoint",
+    topicManager->createSubscriber<autobot_msgs::msg::JointPositionWaypoint>("arm/joint_position_waypoint",
                                                                           std::bind(&CommandHandler::jointPosWaypointCallback,
                                                                                     this,
                                                                                     std::placeholders::_1));
 
-    topicManager->createSubscriber<ptera_msgs::msg::JointPositionWaypoint>("arm/gripper_position_waypoint",
+    topicManager->createSubscriber<autobot_msgs::msg::JointPositionWaypoint>("arm/gripper_position_waypoint",
                                                                           std::bind(&CommandHandler::gripperPosWaypointCallback,
                                                                                     this,
                                                                                     std::placeholders::_1));
 
-    topicManager->createSubscriber<ptera_msgs::msg::Enable>("arm/enable",
+    topicManager->createSubscriber<autobot_msgs::msg::Enable>("arm/enable",
                                                            std::bind(&CommandHandler::enableCallback,
                                                                      this,
                                                                      std::placeholders::_1));
 
-    topicManager->createSubscriber<ptera_msgs::msg::TaskPositionWaypoint>("arm/task_position_waypoint",
+    topicManager->createSubscriber<autobot_msgs::msg::TaskPositionWaypoint>("arm/task_position_waypoint",
                                                                          std::bind(&CommandHandler::taskPosWaypointCallback,
                                                                                    this,
                                                                                    std::placeholders::_1));
 
-    topicManager->createSubscriber<ptera_msgs::msg::TaskVelocityWaypoint>("arm/task_velocity_waypoint",
+    topicManager->createSubscriber<autobot_msgs::msg::TaskVelocityWaypoint>("arm/task_velocity_waypoint",
                                                                          std::bind(&CommandHandler::taskVelWaypointCallback,
                                                                                   this,
                                                                                   std::placeholders::_1));
-    topicManager->createSubscriber<ptera_msgs::msg::JointVelocityWaypoint>("arm/joint_velocity_waypoint",
+    topicManager->createSubscriber<autobot_msgs::msg::JointVelocityWaypoint>("arm/joint_velocity_waypoint",
                                                                          std::bind(&CommandHandler::jointVelWaypointCallback,
                                                                                     this,
                                                                                     std::placeholders::_1));
@@ -69,7 +69,7 @@ void CommandHandler::setNewActiveState(StateMachine::STATE aNewState)
     }
 }
 
-void CommandHandler::enableCallback(const ptera_msgs::msg::Enable::SharedPtr anEnabledCmd)
+void CommandHandler::enableCallback(const autobot_msgs::msg::Enable::SharedPtr anEnabledCmd)
 {
     // TODO: check hardware name in message and use to inform enable behavior
 
@@ -89,19 +89,19 @@ void CommandHandler::enableCallback(const ptera_msgs::msg::Enable::SharedPtr anE
     }
 }
 
-void CommandHandler::jointPosWaypointCallback(const ptera_msgs::msg::JointPositionWaypoint::SharedPtr aMsg)
+void CommandHandler::jointPosWaypointCallback(const autobot_msgs::msg::JointPositionWaypoint::SharedPtr aMsg)
 {
     int numJoints = mManip->getNrCtrlJoints();
     int goalSize = aMsg->positions.size();
 
-    handleWaypoint<ptera_msgs::msg::JointPositionWaypoint,
+    handleWaypoint<autobot_msgs::msg::JointPositionWaypoint,
                    JointPositionWaypoint>(aMsg, goalSize, numJoints, [](const auto& m)
     {
         return JointPositionWaypoint(utils::toJntArray(m->positions), utils::toJntArray(m->tolerances));
     });
 }
 
-void CommandHandler::gripperPosWaypointCallback(const ptera_msgs::msg::JointPositionWaypoint::SharedPtr aMsg)
+void CommandHandler::gripperPosWaypointCallback(const autobot_msgs::msg::JointPositionWaypoint::SharedPtr aMsg)
 {
     // TODO: once hardware names used, move gripper pos setting to jointPosWaypoint path, check for gripper name
 
@@ -126,31 +126,31 @@ void CommandHandler::gripperPosWaypointCallback(const ptera_msgs::msg::JointPosi
     mManip->setGripperGoal(utils::toJntArray(aMsg->positions));
 }
 
-void CommandHandler::jointVelWaypointCallback(const ptera_msgs::msg::JointVelocityWaypoint::SharedPtr aMsg)
+void CommandHandler::jointVelWaypointCallback(const autobot_msgs::msg::JointVelocityWaypoint::SharedPtr aMsg)
 {
     int numJoints = mManip->getNrCtrlJoints();
     int goalSize = aMsg->velocities.size();
 
-    handleWaypoint<ptera_msgs::msg::JointVelocityWaypoint, JointVelocityWaypoint>(aMsg, goalSize, numJoints,
+    handleWaypoint<autobot_msgs::msg::JointVelocityWaypoint, JointVelocityWaypoint>(aMsg, goalSize, numJoints,
          [](const auto& m)
     {
         return JointVelocityWaypoint(utils::toJntArray(m->velocities), utils::toJntArray(m->tolerances));
     });
 }
 
-void CommandHandler::taskPosWaypointCallback(const ptera_msgs::msg::TaskPositionWaypoint::SharedPtr aMsg)
+void CommandHandler::taskPosWaypointCallback(const autobot_msgs::msg::TaskPositionWaypoint::SharedPtr aMsg)
 {
 
-    handleWaypoint<ptera_msgs::msg::TaskPositionWaypoint, TaskPositionWaypoint>(aMsg, -1, -1,
+    handleWaypoint<autobot_msgs::msg::TaskPositionWaypoint, TaskPositionWaypoint>(aMsg, -1, -1,
         [](const auto& wp)
     {
-        return TaskPositionWaypoint(utils::toFrame(wp->pose), utils::toArray6(wp->tolerance));
+        return TaskPositionWaypoint(utils::toFrame(wp->pose.pose), utils::toArray6(wp->tolerance));
     });
 }
 
-void CommandHandler::taskVelWaypointCallback(const ptera_msgs::msg::TaskVelocityWaypoint::SharedPtr aMsg)
+void CommandHandler::taskVelWaypointCallback(const autobot_msgs::msg::TaskVelocityWaypoint::SharedPtr aMsg)
 {
-    handleWaypoint<ptera_msgs::msg::TaskVelocityWaypoint, TaskVelocityWaypoint>(aMsg, -1, -1,
+    handleWaypoint<autobot_msgs::msg::TaskVelocityWaypoint, TaskVelocityWaypoint>(aMsg, -1, -1,
         [](const auto& wp)
     {
         return TaskVelocityWaypoint(utils::toTwist(wp->goal), utils::toTwist(wp->tolerance));

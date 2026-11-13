@@ -96,8 +96,7 @@ void ManipPlannerHandler::planPickCallback(const std::shared_ptr<autobot_msgs::s
     }
 
     const geometry_msgs::msg::PoseStamped graspPose = graspResult->grasp_pose;
-    const geometry_msgs::msg::PoseStamped preGraspPose =
-        computePreGraspPose(graspPose, mConfig.planner.approachDistanceM);
+    const geometry_msgs::msg::PoseStamped preGraspPose = computePreGraspPose(graspPose, mConfig.planner.approachDistanceM);
 
     autobot_msgs::msg::ManipHardwareState::SharedPtr stateCopy;
     {

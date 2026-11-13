@@ -14,7 +14,7 @@
 #include "autobot_manip_controller/JointPositionWaypoint.h"
 #include "autobot_manip_controller/TaskPositionWaypoint.h"
 
-#include "ptera_msgs/msg/manipulator_state.hpp"
+#include "autobot_msgs/msg/manipulator_state.hpp"
 #include "autobot_msgs/msg/manip_hardware_state.hpp"
 
 Manipulator::Manipulator(ConfigManager::Config aConfig)
@@ -60,7 +60,7 @@ Manipulator::Manipulator(ConfigManager::Config aConfig)
         mHardware->sendGripperCommand(firstGripperWp);
     }
 
-    RosTopicManager::getInstance()->createPublisher<ptera_msgs::msg::ManipulatorState>("arm/state");
+    RosTopicManager::getInstance()->createPublisher<autobot_msgs::msg::ManipulatorState>("arm/state");
     RosTopicManager::getInstance()->createPublisher<autobot_msgs::msg::ManipHardwareState>("arm/hardware/state");
     mHardwareStateThread = std::thread(&Manipulator::publishHardwareStateLoop, this);
 }
@@ -560,13 +560,13 @@ void Manipulator::publishStateLoop()
             continue;
         }
 
-        ptera_msgs::msg::ManipulatorState state;
-        state.state = ptera_msgs::msg::ManipulatorState::MOVING;
+        autobot_msgs::msg::ManipulatorState state;
+        state.state = autobot_msgs::msg::ManipulatorState::MOVING;
 
         bool arrived = isArrived();
         if(arrived)
         {
-            state.state = ptera_msgs::msg::ManipulatorState::ARRIVED;
+            state.state = autobot_msgs::msg::ManipulatorState::ARRIVED;
         }
 
         std::vector<double> position(pos.rows());

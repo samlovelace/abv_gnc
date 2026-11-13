@@ -53,6 +53,7 @@ void ConfigManager::loadConfig()
     loadGripperSection    ();
     loadMountSection      ();
     loadPlannerSection    (topConfig);
+    loadExecutorSection   (topConfig);
 
     // Mobile base is optional — a manipulator with no MobileBase entry is standalone
     if (topConfig["MobileBase"] && !topConfig["MobileBase"].IsNull())
@@ -206,6 +207,25 @@ void ConfigManager::loadPlannerSection(const YAML::Node& aTopConfig)
     mConfig.planner.planningTimeS     = optionalScalar<double>(p, "PlanningTimeS",     mConfig.planner.planningTimeS);
     mConfig.planner.stateValidityResolutionFrac =
         optionalScalar<double>(p, "StateValidityResolutionFrac", mConfig.planner.stateValidityResolutionFrac);
+}
+
+// ---------------------------------------------------------------------------
+// Executor: (optional top-level block) — defaults in ExecutorConfig{} apply
+// if absent.
+// ---------------------------------------------------------------------------
+void ConfigManager::loadExecutorSection(const YAML::Node& aTopConfig)
+{
+    if (!aTopConfig["Executor"] || aTopConfig["Executor"].IsNull())
+        return;
+
+    const YAML::Node& e = aTopConfig["Executor"];
+    mConfig.executor.armArrivalTimeoutSec = optionalScalar<double>(e, "ArmArrivalTimeoutSec", mConfig.executor.armArrivalTimeoutSec);
+    mConfig.executor.gripperDwellSec      = optionalScalar<double>(e, "GripperDwellSec",      mConfig.executor.gripperDwellSec);
+    mConfig.executor.tickRateHz           = optionalScalar<double>(e, "TickRateHz",           mConfig.executor.tickRateHz);
+    mConfig.executor.jointTolerance       = optionalScalar<double>(e, "JointTolerance",       mConfig.executor.jointTolerance);
+    mConfig.executor.taskPositionToleranceM = optionalScalar<double>(e, "TaskPositionToleranceM", mConfig.executor.taskPositionToleranceM);
+    mConfig.executor.taskOrientationToleranceRad =
+        optionalScalar<double>(e, "TaskOrientationToleranceRad", mConfig.executor.taskOrientationToleranceRad);
 }
 
 // ---------------------------------------------------------------------------

@@ -208,6 +208,10 @@ void InputHandler::handle(const std::string& anInput)
     {
         handleGripper(false);
     }
+    else if ("execute" == anInput)
+    {
+        handleExecute();
+    }
     else if (anInput == "help" || anInput == "--help" || anInput == "-h")
     {
         std::cout << R"(
@@ -224,6 +228,7 @@ void InputHandler::handle(const std::string& anInput)
         grasp:      request a grasp pose for a tracked object id from autobot_grasp_planner
         open:       open the gripper
         close:      close the gripper
+        execute:    execute a pick plan for a tracked object id via autobot_manip_executor
 
         Type 'help' or '--help' to show this message again.
         )" << std::endl;
@@ -296,12 +301,75 @@ geometry_msgs::msg::Pose InputHandler::transformWorldPoseToManipFrame(const geom
 
 void InputHandler::handleGripper(bool anOpen)
 {
-    ptera_msgs::msg::JointPositionWaypoint waypoint;
+    autobot_msgs::msg::JointPositionWaypoint waypoint;
     waypoint.positions = anOpen ? kGripperOpenPos : kGripperClosedPos;
 
-    RosTopicManager::getInstance()->publishMessage<ptera_msgs::msg::JointPositionWaypoint>(
+    RosTopicManager::getInstance()->publishMessage<autobot_msgs::msg::JointPositionWaypoint>(
         "arm/gripper_position_waypoint", waypoint);
 
     std::cout << GREEN << "Published gripper " << (anOpen ? "open" : "close") << " waypoint (finger_left, finger_right): "
               << waypoint.positions[0] << ", " << waypoint.positions[1] << std::endl;
+}
+
+void InputHandler::executionStatusCallback(const autobot_msgs::msg::ExecutionStatus::SharedPtr aMsg)
+{
+    std::lock_guard<std::mutex> lk(mExecutionStatusMutex);
+    mLatestExecutionStatus = *aMsg;
+    mHasExecutionStatus = true;
+    mExecutionStatusCv.notify_all();
+}
+
+void InputHandler::handleExecute()
+{
+    if (!mExecutionStatusSubscribed)
+    {
+        // Created here, not in the ctor - same reasoning as mPlanGraspClient.
+        RosTopicManager::getInstance()->createSubscriber<autobot_msgs::msg::ExecutionStatus>(
+            "manip/execution_status", std::bind(&InputHandler::executionStatusCallback, this, std::placeholders::_1));
+        mExecutionStatusSubscribed = true;
+    }
+
+    std::cout << "Enter tracked object id: ";
+    std::string idStr;
+    std::getline(std::cin, idStr);
+
+    int32_t id = 0;
+    std::istringstream iss(idStr);
+    if (!(iss >> id))
+    {
+        std::cerr << "Invalid input. Please enter an integer id." << std::endl;
+        return;
+    }
+
+    {
+        std::lock_guard<std::mutex> lk(mExecutionStatusMutex);
+        mHasExecutionStatus = false;
+    }
+
+    autobot_msgs::msg::ExecutePickCommand cmd;
+    cmd.id = id;
+    RosTopicManager::getInstance()->publishMessage<autobot_msgs::msg::ExecutePickCommand>("manip/execute_pick_command", cmd);
+    std::cout << GREEN << "Published execute_pick_command for id=" << id << ", waiting for result..." << std::endl;
+
+    std::unique_lock<std::mutex> lk(mExecutionStatusMutex);
+    const bool gotTerminal = mExecutionStatusCv.wait_for(lk, std::chrono::seconds(60), [this] {
+        return mHasExecutionStatus &&
+               (mLatestExecutionStatus.status == autobot_msgs::msg::ExecutionStatus::SUCCEEDED ||
+                mLatestExecutionStatus.status == autobot_msgs::msg::ExecutionStatus::FAILED);
+    });
+
+    if (!gotTerminal)
+    {
+        std::cout << RED << "Timed out waiting for execution result." << std::endl;
+        return;
+    }
+
+    if (mLatestExecutionStatus.status == autobot_msgs::msg::ExecutionStatus::SUCCEEDED)
+    {
+        std::cout << GREEN << "Pick execution succeeded: " << mLatestExecutionStatus.message << std::endl;
+    }
+    else
+    {
+        std::cout << RED << "Pick execution failed: " << mLatestExecutionStatus.message << std::endl;
+    }
 }
