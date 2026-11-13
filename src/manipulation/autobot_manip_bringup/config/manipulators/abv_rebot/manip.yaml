@@ -2,7 +2,8 @@ type: rebot
 comms: ros
 rate: 10 # Hz
 
-urdf: manipulator.urdf
+urdf_package: rebot_description
+urdf_path: urdf/rebot.urdf
 base_link: rebot_base_link
 end_link: rebot_end_link
 joint_names:

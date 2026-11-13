@@ -23,7 +23,7 @@
 #include "ptera_msgs/msg/vehicle_waypoint.hpp"
 
 #include "autobot_manip_common/BaseState.hpp"
-#include "autobot_manip_common/ConfigManager.h"
+#include "autobot_config/ManipConfigManager.h"
 #include "autobot_common/RateController.hpp"
 #include "autobot_common/RosTopicManager.h"
 
@@ -34,7 +34,7 @@ static constexpr const char* JOINT_STATES_TOPIC = "joint_states";
 class BaseSim
 {
 public:
-    explicit BaseSim(const ConfigManager::MobileBaseConfig& aConfig)
+    explicit BaseSim(const ManipConfigManager::MobileBaseConfig& aConfig)
         : mConfig(aConfig)
     {
         mState.setJointPositions(mConfig.jointAxes, toJntArray(mConfig.initialPositions));
@@ -176,7 +176,7 @@ private:
 
     static constexpr std::chrono::milliseconds kCmdVelTimeout{500};
 
-    ConfigManager::MobileBaseConfig mConfig;
+    ManipConfigManager::MobileBaseConfig mConfig;
 
     std::mutex mMutex;
     BaseState mState;
@@ -191,8 +191,8 @@ int main()
     rclcpp::init(0, nullptr);
     RosTopicManager::getInstance("base_sim")->spinNode();
 
-    ConfigManager::getInstance()->loadConfig();
-    const auto& config = ConfigManager::getInstance()->getConfig();
+    ManipConfigManager::getInstance()->loadConfig();
+    const auto& config = ManipConfigManager::getInstance()->getConfig();
 
     if(!config.mobileBase)
     {

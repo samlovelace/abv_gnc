@@ -6,7 +6,7 @@
 
 #include "autobot_msgs/msg/pick_waypoint.hpp"
 
-PickExecutorStateMachine::PickExecutorStateMachine(const ConfigManager::ExecutorConfig& aConfig,
+PickExecutorStateMachine::PickExecutorStateMachine(const ManipConfigManager::ExecutorConfig& aConfig,
                                                      EnableFn aEnableFn,
                                                      JointWaypointFn aJointWaypointFn,
                                                      TaskWaypointFn aTaskWaypointFn,

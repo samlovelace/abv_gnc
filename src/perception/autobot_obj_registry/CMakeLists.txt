@@ -14,6 +14,7 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(autobot_common REQUIRED)
+find_package(autobot_config REQUIRED)
 find_package(autobot_msgs REQUIRED)
 
 set(SOURCES
@@ -28,6 +29,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 target_link_libraries(${PROJECT_NAME}
   autobot_common::autobot_common
+  autobot_config::percep_config
 )
 
 ament_target_dependencies(${PROJECT_NAME}

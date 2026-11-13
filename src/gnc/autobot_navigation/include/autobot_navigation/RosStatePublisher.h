@@ -4,7 +4,7 @@
 #include <thread>
 #include <chrono>
 
-#include "autobot_common/Configurations.h"
+#include "autobot_config/GncConfigurations.h"
 #include "autobot_common/State.hpp"
 #include "autobot_msgs/msg/state.hpp"
 

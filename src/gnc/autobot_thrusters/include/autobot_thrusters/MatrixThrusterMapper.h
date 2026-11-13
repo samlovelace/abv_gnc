@@ -2,7 +2,7 @@
 #define MATRIXTHRUSTERMAPPER_H
 
 #include "autobot_thrusters/IThrusterMapper.hpp"
-#include "autobot_common/Configurations.h"
+#include "autobot_config/GncConfigurations.h"
 
 class MatrixThrusterMapper : public IThrusterMapper
 {

@@ -10,7 +10,8 @@
 
 #include "plog/Log.h"
 
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/CommonConfigManager.h"
+#include "autobot_config/GncConfigManager.h"
 #include "autobot_common/RateController.hpp"
 
 namespace
@@ -49,9 +50,9 @@ namespace
 CollisionAvoidPathGenerator::CollisionAvoidPathGenerator(const Waypoint& aGoal, RosNavigationListener& aNavSource, const Scene& aScene)
     : mGoal(aGoal), mNavSource(aNavSource), mScene(aScene), mTrajHeading(0.0)
 {
-    mGridResolution = ConfigurationManager::getInstance()->getCollisionAvoidConfig().mGridResolution;
+    mGridResolution = GncConfigManager::getInstance()->getCollisionAvoidConfig().mGridResolution;
 
-    const TableViewConfig& tableConfig = ConfigurationManager::getInstance()->getTableViewConfig();
+    const TableViewConfig& tableConfig = CommonConfigManager::getInstance()->getTableViewConfig();
 
     // Heading-agnostic grid search (see header comment) - use a conservative
     // circumscribing square (max of the two half-extents) rather than assume
@@ -133,7 +134,7 @@ std::size_t CollisionAvoidPathGenerator::getPathPreviewLength() const
 
 void CollisionAvoidPathGenerator::planningLoop()
 {
-    double replanRate = ConfigurationManager::getInstance()->getCollisionAvoidConfig().mReplanRate;
+    double replanRate = GncConfigManager::getInstance()->getCollisionAvoidConfig().mReplanRate;
     RateController rate(static_cast<int>(replanRate));
 
     while(!mDone)

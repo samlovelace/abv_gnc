@@ -2,8 +2,8 @@
 #define THRUSTERCOMMANDER_H
 
 #include <eigen3/Eigen/Dense>
-#include "autobot_common/Configurations.h"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/GncConfigurations.h"
+#include "autobot_config/GncConfigManager.h"
 #include "autobot_thrusters/IThrusterDriver.hpp"
 #include "autobot_thrusters/IThrusterMapper.hpp"
 

@@ -1,12 +1,12 @@
 
 #include "autobot_common/RosNavigationListener.h"
 #include "autobot_common/RosTopicManager.h"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/GncConfigManager.h"
 
 RosNavigationListener::RosNavigationListener(
     std::function<void(autobot_msgs::msg::State::SharedPtr)> aCallback)
     : mAcquiredState(false),
-      mNavDataTimeout(ConfigurationManager::getInstance()->getControlConfig().mNavDataTimeout)
+      mNavDataTimeout(GncConfigManager::getInstance()->getControlConfig().mNavDataTimeout)
 {
     auto cb = [this, aCallback](autobot_msgs::msg::State::SharedPtr msg)
     {

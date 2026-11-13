@@ -7,7 +7,7 @@
 #include <QRectF>
 #include <QVector>
 
-#include "autobot_common/Configurations.h"
+#include "autobot_config/CommonConfigurations.h"
 
 // Plain world-frame (x, y, radius) obstacle, used purely for rendering the
 // persistent obstacle set - main.cpp owns the authoritative list (since it's

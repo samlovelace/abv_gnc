@@ -5,7 +5,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include "autobot_common/DataLogger.h"
-#include "autobot_manip_common/ConfigManager.h"
+#include "autobot_config/ManipConfigManager.h"
 
 #include "autobot_manip_controller/Manipulator.h"
 #include "autobot_manip_controller/StateMachine.h"
@@ -26,9 +26,9 @@ int main()
     DataLogger::get().createMainLog("autobot_manip_controller");
     RosTopicManager::getInstance("autobot_manip_controller")->spinNode();
 
-    ConfigManager::getInstance()->loadConfig();
+    ManipConfigManager::getInstance()->loadConfig();
 
-    auto manip = std::make_shared<Manipulator>(ConfigManager::getInstance()->getConfig());
+    auto manip = std::make_shared<Manipulator>(ManipConfigManager::getInstance()->getConfig());
     auto sm = std::make_shared<StateMachine>(manip);
     CommandHandler* cm = new CommandHandler(sm, manip);
 

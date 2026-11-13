@@ -6,7 +6,7 @@
 
 #include "ruckig/ruckig.hpp"
 
-#include "autobot_manip_common/ConfigManager.h"
+#include "autobot_config/ManipConfigManager.h"
 #include "autobot_manip_common/KinematicsHandler.h"
 
 #include "autobot_manip_controller/JointPositionWaypoint.h"
@@ -14,7 +14,7 @@
 class WaypointExecutor
 {
 public:
-    WaypointExecutor(ConfigManager::Config& aConfig);
+    WaypointExecutor(ManipConfigManager::Config& aConfig);
     ~WaypointExecutor();
 
     // aNumDof controlled joints, starting at aOffset in the kinematics' joint indexing
@@ -30,7 +30,7 @@ private:
     std::unique_ptr<ruckig::InputParameter<0>> mInput;
     std::unique_ptr<ruckig::OutputParameter<0>> mOutput;
 
-    ConfigManager::Config mConfig;
+    ManipConfigManager::Config mConfig;
     std::vector<double> mVelocityLimits;
     std::vector<double> mLowerPosLimits;
     std::vector<double> mUpperPosLimits;

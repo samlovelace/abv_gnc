@@ -14,7 +14,7 @@
 #include <kdl/frames.hpp>
 #include <urdf/model.h>
 
-#include "autobot_manip_common/ConfigManager.h"
+#include "autobot_config/ManipConfigManager.h"
 
 struct CollisionShape 
 {
@@ -45,7 +45,7 @@ public:
     KinematicsHandler();
     ~KinematicsHandler();
 
-    bool init(const ConfigManager::Config& aConfig); 
+    bool init(const ManipConfigManager::Config& aConfig);
     bool solveIK(const KDL::JntArray& anInitPos, const KDL::Frame& aGoalPose, KDL::JntArray& aResultOut);
     bool solveIK(const KDL::JntArray& anInitPos, const KDL::Twist& aGoalVel, KDL::JntArray& aResultOut);
     // aMeasuredVel: full joint velocities; the locked joints' (uncontrolled

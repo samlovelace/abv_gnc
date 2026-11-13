@@ -5,8 +5,8 @@
 #include <thread> 
 
 #include "IStateFetcher.h"
-#include "autobot_common/ConfigurationManager.h"
-#include "autobot_common/Configurations.h" 
+#include "autobot_config/GncConfigManager.h"
+#include "autobot_config/GncConfigurations.h" 
 #include "libmotioncapture/motioncapture.h"
 
 class OptitrackStateFetcher_LibMocap : public IStateFetcher

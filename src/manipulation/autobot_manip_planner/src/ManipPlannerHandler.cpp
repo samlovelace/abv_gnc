@@ -17,7 +17,7 @@ constexpr const char* kPickPlanTopic = "manip/pick_plan";
 
 ManipPlannerHandler::ManipPlannerHandler()
 {
-    mConfig = ConfigManager::getInstance()->getConfig();
+    mConfig = ManipConfigManager::getInstance()->getConfig();
 
     if (!mKinematics.init(mConfig))
     {

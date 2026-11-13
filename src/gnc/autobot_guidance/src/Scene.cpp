@@ -1,12 +1,12 @@
 
 #include "autobot_guidance/Scene.h"
 
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/GncConfigManager.h"
 #include "autobot_common/RosTopicManager.h"
 
 Scene::Scene()
 {
-    SceneConfig& config = ConfigurationManager::getInstance()->getSceneConfig();
+    SceneConfig& config = GncConfigManager::getInstance()->getSceneConfig();
     mBounds = AxisAlignedBoundingBox{config.mXMin, config.mXMax, config.mYMin, config.mYMax};
 
     RosTopicManager::getInstance()->createSubscriber<autobot_msgs::msg::ObstacleArray>(

@@ -6,8 +6,8 @@
 
 #include "autobot_navigation/IStateFetcher.h"
 #include "autobot_navigation/StampedState.h"
-#include "autobot_common/Configurations.h"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/GncConfigurations.h"
+#include "autobot_config/GncConfigManager.h"
 #include "autobot_common/ConsumableBuffer.hpp"
 #include "RosStatePublisher.h"
 #include "ExtendedKalmanFilter.h"

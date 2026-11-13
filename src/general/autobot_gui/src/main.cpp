@@ -28,7 +28,8 @@
 #include "autobot_msgs/msg/policy_active.hpp"
 #include "autobot_msgs/msg/policy_registry.hpp"
 
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/CommonConfigManager.h"
+#include "autobot_config/GncConfigManager.h"
 
 #include "autobot_gui/LivePlot.h"
 #include "autobot_gui/TopicAdapter.hpp"
@@ -46,7 +47,8 @@
 
 int main(int argc, char *argv[])
 {
-    ConfigurationManager::getInstance()->loadConfiguration();
+    CommonConfigManager::getInstance()->loadConfiguration();
+    GncConfigManager::getInstance()->loadConfiguration();
 
     rclcpp::init(0, nullptr);
     RosTopicManager::getInstance("autobot_gui")->spinNode();
@@ -143,7 +145,7 @@ int main(int argc, char *argv[])
                       activePolicyBanner, &ActivePolicyBanner::setActivePolicy);
 
     QString robotIp = QString::fromStdString(
-        ConfigurationManager::getInstance()->getNavigationConfig().mLocalIp);
+        GncConfigManager::getInstance()->getNavigationConfig().mLocalIp);
 
     auto* healthPanel = new NodeHealthPanel({"goal_manager", "navigation", "guidance", "bridge", "control", "thrusters"}, robotIp);
     rightLayout->addWidget(healthPanel);
@@ -166,7 +168,7 @@ int main(int argc, char *argv[])
     QObject::connect(poseSync, &TopicAdapterBase::newDataVariant,
                       panel, &CommandPanel::onPoseSync);
 
-    auto* tableView = new TableTopView(ConfigurationManager::getInstance()->getTableViewConfig());
+    auto* tableView = new TableTopView(CommonConfigManager::getInstance()->getTableViewConfig());
 
     auto* tableStateAdapter =
         new TopicAdapter<autobot_msgs::msg::State, QVector<double>>(

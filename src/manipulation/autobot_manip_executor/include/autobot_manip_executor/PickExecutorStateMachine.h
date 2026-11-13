@@ -9,7 +9,7 @@
 
 #include <geometry_msgs/msg/pose_stamped.hpp>
 
-#include "autobot_manip_common/ConfigManager.h"
+#include "autobot_config/ManipConfigManager.h"
 #include "autobot_msgs/msg/pick_plan.hpp"
 #include "autobot_msgs/msg/pick_waypoint.hpp"
 #include "autobot_msgs/msg/manipulator_state.hpp"
@@ -40,7 +40,7 @@ public:
     using TaskWaypointFn = std::function<void(const geometry_msgs::msg::PoseStamped& aPose, const std::vector<double>& aTolerance)>;
     using GripperWaypointFn = std::function<void(const std::vector<double>& aPositions)>;
 
-    PickExecutorStateMachine(const ConfigManager::ExecutorConfig& aConfig,
+    PickExecutorStateMachine(const ManipConfigManager::ExecutorConfig& aConfig,
                               EnableFn aEnableFn,
                               JointWaypointFn aJointWaypointFn,
                               TaskWaypointFn aTaskWaypointFn,
@@ -74,7 +74,7 @@ private:
     // primary arrival check. Caller must already hold mArmStateMutex.
     bool withinInflatedTolerance(const autobot_msgs::msg::PickWaypoint& wp) const;
 
-    ConfigManager::ExecutorConfig mConfig;
+    ManipConfigManager::ExecutorConfig mConfig;
     EnableFn mEnableFn;
     JointWaypointFn mJointWaypointFn;
     TaskWaypointFn mTaskWaypointFn;

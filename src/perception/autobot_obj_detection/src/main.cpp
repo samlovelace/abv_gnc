@@ -3,7 +3,8 @@
 #include "autobot_common/RosTopicManager.h"
 #include "autobot_common/DataLogger.h"
 #include "autobot_common/SignalHandler.hpp"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/CommonConfigManager.h"
+#include "autobot_config/PercepConfigManager.h"
 #include "autobot_common/HeartbeatPublisher.h"
 #include "autobot_obj_detection/ObjectDetectionHandler.h"
 
@@ -14,7 +15,8 @@ int main()
     const std::string name = "obj_detection";
 
     DataLogger::get().createMainLog(name);
-    ConfigurationManager::getInstance()->loadConfiguration();
+    CommonConfigManager::getInstance()->loadConfiguration();
+    PercepConfigManager::getInstance()->loadConfiguration();
 
     rclcpp::init(0, nullptr);
     RosTopicManager::getInstance(name);

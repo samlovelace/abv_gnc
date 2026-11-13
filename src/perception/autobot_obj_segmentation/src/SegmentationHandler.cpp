@@ -14,7 +14,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <tf2/exceptions.h>
 
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/PercepConfigManager.h"
 #include "autobot_common/RosTopicManager.h"
 #include "autobot_msgs/msg/object_observation.hpp"
 
@@ -180,7 +180,7 @@ SegmentationHandler::SegmentationHandler()
     mDepthSub.subscribe(RosTopicManager::getInstance(), kDepthTopic, rmw_qos_profile_sensor_data);
     mDetectionsSub.subscribe(RosTopicManager::getInstance(), kDetectionsTopic, rmw_qos_profile_default);
 
-    const auto& cfg = ConfigurationManager::getInstance()->getObjSegmentationConfig();
+    const auto& cfg = PercepConfigManager::getInstance()->getObjSegmentationConfig();
 
     mSync = std::make_unique<Synchronizer>(SyncPolicy(10), mDepthSub, mDetectionsSub);
     mSync->setMaxIntervalDuration(rclcpp::Duration::from_seconds(cfg.mSyncSlopSec));
@@ -210,8 +210,8 @@ void SegmentationHandler::onSynced(const sensor_msgs::msg::Image::ConstSharedPtr
         return;
     }
 
-    const auto& cfg = ConfigurationManager::getInstance()->getObjSegmentationConfig();
-    const auto& extrinsicsCfg = ConfigurationManager::getInstance()->getCameraExtrinsicsConfig();
+    const auto& cfg = PercepConfigManager::getInstance()->getObjSegmentationConfig();
+    const auto& extrinsicsCfg = PercepConfigManager::getInstance()->getCameraExtrinsicsConfig();
     const float fx = static_cast<float>(info->k[0]);
     const float fy = static_cast<float>(info->k[4]);
     const float cx = static_cast<float>(info->k[2]);

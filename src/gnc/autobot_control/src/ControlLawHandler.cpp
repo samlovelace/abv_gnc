@@ -2,7 +2,7 @@
 #include "autobot_control/PidControlLaw.h"
 
 #include "autobot_common/RosTopicManager.h"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/GncConfigManager.h"
 #include "autobot_msgs/msg/thruster_command.hpp"
 #include "plog/Log.h"
 
@@ -25,7 +25,7 @@ namespace
 
 ControlLawHandler::ControlLawHandler()
 {
-    auto& config = ConfigurationManager::getInstance()->getControlLawConfig();
+    auto& config = GncConfigManager::getInstance()->getControlLawConfig();
 
     if("LQR" == config.mLawType || "lqr" == config.mLawType ||
        "MPC" == config.mLawType || "mpc" == config.mLawType)

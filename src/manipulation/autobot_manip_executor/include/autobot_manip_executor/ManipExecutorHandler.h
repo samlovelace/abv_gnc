@@ -3,7 +3,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include "autobot_manip_common/ConfigManager.h"
+#include "autobot_config/ManipConfigManager.h"
 #include "autobot_manip_executor/PickExecutorStateMachine.h"
 #include "autobot_msgs/msg/execute_pick_command.hpp"
 #include "autobot_msgs/msg/manipulator_state.hpp"
@@ -23,7 +23,7 @@ private:
 
     void publishStatus();
 
-    ConfigManager::Config mConfig;
+    ManipConfigManager::Config mConfig;
     PickExecutorStateMachine mStateMachine;
 
     // Separate client node for the one-shot, bounded manip/plan_pick call -

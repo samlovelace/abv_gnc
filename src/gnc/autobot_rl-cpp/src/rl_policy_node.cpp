@@ -8,7 +8,7 @@
 
 #include "autobot_common/RosTopicManager.h"
 #include "autobot_common/HeartbeatPublisher.h"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/CommonConfigManager.h"
 #include "autobot_msgs/msg/thruster_command.hpp"
 
 // ==========================================================================
@@ -260,7 +260,7 @@ int main(int argc, char** argv)
     // needed autobot_bringup's config.yaml before (ROS parameters only), so
     // this load was missing; without it mRate is uninitialized and
     // HeartbeatPublisher's timer period computation can throw.
-    ConfigurationManager::getInstance()->loadConfiguration();
+    CommonConfigManager::getInstance()->loadConfiguration();
 
     rclcpp::init(argc, argv);
     RosTopicManager::getInstance("autobot_rl");

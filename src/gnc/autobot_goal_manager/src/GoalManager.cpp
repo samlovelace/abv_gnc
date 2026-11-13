@@ -26,7 +26,7 @@ GoalManager::GoalManager() :
     mLastInputRecvdAt(std::chrono::steady_clock::now()), mStaleInputThreshold(std::chrono::duration<double>(std::chrono::milliseconds(250))),
     mPoseError(), mVelError(),
     mArrivalTimerActive(false),
-    mConfig(ConfigurationManager::getInstance()->getControlConfig()),
+    mConfig(GncConfigManager::getInstance()->getControlConfig()),
     mArrivalTol(mConfig.mPoseArrivalTol),
     mGoalType(GoalType::NUM_TYPES)
 {

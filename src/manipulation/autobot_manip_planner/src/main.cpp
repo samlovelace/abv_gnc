@@ -1,17 +1,17 @@
 // ManipPlannerHandler.h (via MotionPlanner.h) must be included before any
-// header that pulls plog/Log.h (SignalHandler.hpp, ConfigurationManager.h
-// below) - plog's LOG_DEBUG/LOG_WARN/etc. macros collide with OMPL's own
-// identically-named enum members in ompl/util/Console.h, corrupting that
-// enum's declaration if plog's macros are already defined when it's parsed.
+// header that pulls plog/Log.h (SignalHandler.hpp below) - plog's
+// LOG_DEBUG/LOG_WARN/etc. macros collide with OMPL's own identically-named
+// enum members in ompl/util/Console.h, corrupting that enum's declaration
+// if plog's macros are already defined when it's parsed.
 #include "autobot_manip_planner/ManipPlannerHandler.h"
 
 #include <cstdio>
 #include "autobot_common/RosTopicManager.h"
 #include "autobot_common/DataLogger.h"
 #include "autobot_common/SignalHandler.hpp"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/CommonConfigManager.h"
 #include "autobot_common/HeartbeatPublisher.h"
-#include "autobot_manip_common/ConfigManager.h"
+#include "autobot_config/ManipConfigManager.h"
 
 int main()
 {
@@ -20,8 +20,8 @@ int main()
     const std::string name = "manip_planner";
 
     DataLogger::get().createMainLog(name);
-    ConfigurationManager::getInstance()->loadConfiguration();
-    ConfigManager::getInstance()->loadConfig();
+    CommonConfigManager::getInstance()->loadConfiguration();
+    ManipConfigManager::getInstance()->loadConfig();
 
     rclcpp::init(0, nullptr);
     RosTopicManager::getInstance(name);

@@ -2,7 +2,7 @@
 #define PIDCONTROLLAW_H
 
 #include <eigen3/Eigen/Dense>
-#include "autobot_common/Configurations.h"
+#include "autobot_config/GncConfigurations.h"
 #include "autobot_control/IControlLaw.hpp"
 #include <chrono>
 

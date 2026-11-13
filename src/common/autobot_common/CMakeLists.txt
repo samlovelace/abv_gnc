@@ -12,7 +12,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(autobot_msgs REQUIRED)
-find_package(yaml-cpp REQUIRED)
+find_package(autobot_config REQUIRED)
 
 # ── ONNX Runtime ──────────────────────────────────────────────────────────────
 # Set ORT_ROOT to your local ONNX Runtime install if it isn't on the system
@@ -45,7 +45,6 @@ message(STATUS "ORT include : ${ORT_INCLUDE_DIR}")
 message(STATUS "ORT lib     : ${ORT_LIB}")
 
 add_library(${PROJECT_NAME} SHARED
-  src/ConfigurationManager.cpp
   src/DataLogger.cpp
   src/HeartbeatPublisher.cpp
   src/RosNavigationListener.cpp
@@ -60,11 +59,12 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${ORT_INCLUDE_DIR})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
-  yaml-cpp
   rclcpp::rclcpp
   ${std_msgs_TARGETS}
   ${autobot_msgs_TARGETS}
-  ${ORT_LIB})
+  ${ORT_LIB}
+  autobot_config::common_config
+  autobot_config::gnc_config)
 
 install(TARGETS ${PROJECT_NAME}
         EXPORT ${PROJECT_NAME}_targets
@@ -74,5 +74,5 @@ install(DIRECTORY include/
         DESTINATION include)
 
 ament_export_targets(${PROJECT_NAME}_targets HAS_LIBRARY_TARGET)
-ament_export_dependencies(rclcpp std_msgs autobot_msgs yaml-cpp)
+ament_export_dependencies(rclcpp std_msgs autobot_msgs autobot_config)
 ament_package()

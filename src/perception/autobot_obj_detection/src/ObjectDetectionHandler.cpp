@@ -2,7 +2,7 @@
 #include <opencv2/imgproc.hpp>
 #include <plog/Log.h>
 
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/PercepConfigManager.h"
 #include "autobot_common/RosTopicManager.h"
 #include "autobot_obj_detection/DetectorFactory.hpp"
 #include "autobot_obj_detection/ObjectDetectionHandler.h"
@@ -32,7 +32,7 @@ sensor_msgs::msg::Image maskToImageMsg(const cv::Mat& mask, const std_msgs::msg:
 
 ObjectDetectionHandler::ObjectDetectionHandler()
 {
-    const auto& cfg = ConfigurationManager::getInstance()->getObjDetectionConfig();
+    const auto& cfg = PercepConfigManager::getInstance()->getObjDetectionConfig();
 
     DetectorConfig detectorCfg;
     detectorCfg.type = cfg.mType;

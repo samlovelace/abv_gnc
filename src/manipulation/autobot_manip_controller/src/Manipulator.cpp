@@ -17,7 +17,7 @@
 #include "autobot_msgs/msg/manipulator_state.hpp"
 #include "autobot_msgs/msg/manip_hardware_state.hpp"
 
-Manipulator::Manipulator(ConfigManager::Config aConfig)
+Manipulator::Manipulator(ManipConfigManager::Config aConfig)
     : mConfig(aConfig), mWaypointExecutor(std::make_unique<WaypointExecutor>(mConfig)),
       mKinematicsHandler(std::make_shared<KinematicsHandler>()),
       mExecutorReady(false), mEnabled(false), mRunning(true), mIsArrived(false)

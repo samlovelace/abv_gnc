@@ -7,7 +7,7 @@
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
 #include "autobot_common/RosTopicManager.h"
-#include "autobot_manip_common/ConfigManager.h"
+#include "autobot_config/ManipConfigManager.h"
 #include "autobot_common/RateController.hpp"
 
 #include "autobot_msgs/msg/manip_hardware_telemetry.hpp"
@@ -31,7 +31,7 @@ bool HardwareManager::init()
     RosTopicManager::getInstance()->createSubscriber<autobot_msgs::msg::ManipHardwareGoal>("arm/hardware/goal",
         std::bind(&HardwareManager::goalCallback, this, std::placeholders::_1));
 
-    const auto& config = ConfigManager::getInstance()->getConfig();
+    const auto& config = ManipConfigManager::getInstance()->getConfig();
     mHasGripper = config.gripper.has_value();
     mNumArmJoints = static_cast<int>(config.manipulator.jointNames.size());
 
@@ -62,7 +62,7 @@ void HardwareManager::run()
     KDL::JntArray pos, vel;
     std::vector<double> posV, velV;
 
-    const std::string& name = ConfigManager::getInstance()->getConfig().manipName;
+    const std::string& name = ManipConfigManager::getInstance()->getConfig().manipName;
 
     autobot_msgs::msg::ManipHardwareTelemetry state;
     autobot_msgs::msg::ManipHardwareTelemetry gripperState;

@@ -12,6 +12,7 @@
   <depend>rclcpp</depend>
   <depend>sensor_msgs</depend>
   <depend>autobot_common</depend>
+  <depend>autobot_config</depend>
   <depend>autobot_msgs</depend>
   <depend>cv_bridge</depend>
   <depend>libopencv-dev</depend>

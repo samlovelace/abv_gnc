@@ -21,7 +21,7 @@ constexpr const char* kPlanPickService = "manip/plan_pick";
 }  // namespace
 
 ManipExecutorHandler::ManipExecutorHandler()
-    : mConfig(ConfigManager::getInstance()->getConfig()),
+    : mConfig(ManipConfigManager::getInstance()->getConfig()),
       mStateMachine(
           mConfig.executor,
           [](bool aEnabled) {

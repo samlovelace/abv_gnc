@@ -2,7 +2,7 @@
 #include "autobot_manip_controller/WaypointExecutor.h"
 #include "plog/Log.h"
 
-WaypointExecutor::WaypointExecutor(ConfigManager::Config& aConfig) : mConfig(aConfig)
+WaypointExecutor::WaypointExecutor(ManipConfigManager::Config& aConfig) : mConfig(aConfig)
 {
 
 }

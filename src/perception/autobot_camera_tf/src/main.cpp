@@ -5,7 +5,8 @@
 #include "autobot_common/RosTopicManager.h"
 #include "autobot_common/DataLogger.h"
 #include "autobot_common/SignalHandler.hpp"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/CommonConfigManager.h"
+#include "autobot_config/PercepConfigManager.h"
 #include "autobot_common/HeartbeatPublisher.h"
 
 int main()
@@ -15,14 +16,15 @@ int main()
     const std::string name = "camera_tf";
 
     DataLogger::get().createMainLog(name);
-    ConfigurationManager::getInstance()->loadConfiguration();
+    CommonConfigManager::getInstance()->loadConfiguration();
+    PercepConfigManager::getInstance()->loadConfiguration();
 
     rclcpp::init(0, nullptr);
     RosTopicManager::getInstance(name);
     RosTopicManager::getInstance()->spinNode();
     HeartbeatPublisher heartbeat(name);
 
-    const auto& cfg = ConfigurationManager::getInstance()->getCameraExtrinsicsConfig();
+    const auto& cfg = PercepConfigManager::getInstance()->getCameraExtrinsicsConfig();
 
     geometry_msgs::msg::TransformStamped transform;
     transform.header.stamp = RosTopicManager::getInstance()->now();

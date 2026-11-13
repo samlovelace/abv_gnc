@@ -7,7 +7,7 @@
 #include <kdl/jntarray.hpp>
 
 #include "autobot_manip_common/BaseState.hpp"
-#include "autobot_manip_common/ConfigManager.h"
+#include "autobot_config/ManipConfigManager.h"
 
 #include "ptera_msgs/msg/robot_state.hpp"
 
@@ -18,7 +18,7 @@
 class MobileBaseInterface
 {
 public:
-    MobileBaseInterface(const ConfigManager::MobileBaseConfig& aConfig, int aControlRateHz);
+    MobileBaseInterface(const ManipConfigManager::MobileBaseConfig& aConfig, int aControlRateHz);
     ~MobileBaseInterface();
 
     bool init();

@@ -12,11 +12,11 @@ The `autobot_description` package provides a URDF/xacro model of the vehicle and
 
 ## Model
 
-`urdf/autobot_chassis.urdf.xacro` models the vehicle's 3-DOF planar motion explicitly as a joint chain rather than a free-floating body, so it can be driven directly from published joint states in RViz:
+`urdf/abv_chassis.urdf.xacro` models the vehicle's 3-DOF planar motion explicitly as a joint chain rather than a free-floating body, so it can be driven directly from published joint states in RViz:
 
-- `x_joint` (prismatic, x) → `y_joint` (prismatic, y) → `yaw_joint` (revolute, yaw) → `vehicle_link`, which carries the visual mesh (`meshes/autobot_chassis/autobot_v2.dae`).
+- `x_joint` (prismatic, x) → `y_joint` (prismatic, y) → `yaw_joint` (revolute, yaw) → `vehicle_link`, which carries the visual mesh (`meshes/abv_chassis/autobot_v2.dae`).
 
-`urdf/abv.urdf.xacro` is the top-level model that instantiates the chassis macro and attaches a `widow_xl` arm (joint prefix `wxr_`) to `vehicle_link`; `urdf/autobot_chassis-standalone.urdf.xacro` provides a standalone (non-macro) version for previewing the chassis alone. `urdf/manipulators/` holds the `widow_xl` arm model (`widow_xl.urdf.xacro`, plus a standalone version for previewing it alone).
+`urdf/abv.urdf.xacro` is the top-level model that instantiates the chassis macro and attaches a `widow_xl` arm (joint prefix `wxr_`) to `vehicle_link`; `urdf/abv_chassis-standalone.urdf.xacro` provides a standalone (non-macro) version for previewing the chassis alone. `urdf/manipulators/` holds the `widow_xl` arm model (`widow_xl.urdf.xacro`, plus a standalone version for previewing it alone).
 
 ## Usage
 

@@ -7,12 +7,12 @@
 #include <sensor_msgs/msg/joint_state.hpp>
 
 #include "autobot_manip_hardware/IManipComms.hpp"
-#include "autobot_manip_common/ConfigManager.h"
+#include "autobot_config/ManipConfigManager.h"
 
 class RosManipComms : public IManipComms
 {
 public:
-    RosManipComms(const ConfigManager::Config& aConfig);
+    RosManipComms(const ManipConfigManager::Config& aConfig);
     ~RosManipComms() override;
 
     bool init() override;

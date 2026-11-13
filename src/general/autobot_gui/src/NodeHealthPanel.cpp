@@ -1,5 +1,5 @@
 #include "autobot_gui/NodeHealthPanel.h"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/CommonConfigManager.h"
 
 #include <QVBoxLayout>
 #include <QGridLayout>
@@ -13,7 +13,7 @@ constexpr int kGridColumns = 2;
 NodeHealthPanel::NodeHealthPanel(const QStringList& aExpectedNodes, const QString& aRobotIp, QWidget* parent)
     : QWidget(parent)
 {
-    HeartbeatConfig config = ConfigurationManager::getInstance()->getHeartbeatConfig();
+    HeartbeatConfig config = CommonConfigManager::getInstance()->getHeartbeatConfig();
     mStaleAfterSec = config.mStaleAfter;
 
     auto* layout = new QVBoxLayout(this);

@@ -1,6 +1,6 @@
 #include "plog/Log.h"
 
-#include "autobot_manip_common/ConfigManager.h"
+#include "autobot_config/ManipConfigManager.h"
 
 #include "autobot_manip_hardware/ManipulatorFactory.h"
 #include "autobot_manip_hardware/RosManipComms.h"
@@ -9,7 +9,7 @@
 
 std::shared_ptr<IManipComms> ManipulatorFactory::create()
 {
-    auto config = ConfigManager::getInstance()->getConfig();
+    auto config = ManipConfigManager::getInstance()->getConfig();
 
     if("ros" == config.commsMode)
     {
@@ -19,7 +19,7 @@ std::shared_ptr<IManipComms> ManipulatorFactory::create()
     else if ("dynamixel" == config.manipType && "dynamixel" == config.commsMode)
     {
         LOGW << "Using DynamixelManipComms";
-        return std::make_shared<DynamixelManipComms>(ConfigManager::getInstance()->getRawNode()["comms_configs"],
+        return std::make_shared<DynamixelManipComms>(ManipConfigManager::getInstance()->getRawNode()["comms_configs"],
                                                        static_cast<int>(config.manipulator.jointNames.size()));
     }
     else if("simulated" == config.commsMode)

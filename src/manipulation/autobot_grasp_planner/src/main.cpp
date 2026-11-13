@@ -2,7 +2,7 @@
 #include "autobot_common/RosTopicManager.h"
 #include "autobot_common/DataLogger.h"
 #include "autobot_common/SignalHandler.hpp"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/CommonConfigManager.h"
 #include "autobot_common/HeartbeatPublisher.h"
 #include "autobot_grasp_planner/GraspPlannerHandler.h"
 
@@ -13,7 +13,7 @@ int main()
     const std::string name = "grasp_planner";
 
     DataLogger::get().createMainLog(name);
-    ConfigurationManager::getInstance()->loadConfiguration();
+    CommonConfigManager::getInstance()->loadConfiguration();
 
     rclcpp::init(0, nullptr);
     RosTopicManager::getInstance(name);

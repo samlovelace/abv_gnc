@@ -8,8 +8,8 @@
 #include "autobot_common/ArrivalStatus.hpp"
 #include "autobot_common/ThreadSafe.hpp"
 #include "autobot_common/RosNavigationListener.h"
-#include "autobot_common/Configurations.h"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/GncConfigurations.h"
+#include "autobot_config/GncConfigManager.h"
 
 #include "autobot_goal_manager/GoalType.hpp"
 

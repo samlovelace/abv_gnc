@@ -12,6 +12,13 @@
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
+  <depend>rclcpp</depend>
+  <depend>yaml-cpp</depend>
+  <depend>autobot_config</depend>
+  <depend>kdl_parser</depend>
+  <depend>urdf</depend>
+  <depend>eigen</depend>
+
   <export>
     <build_type>ament_cmake</build_type>
   </export>

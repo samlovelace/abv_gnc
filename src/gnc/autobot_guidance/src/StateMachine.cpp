@@ -8,7 +8,7 @@
 #include "autobot_msgs/msg/path.hpp"
 
 #include "autobot_common/RateController.hpp"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/GncConfigManager.h"
 #include "autobot_common/RosTopicManager.h"
 
 #include "autobot_guidance/StateMachine.h"
@@ -53,7 +53,7 @@ void StateMachine::onCommand(const Command& aCommand)
 
 void StateMachine::run()
 {
-    int rateConfig = ConfigurationManager::getInstance()->getGuidanceConfig().mStateMachineRate; 
+    int rateConfig = GncConfigManager::getInstance()->getGuidanceConfig().mStateMachineRate; 
     RateController rate(rateConfig); 
 
     mStatusPublishThread = std::thread(&StateMachine::statusPublishLoop, this);
@@ -190,7 +190,7 @@ void StateMachine::sendWaypoint()
     // path generator supplied its own override for this waypoint
     double waypointTimeout = wp.mTimeout > 0.0
         ? wp.mTimeout
-        : ConfigurationManager::getInstance()->getGuidanceConfig().mWaypointTimeout;
+        : GncConfigManager::getInstance()->getGuidanceConfig().mWaypointTimeout;
 
     mWaypointWatchdog.start(waypointTimeout, std::bind(&StateMachine::onWaypointTimeout, this));
 }
@@ -260,7 +260,7 @@ void StateMachine::sendStopCommand()
 Eigen::Vector3d StateMachine::resolveArrivalTolerance(const Waypoint& aWaypoint) const
 {
     Eigen::Vector3d resolved;
-    Eigen::Vector3d configDefault = ConfigurationManager::getInstance()->getControlConfig().mPoseArrivalTol;
+    Eigen::Vector3d configDefault = GncConfigManager::getInstance()->getControlConfig().mPoseArrivalTol;
 
     for(int i = 0; i < 3; i++)
     {
@@ -298,7 +298,7 @@ void StateMachine::onWaypointTimeout()
     // use the tolerance actually resolved (and sent to the controller) for
     // this waypoint, not the raw (possibly unset/sentinel) command tolerance
     Eigen::Vector3d relaxedTol = resolveArrivalTolerance(mCurrentWaypoint) *
-        ConfigurationManager::getInstance()->getGuidanceConfig().mWaypointTimeoutToleranceScale;
+        GncConfigManager::getInstance()->getGuidanceConfig().mWaypointTimeoutToleranceScale;
     bool withinRelaxedTol = (error.array().abs() < relaxedTol.array()).all();
 
     if(withinRelaxedTol)
@@ -362,7 +362,7 @@ std::string StateMachine::toString(StateMachine::States aState)
 void StateMachine::statusPublishLoop()
 {
     // publish control status at same rate as StateMachine loop 
-    int rateConfig = ConfigurationManager::getInstance()->getGuidanceConfig().mStateMachineRate; 
+    int rateConfig = GncConfigManager::getInstance()->getGuidanceConfig().mStateMachineRate; 
     RateController rate(rateConfig); 
 
     autobot_msgs::msg::GuidanceStatus statusToSend;

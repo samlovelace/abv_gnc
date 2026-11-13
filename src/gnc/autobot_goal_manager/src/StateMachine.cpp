@@ -1,7 +1,7 @@
 
 #include "autobot_goal_manager/StateMachine.h"
 #include "autobot_common/RateController.hpp"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/GncConfigManager.h"
 #include "autobot_common/RosTopicManager.h"
 #include <iostream> 
 #include "plog/Log.h"
@@ -24,7 +24,7 @@ StateMachine::~StateMachine()
 
 void StateMachine::run()
 {
-    int rateConfig = ConfigurationManager::getInstance()->getControlConfig().mStateMachineRate; 
+    int rateConfig = GncConfigManager::getInstance()->getControlConfig().mStateMachineRate; 
     RateController rate(rateConfig); 
 
     mControlStatusPublishThread = std::thread(&StateMachine::controlStatusPublishLoop, this);
@@ -160,7 +160,7 @@ std::string StateMachine::toString(StateMachine::States aState)
 void StateMachine::controlStatusPublishLoop()
 {
     // publish control status at same rate as StateMachine loop 
-    int rateConfig = ConfigurationManager::getInstance()->getControlConfig().mStateMachineRate; 
+    int rateConfig = GncConfigManager::getInstance()->getControlConfig().mStateMachineRate; 
     RateController rate(rateConfig); 
 
     autobot_msgs::msg::ControllerStatus statusToSend;

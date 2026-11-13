@@ -17,7 +17,7 @@
 
 ThrusterCommander::ThrusterCommander() :
     mThrusterCommand("00000000"),
-    mConfig(ConfigurationManager::getInstance()->getThrusterConfig()),
+    mConfig(GncConfigManager::getInstance()->getThrusterConfig()),
     mThrusterDriver(std::make_unique<ThrusterDriverImpl>(mConfig.mGpioPins))
 {
     mThrusterDriver->init();

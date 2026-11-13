@@ -8,7 +8,7 @@
 
 static constexpr const char* ROBOT_STATE_TOPIC = "robot/state";
 
-MobileBaseInterface::MobileBaseInterface(const ConfigManager::MobileBaseConfig& aConfig, int aControlRateHz) :
+MobileBaseInterface::MobileBaseInterface(const ManipConfigManager::MobileBaseConfig& aConfig, int aControlRateHz) :
     mJointAxes(aConfig.jointAxes), mCommandTopic(aConfig.commandTopic),
     mControllable(aConfig.controllable), mControlPeriod(1.0 / aControlRateHz),
     mHasState(false)

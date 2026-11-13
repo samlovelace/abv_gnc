@@ -9,7 +9,7 @@
 #include "autobot_common/RosTopicManager.h"
 #include "autobot_manip_hardware/RosManipComms.h"
 
-RosManipComms::RosManipComms(const ConfigManager::Config& aConfig)
+RosManipComms::RosManipComms(const ManipConfigManager::Config& aConfig)
 {
     mNumArmJoints = static_cast<int>(aConfig.manipulator.jointNames.size());
     mNumGripperJoints = aConfig.gripper

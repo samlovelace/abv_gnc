@@ -1,7 +1,7 @@
 
 #include <cstdio>
 #include "autobot_common/RosTopicManager.h"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/CommonConfigManager.h"
 #include "autobot_common/HeartbeatPublisher.h"
 #include "autobot_bridge/NavigationConvertor.h"
 #include "autobot_bridge/ControllerStatusConvertor.h"
@@ -10,7 +10,7 @@
 
 int main()
 {
-    ConfigurationManager::getInstance()->loadConfiguration();
+    CommonConfigManager::getInstance()->loadConfiguration();
 
     rclcpp::init(0, nullptr);
     RosTopicManager::getInstance("autobot_bridge");

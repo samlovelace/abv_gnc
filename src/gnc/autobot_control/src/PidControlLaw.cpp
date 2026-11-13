@@ -1,8 +1,8 @@
 
 #include "autobot_control/PidControlLaw.h"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/GncConfigManager.h"
 
-PidControlLaw::PidControlLaw() : mConfig(ConfigurationManager::getInstance()->getControlLawConfig())
+PidControlLaw::PidControlLaw() : mConfig(GncConfigManager::getInstance()->getControlLawConfig())
 {
     mPrevTime = std::chrono::steady_clock::now();
     mPrevPoseError = Eigen::Vector3d::Zero();

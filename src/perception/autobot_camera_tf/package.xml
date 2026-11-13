@@ -16,6 +16,7 @@
   <depend>tf2_ros</depend>
   <depend>geometry_msgs</depend>
   <depend>autobot_common</depend>
+  <depend>autobot_config</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

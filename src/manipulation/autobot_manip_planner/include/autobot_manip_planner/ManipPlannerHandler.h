@@ -9,7 +9,7 @@
 #include "autobot_msgs/msg/pick_plan.hpp"
 #include "autobot_msgs/srv/plan_grasp.hpp"
 #include "autobot_msgs/srv/plan_pick.hpp"
-#include "autobot_manip_common/ConfigManager.h"
+#include "autobot_config/ManipConfigManager.h"
 #include "autobot_manip_common/KinematicsHandler.h"
 #include "autobot_manip_planner/RobotCollisionModel.h"
 #include "autobot_manip_planner/CollisionChecker.h"
@@ -43,7 +43,7 @@ private:
                                               const geometry_msgs::msg::PoseStamped& aPreGraspPose,
                                               const geometry_msgs::msg::PoseStamped& aGraspPose) const;
 
-    ConfigManager::Config mConfig;
+    ManipConfigManager::Config mConfig;
     KinematicsHandler mKinematics;
 
     RobotCollisionModel mCollisionModel;

@@ -8,13 +8,13 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(autobot_config REQUIRED)
 
 find_package(kdl_parser REQUIRED)
 find_package(urdf REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
-    src/ConfigManager.cpp
     src/KinematicsHandler.cpp
 )
 
@@ -25,6 +25,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 target_link_libraries(${PROJECT_NAME} PUBLIC
     yaml-cpp
     rclcpp::rclcpp
+    autobot_config::manip_config
 )
 ament_target_dependencies(${PROJECT_NAME} PUBLIC
     kdl_parser
@@ -39,5 +40,5 @@ install(DIRECTORY include/
     DESTINATION include)
 
 ament_export_targets(${PROJECT_NAME}_targets HAS_LIBRARY_TARGET)
-ament_export_dependencies(rclcpp yaml-cpp)
+ament_export_dependencies(rclcpp yaml-cpp autobot_config kdl_parser urdf)
 ament_package()

@@ -10,7 +10,7 @@
 #include <thread>
 
 #include "HardwareInterface.h"
-#include "autobot_manip_common/ConfigManager.h"
+#include "autobot_config/ManipConfigManager.h"
 #include "autobot_common/RateController.hpp"
 #include "autobot_manip_common/KinematicsHandler.h"
 
@@ -24,7 +24,7 @@
 class Manipulator
 {
 public:
-    Manipulator(const ConfigManager::Config aConfig);
+    Manipulator(const ManipConfigManager::Config aConfig);
     ~Manipulator();
 
     enum class POSE
@@ -70,7 +70,7 @@ public:
 private:
     std::shared_ptr<HardwareInterface> mHardware;
     std::shared_ptr<MobileBaseInterface> mBase; // null without a mobile base
-    ConfigManager::Config mConfig;
+    ManipConfigManager::Config mConfig;
     std::unique_ptr<WaypointExecutor> mWaypointExecutor;
     std::shared_ptr<KinematicsHandler> mKinematicsHandler;
 

@@ -13,6 +13,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(autobot_common REQUIRED)
+find_package(autobot_config REQUIRED)
 find_package(autobot_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED COMPONENTS core imgproc)
@@ -31,6 +32,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME}
   autobot_common::autobot_common
+  autobot_config::percep_config
   ${OpenCV_LIBS}
   cv_bridge::cv_bridge
 )

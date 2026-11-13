@@ -19,7 +19,7 @@ KinematicsHandler::~KinematicsHandler()
 
 }
 
-bool KinematicsHandler::init(const ConfigManager::Config& aConfig)
+bool KinematicsHandler::init(const ManipConfigManager::Config& aConfig)
 {
     if(aConfig.mobileBase)
     {

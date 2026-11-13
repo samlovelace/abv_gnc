@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>autobot_config</name>
+  <version>0.0.0</version>
+  <description>Per-subsystem configuration managers (common, gnc, manip, percep)</description>
+  <maintainer email="samlovelace12@gmail.com">sam</maintainer>
+  <license>TODO: License declaration</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <depend>rclcpp</depend>
+  <depend>yaml-cpp</depend>
+  <depend>ament_index_cpp</depend>
+  <depend>kdl_parser</depend>
+  <depend>urdf</depend>
+  <depend>eigen</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

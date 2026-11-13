@@ -2,9 +2,9 @@
 #include "autobot_common/RosTopicManager.h"
 #include "autobot_common/DataLogger.h"
 #include "autobot_common/SignalHandler.hpp"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/CommonConfigManager.h"
 #include "autobot_common/HeartbeatPublisher.h"
-#include "autobot_manip_common/ConfigManager.h"
+#include "autobot_config/ManipConfigManager.h"
 #include "autobot_manip_executor/ManipExecutorHandler.h"
 
 int main()
@@ -14,8 +14,8 @@ int main()
     const std::string name = "manip_executor";
 
     DataLogger::get().createMainLog(name);
-    ConfigurationManager::getInstance()->loadConfiguration();
-    ConfigManager::getInstance()->loadConfig();
+    CommonConfigManager::getInstance()->loadConfiguration();
+    ManipConfigManager::getInstance()->loadConfig();
 
     rclcpp::init(0, nullptr);
     RosTopicManager::getInstance(name);

@@ -11,7 +11,7 @@
 using OptitrackStateFetcher = OptitrackStateFetcher_LibMocap; 
 
 VehicleStateTracker::VehicleStateTracker() : 
-    mConfig(ConfigurationManager::getInstance()->getNavigationConfig())
+    mConfig(GncConfigManager::getInstance()->getNavigationConfig())
 {
     FetcherType typeToMake = toEnum(mConfig.mInterface); 
 

@@ -4,7 +4,8 @@
 #include <random>
 
 #include "autobot_simulator/VehicleSimulator.h"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/CommonConfigManager.h"
+#include "autobot_config/GncConfigManager.h"
 #include "autobot_common/RosTopicManager.h"
 #include "plog/Log.h"
 #include <stdexcept>
@@ -24,23 +25,23 @@ bool isOptitrackInterface(std::string aInterface)
 VehicleSimulator::VehicleSimulator(/* args */) :
     mUdpServer(std::make_unique<UdpServer>(6969, std::bind(&VehicleSimulator::onRecieved, this, std::placeholders::_1))),
     mOptitrackEmulator(std::make_unique<OptitrackEmulator>(
-        ConfigurationManager::getInstance()->getNavigationConfig().mRigidBodyName,
+        GncConfigManager::getInstance()->getNavigationConfig().mRigidBodyName,
         kVrpnDefaultPort)),
-    mUseOptitrackEmulator(isOptitrackInterface(ConfigurationManager::getInstance()->getNavigationConfig().mInterface)),
-    mMass(ConfigurationManager::getInstance()->getControlConfig().mMass),
-    mIzz(ConfigurationManager::getInstance()->getControlConfig().mInertia),
-    mThrusterForce(ConfigurationManager::getInstance()->getControlConfig().mForce),
-    mMomentArm(ConfigurationManager::getInstance()->getControlConfig().mMomentArm),
+    mUseOptitrackEmulator(isOptitrackInterface(GncConfigManager::getInstance()->getNavigationConfig().mInterface)),
+    mMass(GncConfigManager::getInstance()->getControlConfig().mMass),
+    mIzz(GncConfigManager::getInstance()->getControlConfig().mInertia),
+    mThrusterForce(GncConfigManager::getInstance()->getControlConfig().mForce),
+    mMomentArm(GncConfigManager::getInstance()->getControlConfig().mMomentArm),
     mTimestep(0.01), mDamping(0.0005),
-    mUseExternalPropagation(ConfigurationManager::getInstance()->getControlConfig().mUseExternalPropagation),
-    mExternalStateTopic(ConfigurationManager::getInstance()->getControlConfig().mExternalStateTopic),
-    mWrenchCommandTopic(ConfigurationManager::getInstance()->getControlConfig().mWrenchCommandTopic),
-    mWrenchTargetLink(ConfigurationManager::getInstance()->getControlConfig().mWrenchTargetLink),
+    mUseExternalPropagation(GncConfigManager::getInstance()->getControlConfig().mUseExternalPropagation),
+    mExternalStateTopic(GncConfigManager::getInstance()->getControlConfig().mExternalStateTopic),
+    mWrenchCommandTopic(GncConfigManager::getInstance()->getControlConfig().mWrenchCommandTopic),
+    mWrenchTargetLink(GncConfigManager::getInstance()->getControlConfig().mWrenchTargetLink),
     mExternalStateRecvd(false),
     mVelocity(Eigen::Vector2d::Zero()), mThrustForce(Eigen::Vector3d::Zero()),
-    mSimulateDropoutEnabled(ConfigurationManager::getInstance()->getNavigationConfig().mSimulateDropout)
+    mSimulateDropoutEnabled(GncConfigManager::getInstance()->getNavigationConfig().mSimulateDropout)
 {
-    auto thrusterConfig = ConfigurationManager::getInstance()->getThrusterConfig();
+    auto thrusterConfig = GncConfigManager::getInstance()->getThrusterConfig();
     if(thrusterConfig.mAllocationX.size() != 8 || thrusterConfig.mAllocationY.size() != 8 || thrusterConfig.mAllocationYaw.size() != 8)
     {
         throw std::runtime_error("Thrusters.Allocation rows must each have exactly 8 entries");
@@ -59,7 +60,7 @@ VehicleSimulator::VehicleSimulator(/* args */) :
     // TableTopView's coordinate convention) by half the robot's footprint in
     // each axis, so the whole body starts on the table rather than centered
     // exactly on the corner with half of it hanging off the edge.
-    const TableViewConfig& tableConfig = ConfigurationManager::getInstance()->getTableViewConfig();
+    const TableViewConfig& tableConfig = CommonConfigManager::getInstance()->getTableViewConfig();
     mVehicleState.x = tableConfig.mRobotLength / 2.0;
     mVehicleState.y = tableConfig.mRobotWidth / 2.0;
     mVehicleState.yaw = 0.0;

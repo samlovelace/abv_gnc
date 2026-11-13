@@ -5,7 +5,7 @@
 
 #include <plog/Log.h>
 
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/PercepConfigManager.h"
 #include "autobot_common/RosTopicManager.h"
 
 namespace {
@@ -24,7 +24,7 @@ ObjectRegistryHandler::ObjectRegistryHandler()
                                     std::bind(&ObjectRegistryHandler::getTrackedObjectsCallback, this,
                                               std::placeholders::_1, std::placeholders::_2));
 
-    const double rateHz = ConfigurationManager::getInstance()->getObjRegistryConfig().mPruneRateHz;
+    const double rateHz = PercepConfigManager::getInstance()->getObjRegistryConfig().mPruneRateHz;
     const auto period = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::duration<double>(1.0 / rateHz));
     mTimer = topicManager->create_wall_timer(period, std::bind(&ObjectRegistryHandler::tick, this));
 }
@@ -33,7 +33,7 @@ ObjectRegistryHandler::~ObjectRegistryHandler() = default;
 
 void ObjectRegistryHandler::observationsCallback(autobot_msgs::msg::ObjectObservations::SharedPtr aMsg)
 {
-    const auto& cfg = ConfigurationManager::getInstance()->getObjRegistryConfig();
+    const auto& cfg = PercepConfigManager::getInstance()->getObjRegistryConfig();
     const rclcpp::Time now = RosTopicManager::getInstance()->now();
 
     for (const auto& obs : aMsg->observations)
@@ -82,7 +82,7 @@ void ObjectRegistryHandler::getTrackedObjectsCallback(const std::shared_ptr<auto
 
 void ObjectRegistryHandler::tick()
 {
-    const auto& cfg = ConfigurationManager::getInstance()->getObjRegistryConfig();
+    const auto& cfg = PercepConfigManager::getInstance()->getObjRegistryConfig();
     const rclcpp::Time now = RosTopicManager::getInstance()->now();
 
     for (auto it = mTrackedObjects.begin(); it != mTrackedObjects.end(); )

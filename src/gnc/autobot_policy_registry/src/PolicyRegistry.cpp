@@ -1,7 +1,7 @@
 #include "autobot_policy_registry/PolicyRegistry.h"
 
 #include "autobot_common/RosTopicManager.h"
-#include "autobot_common/ConfigurationManager.h"
+#include "autobot_config/CommonConfigManager.h"
 #include "autobot_msgs/msg/policy_active.hpp"
 #include "autobot_msgs/msg/policy_entry.hpp"
 #include "autobot_msgs/msg/policy_registry.hpp"
@@ -22,7 +22,7 @@ PolicyRegistry::PolicyRegistry()
     mSwitchService = topicManager->create_service<autobot_msgs::srv::PolicySwitch>("abv/policy/switch",
                                     std::bind(&PolicyRegistry::switchCallback, this, std::placeholders::_1, std::placeholders::_2));
 
-    double rateHz = ConfigurationManager::getInstance()->getHeartbeatConfig().mRate;
+    double rateHz = CommonConfigManager::getInstance()->getHeartbeatConfig().mRate;
     auto period = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::duration<double>(1.0 / rateHz));
     mTimer = topicManager->create_wall_timer(period, std::bind(&PolicyRegistry::tick, this));
 
@@ -77,7 +77,7 @@ void PolicyRegistry::switchCallback(const std::shared_ptr<autobot_msgs::srv::Pol
 
 void PolicyRegistry::tick()
 {
-    double staleAfter = ConfigurationManager::getInstance()->getHeartbeatConfig().mStaleAfter;
+    double staleAfter = CommonConfigManager::getInstance()->getHeartbeatConfig().mStaleAfter;
     auto now = std::chrono::steady_clock::now();
 
     for(auto& [name, record] : mPolicies)
