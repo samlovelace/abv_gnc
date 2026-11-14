@@ -1,4 +1,5 @@
 #include "autobot_config/ManipConfigManager.h"
+#include "autobot_config/Util.hpp"
 #include "plog/Log.h"
 #include <stdexcept>
 #include <filesystem>
@@ -10,44 +11,37 @@ using namespace autobot_config::YamlUtil;
 
 void ManipConfigManager::loadConfig()
 {
-    // Locate the autobot_manip_bringup share directory via ament
-    const fs::path shareDir = []{
-        try {
-            return fs::path(ament_index_cpp::get_package_share_directory("autobot_manip_bringup"));
-        } catch (const std::exception& e) {
-            throw std::runtime_error(
-                std::string("[ManipConfigManager] Could not locate autobot_manip_bringup package: ") + e.what());
-        }
-    }();
-
     // Load top-level config.yaml to find which manipulator to use
-    const fs::path configPath = shareDir / "config" / "config.yaml";
+    const fs::path configPath = fs::path(util::getConfigPath("manipulation.yaml")); 
     if (!fs::exists(configPath))
-        throw std::runtime_error(
-            "[ManipConfigManager] Top-level config not found: " + configPath.string());
+    {    
+        throw std::runtime_error("[ManipConfigManager] Top-level config not found: " + configPath.string());
+    }
 
     LOGI << "Loading config: " << configPath.string();
     const YAML::Node topConfig = YAML::LoadFile(configPath.string());
 
-    const YAML::Node manipNode = require(topConfig, "Manipulator", "config.yaml");
+    const YAML::Node manipNode = require(topConfig, "Manipulator", "manipulation.yaml");
     const std::string manipName = requireScalar<std::string>(manipNode, "name", "Manipulator");
 
-    // Resolve manip.yaml from the named manipulator subdirectory
-    const fs::path manipDir     = shareDir / "config" / "manipulators" / manipName;
-    const fs::path manipYamlPath = manipDir / "manip.yaml";
+    // Resolve manipulator.yaml from the manipulator description package
+    const fs::path shareDir = ament_index_cpp::get_package_share_directory(manipName + "_description"); 
+    const fs::path manipYamlPath = shareDir / "config" / "manipulator.yaml";
     if (!fs::exists(manipYamlPath))
+    {
         throw std::runtime_error(
-            "[ManipConfigManager] manip.yaml not found for manipulator '" + manipName +
+            "[ManipConfigManager] manipulator.yaml not found for manipulator '" + manipName +
             "': " + manipYamlPath.string());
+    }
 
     LOGI << "Loading manipulator config: " << manipYamlPath.string();
     mManipRoot = YAML::LoadFile(manipYamlPath.string());
 
     mConfig.manipName = manipName;
 
-    // Top-level manip.yaml fields
-    mConfig.manipType     = requireScalar<std::string>(mManipRoot, "type",  "manip.yaml");
-    mConfig.commsMode     = requireScalar<std::string>(mManipRoot, "comms", "manip.yaml");
+    // Top-level manipulator.yaml fields
+    mConfig.manipType     = requireScalar<std::string>(mManipRoot, "type",  "manipulator.yaml");
+    mConfig.commsMode     = requireScalar<std::string>(mManipRoot, "comms", "manipulator.yaml");
     mConfig.controlRateHz = optionalScalar<int>(mManipRoot, "rate", 10);
 
     loadManipulatorSection();
@@ -133,12 +127,9 @@ void ManipConfigManager::loadMobileBaseSection(const fs::path& baseDir, const YA
     mConfig.mobileBase = std::move(mb);
 }
 
-// ---------------------------------------------------------------------------
-// manip.yaml (flattened — arm fields live at the root, no more nested key)
-// ---------------------------------------------------------------------------
 void ManipConfigManager::loadManipulatorSection()
 {
-    const std::string ctx = "manip.yaml";
+    const std::string ctx = "manipulator.yaml";
     const YAML::Node& m = mManipRoot;
 
     const std::string urdfPackage = requireScalar<std::string>(m, "urdf_package", ctx);
@@ -169,7 +160,7 @@ void ManipConfigManager::loadManipulatorSection()
 }
 
 // ---------------------------------------------------------------------------
-// manip.yaml: gripper (optional — absent for a manipulator with no gripper).
+// manipulator.yaml: gripper (optional — absent for a manipulator with no gripper).
 // Deliberately not merged into Config's flat joint vectors — those feed
 // WaypointExecutor/KinematicsHandler and must stay arm(+base)-only.
 // ---------------------------------------------------------------------------

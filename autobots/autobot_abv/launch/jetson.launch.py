@@ -3,8 +3,17 @@ from launch import LaunchDescription
 from launch.actions import ExecuteProcess
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
+from launch.actions import SetEnvironmentVariable
 
 def generate_launch_description():
+
+    robot_dir = get_package_share_directory("autobot_abv")
+    config_dir = os.path.join(robot_dir, "config")
+    
+        
+    configs = SetEnvironmentVariable(
+                name="AUTOBOT_CONFIG_DIR",
+                value=config_dir)
 
     guidance = ExecuteProcess(
         name='autobot_guidance',
@@ -89,4 +98,4 @@ def generate_launch_description():
         additional_env={'ROS_DOMAIN_ID': os.environ.get('ROS_DOMAIN_ID', '0')},
         output='screen')
 
-    return LaunchDescription([guidance, navigation, goal_manager, control, thrusters, rl, policy_registry])
+    return LaunchDescription([configs, guidance, navigation, goal_manager, control, thrusters, rl, policy_registry])

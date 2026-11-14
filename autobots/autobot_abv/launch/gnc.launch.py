@@ -11,10 +11,24 @@ from launch.conditions import IfCondition
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackagePrefix, FindPackageShare
 
+import os
+
+from launch import LaunchDescription
+from launch.actions import SetEnvironmentVariable
+from launch_ros.actions import Node
+from ament_index_python.packages import get_package_share_directory
+
 
 def generate_launch_description():
 
+    robot_dir = get_package_share_directory("autobot_abv")
+    config_dir = os.path.join(robot_dir, "config")
+
     return LaunchDescription([
+        SetEnvironmentVariable(
+            name="AUTOBOT_CONFIG_DIR",
+            value=config_dir
+        ),
         DeclareLaunchArgument('sim', default_value='false'),
 
         Node(
@@ -116,11 +130,6 @@ def generate_launch_description():
                 Node(
                     package='autobot_gui',
                     executable='autobot_gui',
-                    output='screen',
-                ),
-                Node(
-                    package='autobot_commander',
-                    executable='autobot_commander',
                     output='screen',
                 ),
             ]

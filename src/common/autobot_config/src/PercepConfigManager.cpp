@@ -1,14 +1,14 @@
 #include "autobot_config/PercepConfigManager.h"
 #include "autobot_config/YamlUtil.h"
+#include "autobot_config/Util.hpp"
 
-#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <filesystem>
 
 using namespace autobot_config::YamlUtil;
 
 void PercepConfigManager::loadConfiguration()
 {
-    std::string configFilePath = ament_index_cpp::get_package_share_directory("autobot_bringup") + "/config/config.yaml";
+    std::string configFilePath = util::getConfigPath("perception.yaml");
     if (!std::filesystem::exists(configFilePath))
     {
         throw std::runtime_error("Missing configuration file at " + configFilePath);

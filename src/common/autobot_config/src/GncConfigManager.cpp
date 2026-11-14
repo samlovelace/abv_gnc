@@ -1,25 +1,16 @@
 #include "autobot_config/GncConfigManager.h"
 #include "autobot_config/YamlUtil.h"
+#include "autobot_config/Util.hpp"
+
 #include "plog/Log.h"
 
-#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <filesystem>
 
 using namespace autobot_config::YamlUtil;
 
 void GncConfigManager::loadConfiguration()
 {
-    LOGD << R"(
-        __    __   _______  __       __        ______               ___      .______   ____    ____
-       |  |  |  | |   ____||  |     |  |      /  __  \             /   \     |   _  \  \   \  /   /
-       |  |__|  | |  |__   |  |     |  |     |  |  |  |           /  ^  \    |  |_)  |  \   \/   /
-       |   __   | |   __|  |  |     |  |     |  |  |  |          /  /_\  \   |   _  <    \      /
-       |  |  |  | |  |____ |  `----.|  `----.|  `--'  |  __     /  _____  \  |  |_)  |    \    /
-       |__|  |__| |_______||_______||_______| \______/  (_ )   /__/     \__\ |______/      \__/
-                                                         |/
-       )";
-
-    std::string configFilePath = ament_index_cpp::get_package_share_directory("autobot_bringup") + "/config/config.yaml";
+    std::string configFilePath = util::getConfigPath("gnc.yaml");
     if (!std::filesystem::exists(configFilePath))
     {
         throw std::runtime_error("Missing configuration file at " + configFilePath);

@@ -1,0 +1,34 @@
+Manipulator:
+  name: rebot
+
+# MobileBase:
+#   name: tabletop # omit this whole key (or leave name blank/null) for a standalone manipulator
+#   controllable: false # true: base joints are planned/commanded; false: base is measured-only (default)
+
+StateMachine:
+  rate: 25 # Hz
+
+# TODO: remove engine config
+Engine:
+  rate: 50 # Hz
+
+  Planning:
+    type: simple
+
+  GraspPlanning:
+    type: pca
+    visualize: false
+
+Planner:
+  ApproachDistanceM: 0.15
+  PlanningTimeS: 2.0
+  StateValidityResolutionFrac: 0.01
+
+Executor:
+  ArmArrivalTimeoutSec: 15.0
+  GripperDwellSec: 1.0
+  TickRateHz: 20.0
+  JointTolerance: 0.05
+  InflatedToleranceFactor: 3.0
+  TaskPositionToleranceM: 0.01
+  TaskOrientationToleranceRad: 0.05
