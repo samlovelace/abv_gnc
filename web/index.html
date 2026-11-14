@@ -14,21 +14,32 @@
     <header class="topbar">
       <div class="left"><span id="conn">● connecting</span></div>
       <div class="center">
-        <span class="label"></span>
-        <span id="active-policy" class="active-policy">—</span>
+        <span class="label">Active Policy:</span>
+        <span id="active-policy" class="policy">—</span>
       </div>
       <div class="right"><button id="stop-btn">STOP</button></div>
     </header>
 
-    <div class="policy-row">
-      <label for="policy-registry">Active Policy:</label>
-      <select name="policy-select" id="policy-select">
-        <option value="none">None</option>
-      </select>
-      <button id="policy-switch-btn">Select</button>
-    </div>
-
     <main class="main-layout">
+      <div class="right-column"></div>
+    </main>
+
+    <!-- Panel templates: inert until main.ts clones the ones named in
+         panels.json and mounts them. Each <template> here corresponds to
+         one entry in src/panel-registry.ts - see that file for the
+         mapping to Handler classes and mount points. -->
+
+    <template id="panel-policy">
+      <div class="policy-row">
+        <label for="policy-select">Policy:</label>
+        <select name="policy-select" id="policy-select">
+          <option value="none">None</option>
+        </select>
+        <button id="policy-switch-btn">Select</button>
+      </div>
+    </template>
+
+    <template id="panel-topdown">
       <section class="topdown">
         <svg id="topdown-svg" viewBox="0 0 1.8 3.6">
           <defs>
@@ -72,13 +83,17 @@
           </g>
         </svg>
       </section>
+    </template>
 
+    <template id="panel-telemetry">
       <section class="telemetry-plots">
         <div id="plot-pos"></div>
         <div id="plot-vel"></div>
         <div id="plot-input"></div>
       </section>
+    </template>
 
+    <template id="panel-command">
       <section class="command-panel">
         <label>Command</label>
         <div class="command-mode-row">
@@ -196,10 +211,13 @@
           <div id="axis-grid" class="axis-grid"></div>
         </section>
       </section>
+    </template>
+
+    <template id="panel-camera">
       <section class="camera-view">
         <img id="camera" alt="MuJoCo Camera" />
         <canvas id="camera-overlay"></canvas>
       </section>
-    </main>
+    </template>
   </body>
 </html>

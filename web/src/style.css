@@ -17,13 +17,30 @@ body {
 .topbar {
   position: sticky;
   top: 0;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
   padding: 8px 16px;
 }
+
+.topbar .left,
 .topbar .right {
-  justify-self: end;
+  flex: 1;
+}
+
+.topbar .center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.topbar .right {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.topbar .label {
+  color: #aaa;
 }
 
 #stop-btn {
@@ -65,18 +82,72 @@ body {
 .policy-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 16px;
+  gap: 10px;
+  padding: 10px 16px;
+  background: #161616;
+  border: 1px solid #333;
+  border-radius: 8px;
 }
 
-/* tabletop view | telemetry plots, filling whatever space is left between
-   the topbar/policy-row above and the command panel below */
+.policy-row label {
+  color: #aaa;
+}
+
+#policy-select {
+  background-color: #1a1a1a;
+  color: #ddd;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#policy-select:hover {
+  border-color: #666;
+}
+
+#policy-switch-btn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#policy-switch-btn:hover {
+  background-color: #1a6ff7;
+}
+
+#policy-switch-btn:active,
+#policy-switch-btn:disabled {
+  background-color: #2a5fc6;
+}
+
+/* tabletop view | telemetry plots on the left, filling whatever space is
+   left next to the fixed-width right column (command panel + policy
+   selector, stacked - see .right-column below) */
 .main-layout {
   display: flex;
   flex: 1;
   min-height: 0;
   gap: 16px;
   padding: 16px;
+}
+
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 280px;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+
+.right-column:empty {
+  display: none;
 }
 
 .topdown {

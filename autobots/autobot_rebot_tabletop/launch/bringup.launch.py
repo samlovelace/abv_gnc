@@ -1,26 +1,39 @@
 import os
 
 from launch import LaunchDescription
+from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
+from launch.launch_description_sources import AnyLaunchDescriptionSource
+from launch.substitutions import PathJoinSubstitution
 from launch_ros.actions import Node
-
-from launch import LaunchDescription
-from launch.actions import SetEnvironmentVariable
-from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
 from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
-    
+
     robot_dir = get_package_share_directory("autobot_rebot_tabletop")
     config_dir = os.path.join(robot_dir, "config")
-    
+    panels_json = os.path.join(config_dir, "panels.json")
+
     return LaunchDescription(
         [
             SetEnvironmentVariable(
                 name="AUTOBOT_CONFIG_DIR",
                 value=config_dir
             ),
-            
+
+            # Web GUI: rosbridge + http.server, serving this robot's panels.json
+            IncludeLaunchDescription(
+                AnyLaunchDescriptionSource(
+                    PathJoinSubstitution([
+                        FindPackageShare('autobot_bringup'),
+                        'launch',
+                        'web_gui.launch.py'
+                    ])
+                ),
+                launch_arguments={'panels_json': panels_json}.items(),
+            ),
+
             # Manipulation nodes
             Node(
                 package="autobot_grasp_planner",

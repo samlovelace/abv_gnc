@@ -4,54 +4,40 @@ import type { Handler } from "./handler";
 import type { RosClient } from "./ros";
 import {
   type SwitchPolicyRequest,
-  type PolicyActive,
   type PolicyEntry,
   type PolicyRegistry,
   type SwitchPolicyResponse,
 } from "./messages";
 
-const POLICY_ACTIVE_TOPIC = "abv/policy/active";
-const POLICY_ACTIVE_TYPE = "autobot_msgs/msg/PolicyActive";
 const POLICY_REGISTRY_TOPIC = "abv/policy/registry";
 const POLICY_REGISTRY_TYPE = "autobot_msgs/msg/PolicyRegistry";
 const POLICY_SWITCH_TYPE = "autobot_msgs/srv/PolicySwitch.srv";
 const POLICY_SWITCH_TOPIC = "abv/policy/switch";
 
-// @brief handles
-//    * updating active policy banner
-//    * updating policy registry selections
-//    * sending active policy switch command
+// The policy selector panel - lets the operator pick a registered policy and
+// switch to it. The always-visible "currently active policy" display is a
+// separate, unconditional piece of chrome - see ActivePolicyHandler.
 export class PolicyHandler implements Handler {
   private registry = new Map<string, PolicyEntry>();
   private lastKey = "";
 
-  private activeEl: HTMLElement;
   private selectEl: HTMLSelectElement;
   private switchBtn: HTMLButtonElement;
 
   constructor(
     private ros: RosClient,
-    root: HTMLElement,
+    root: ParentNode,
   ) {
-    this.activeEl = must<HTMLElement>(root, ".active-policy");
     this.selectEl = must<HTMLSelectElement>(root, "#policy-select");
     this.switchBtn = must<HTMLButtonElement>(root, "#policy-switch-btn");
 
-    ros.watch(POLICY_ACTIVE_TOPIC, POLICY_ACTIVE_TYPE);
     ros.watch(POLICY_REGISTRY_TOPIC, POLICY_REGISTRY_TYPE);
 
     this.switchBtn.addEventListener("click", this.onSwitchClick);
   }
 
   update(): void {
-    this.updateActive();
     this.updateRegistry();
-  }
-
-  private updateActive() {
-    const policy = this.ros.latest<PolicyActive>(POLICY_ACTIVE_TOPIC);
-    const name = policy?.policy_name;
-    if (this.activeEl) this.activeEl.textContent = name ?? "--";
   }
 
   private updateRegistry() {

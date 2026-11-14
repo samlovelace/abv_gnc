@@ -1,7 +1,6 @@
 from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
-    ExecuteProcess,
     GroupAction,
     IncludeLaunchDescription,
 )
@@ -23,6 +22,7 @@ def generate_launch_description():
 
     robot_dir = get_package_share_directory("autobot_abv")
     config_dir = os.path.join(robot_dir, "config")
+    panels_json = os.path.join(config_dir, "panels.json")
 
     return LaunchDescription([
         SetEnvironmentVariable(
@@ -88,34 +88,16 @@ def generate_launch_description():
             emulate_tty=True,
         ),
 
-        # ROSBridge WebSocket Server
+        # Web GUI: rosbridge + http.server, serving this robot's panels.json
         IncludeLaunchDescription(
             AnyLaunchDescriptionSource(
                 PathJoinSubstitution([
-                    FindPackageShare('rosbridge_server'),
-                    'launch',
-                    'rosbridge_websocket_launch.xml'
-                ])
-            )
-        ),
-        
-        # Web GUI Server
-        ExecuteProcess(
-            cmd=[
-                'python3',
-                '-m',
-                'http.server',
-                '8080',
-                '--bind',
-                '0.0.0.0',
-                '--directory',
-                PathJoinSubstitution([
                     FindPackageShare('autobot_bringup'),
-                    'web'
-                ]),
-            ],
-            output='screen',
-            emulate_tty=True,
+                    'launch',
+                    'web_gui.launch.py'
+                ])
+            ),
+            launch_arguments={'panels_json': panels_json}.items(),
         ),
 
         # Simulation-only nodes
