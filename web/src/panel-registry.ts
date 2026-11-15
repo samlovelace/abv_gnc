@@ -5,6 +5,7 @@ import { TelemetryHandler } from "./telemetry-handler";
 import { TableInteractionHandler } from "./table-interaction-handler";
 import { CommandPanelHandler } from "./command-panel-handler";
 import { ImageHandler } from "./image-handler";
+import { ManipCommandPanel } from "./manip-command-panel-handler";
 
 // The fixed set of panel kinds a robot's panels.json may name. Each one maps
 // to exactly one <template> in index.html and one Handler class - robots
@@ -58,6 +59,17 @@ export const PANEL_REGISTRY: Record<string, PanelDef> = {
     mount: mountInMainLayout,
     Handler: ImageHandler,
   },
+  manipcommand: {
+    templateId: "manip-command",
+    mount: mountInMainLayout,
+    Handler: ManipCommandPanel,
+  },
 };
 
-export const DEFAULT_PANELS = ["telemetry", "topdown", "command", "policy", "camera"];
+export const DEFAULT_PANELS = [
+  "telemetry",
+  "topdown",
+  "command",
+  "policy",
+  "camera",
+];

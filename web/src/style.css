@@ -336,3 +336,95 @@ body {
   left: 0;
   pointer-events: none; /* clicks pass through to the image */
 }
+
+.manip-command-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px 16px;
+  width: 360px;
+}
+
+.manip-enable-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.enable-pill {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  color: white;
+}
+
+.enable-pill[data-state="disabled"] {
+  background-color: #7f1d1d;
+}
+
+.enable-pill[data-state="disabled"]:hover {
+  background-color: #991b1b;
+}
+
+.enable-pill[data-state="enabled"] {
+  background-color: #166534;
+}
+
+.enable-pill[data-state="enabled"]:hover {
+  background-color: #15803d;
+}
+
+.joint-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.joint-slider-row {
+  display: grid;
+  grid-template-columns: max-content 1fr max-content;
+  align-items: center;
+  gap: 10px;
+}
+
+.joint-slider-row label,
+.jog-row label {
+  min-width: 70px;
+}
+
+.joint-value,
+.jog-value {
+  font-family: monospace;
+  min-width: 56px;
+  text-align: right;
+}
+
+.jog-row {
+  display: grid;
+  grid-template-columns: max-content max-content 1fr max-content;
+  align-items: center;
+  gap: 10px;
+}
+
+.jog-row button {
+  width: 32px;
+}
+
+.task-axis-row {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.gripper-row {
+  display: grid;
+  grid-template-columns: max-content 1fr max-content;
+  align-items: center;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid #333;
+}

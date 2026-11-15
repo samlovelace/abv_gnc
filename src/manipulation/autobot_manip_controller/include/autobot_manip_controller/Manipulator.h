@@ -99,6 +99,17 @@ private:
 
     std::map<POSE, KDL::JntArray> mArmPoseMap;
 
+    // Precomputed once in the constructor (same slice WaypointExecutor uses,
+    // see WaypointExecutor::init) and republished periodically on
+    // arm/joint_limits - gripper range is derived from GripperConfig's
+    // open/closed positions since gripper joints are excluded from the
+    // kinematics tree and have no KDL limits.
+    std::vector<double> mJointLowerLimits;
+    std::vector<double> mJointUpperLimits;
+    std::vector<double> mJointVelLimits;
+    std::vector<double> mGripperLowerLimits;
+    std::vector<double> mGripperUpperLimits;
+
     std::thread mControlThread;
     std::thread mArrivalThread;
     std::thread mPublishThread;

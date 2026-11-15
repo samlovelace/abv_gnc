@@ -119,3 +119,85 @@ export interface Detections2D {
   header: Header;
   detections: Detection2D[];
 }
+
+export interface Vec3xyz {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface Quaternion {
+  x: number;
+  y: number;
+  z: number;
+  w: number;
+}
+
+export interface Pose {
+  position: Vec3xyz;
+  orientation: Quaternion;
+}
+
+export interface PoseStamped {
+  header: Header;
+  pose: Pose;
+}
+
+export interface Twist {
+  linear: Vec3xyz;
+  angular: Vec3xyz;
+}
+
+export const ManipHardwareState_DISABLED = 0;
+export const ManipHardwareState_IDLE = 1;
+export const ManipHardwareState_MOVING = 2;
+
+export interface ManipHardwareState {
+  header: Header;
+  name: string;
+  position: number[]; // [base..., arm...]
+  velocity: number[]; // [base..., arm...]
+  task_pose: Pose;
+  task_velocity: Twist;
+  state: number; // ManipHardwareState_DISABLED | _IDLE | _MOVING
+}
+
+export interface ManipHardwareTelemetry {
+  name: string;
+  position: number[];
+  velocity: number[];
+}
+
+export interface JointPositionWaypoint {
+  positions: number[];
+  tolerances: number[];
+}
+
+export interface JointVelocityWaypoint {
+  velocities: number[];
+  tolerances: number[];
+}
+
+export interface TaskPositionWaypoint {
+  pose: PoseStamped;
+  tolerance: number[];
+}
+
+export interface TaskVelocityWaypoint {
+  goal: Twist;
+  tolerance: Twist;
+}
+
+export interface JointLimits {
+  joint_names: string[];
+  lower: number[];
+  upper: number[];
+  velocity: number[];
+  gripper_joint_names: string[];
+  gripper_lower: number[];
+  gripper_upper: number[];
+}
+
+export interface Enable {
+  enabled: boolean;
+}

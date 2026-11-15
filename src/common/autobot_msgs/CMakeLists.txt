@@ -19,6 +19,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ManipHardwareGoal.msg"
   "msg/ManipHardwareState.msg"
   "msg/ManipHardwareTelemetry.msg"
+  "msg/JointLimits.msg"
   "msg/NodeStatus.msg"
   "msg/Obstacle.msg"
   "msg/ObstacleArray.msg"

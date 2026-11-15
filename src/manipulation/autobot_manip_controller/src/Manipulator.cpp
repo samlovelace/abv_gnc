@@ -4,6 +4,7 @@
 #include <limits.h>
 #include <thread>
 #include <fstream>
+#include <algorithm>
 
 #include <plog/Log.h>
 
@@ -16,6 +17,7 @@
 
 #include "autobot_msgs/msg/manipulator_state.hpp"
 #include "autobot_msgs/msg/manip_hardware_state.hpp"
+#include "autobot_msgs/msg/joint_limits.hpp"
 
 Manipulator::Manipulator(ManipConfigManager::Config aConfig)
     : mConfig(aConfig), mWaypointExecutor(std::make_unique<WaypointExecutor>(mConfig)),
@@ -58,10 +60,38 @@ Manipulator::Manipulator(ManipConfigManager::Config aConfig)
             firstGripperWp(i) = mConfig.gripper->initialPositions[i];
         }
         mHardware->sendGripperCommand(firstGripperWp);
+
+        const auto& open = mConfig.gripper->openPos;
+        const auto& closed = mConfig.gripper->closedPos;
+        if(open && closed)
+        {
+            for(size_t i = 0; i < mConfig.gripper->jointNames.size(); i++)
+            {
+                mGripperLowerLimits.push_back(std::min((*open)[i], (*closed)[i]));
+                mGripperUpperLimits.push_back(std::max((*open)[i], (*closed)[i]));
+            }
+        }
+    }
+
+    // Same slice WaypointExecutor::init uses (ctrlOffset..ctrlOffset+numCtrlJoints)
+    // so these line up 1:1 with ctrlJointNames / the joint_position_waypoint
+    // and joint_velocity_waypoint ordering.
+    {
+        KDL::JntArray velLimits = mKinematicsHandler->getJointLimits("velocity");
+        KDL::JntArray lowerPosLimits = mKinematicsHandler->getJointLimits("lower");
+        KDL::JntArray upperPosLimits = mKinematicsHandler->getJointLimits("upper");
+
+        for(int i = 0; i < numCtrlJoints; i++)
+        {
+            mJointVelLimits.push_back(velLimits(mConfig.ctrlOffset + i));
+            mJointLowerLimits.push_back(lowerPosLimits(mConfig.ctrlOffset + i));
+            mJointUpperLimits.push_back(upperPosLimits(mConfig.ctrlOffset + i));
+        }
     }
 
     RosTopicManager::getInstance()->createPublisher<autobot_msgs::msg::ManipulatorState>("arm/state");
     RosTopicManager::getInstance()->createPublisher<autobot_msgs::msg::ManipHardwareState>("arm/hardware/state");
+    RosTopicManager::getInstance()->createPublisher<autobot_msgs::msg::JointLimits>("arm/joint_limits");
     mHardwareStateThread = std::thread(&Manipulator::publishHardwareStateLoop, this);
 }
 
@@ -667,9 +697,33 @@ void Manipulator::publishHardwareStateLoop()
     state.header.frame_id = rootFrame;
     state.name = mConfig.manipName;
 
+    autobot_msgs::msg::JointLimits limitsMsg;
+    limitsMsg.joint_names = mConfig.ctrlJointNames;
+    limitsMsg.lower = mJointLowerLimits;
+    limitsMsg.upper = mJointUpperLimits;
+    limitsMsg.velocity = mJointVelLimits;
+    if(mConfig.gripper)
+    {
+        limitsMsg.gripper_joint_names = mConfig.gripper->jointNames;
+    }
+    limitsMsg.gripper_lower = mGripperLowerLimits;
+    limitsMsg.gripper_upper = mGripperUpperLimits;
+
+    // Static data - no need to publish every tick, just often enough that any
+    // browser connecting at any time picks it up quickly (no latched/
+    // transient-local QoS option on RosTopicManager::createPublisher today).
+    const int limitsPublishPeriodTicks = std::max(1, (int)mConfig.controlRateHz);
+    int tick = 0;
+
     while(mRunning)
     {
         rate.start();
+
+        if(tick % limitsPublishPeriodTicks == 0)
+        {
+            RosTopicManager::getInstance()->publishMessage("arm/joint_limits", limitsMsg);
+        }
+        tick++;
 
         // full kinematic joint space [base..., arm...], no gripper
         const KDL::JntArray pos = getFullJointPositions();
@@ -715,6 +769,22 @@ void Manipulator::publishHardwareStateLoop()
         state.task_velocity.angular.x = twist.rot.x();
         state.task_velocity.angular.y = twist.rot.y();
         state.task_velocity.angular.z = twist.rot.z();
+
+        // Mirrors StateMachine::STATE - Manipulator has no reference back to
+        // StateMachine (StateMachine owns Manipulator, not the reverse), so
+        // re-derive it from the same rule StateMachine::run() itself uses.
+        if(!isEnabled())
+        {
+            state.state = autobot_msgs::msg::ManipHardwareState::DISABLED;
+        }
+        else if(isArrived())
+        {
+            state.state = autobot_msgs::msg::ManipHardwareState::IDLE;
+        }
+        else
+        {
+            state.state = autobot_msgs::msg::ManipHardwareState::MOVING;
+        }
 
         RosTopicManager::getInstance()->publishMessage("arm/hardware/state", state);
         rate.block();
