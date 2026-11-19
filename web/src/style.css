@@ -9,9 +9,35 @@ body {
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
-  color: #ddd;
-  background: #000000;
+  color: #e4e4e6;
+  background: #1a1b1e;
   font-family: system-ui, sans-serif;
+}
+
+/* Dark-theme baseline for every plain select/number input in the app -
+   without this they fall back to the browser's light-themed native control,
+   which was the main source of the low-contrast, washed-out look (most
+   visible on the manip panel's mode selects and task-pose number fields,
+   but it affected every panel that used a bare <select>/<input type=number>
+   without its own #id-specific override). */
+select,
+input[type="number"] {
+  background-color: #1c1d20;
+  color: #e4e4e6;
+  border: 1px solid #45464c;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+select:hover,
+input[type="number"]:hover {
+  border-color: #5a5b61;
+}
+
+input[type="range"] {
+  accent-color: #3b82f6;
 }
 
 .topbar {
@@ -19,7 +45,9 @@ body {
   top: 0;
   display: flex;
   align-items: center;
-  padding: 8px 16px;
+  padding: 10px 16px;
+  background: #212226;
+  border-bottom: 1px solid #35363b;
 }
 
 .topbar .left,
@@ -83,20 +111,20 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 16px;
-  background: #161616;
-  border: 1px solid #333;
-  border-radius: 8px;
+  padding: 14px 16px;
+  background: #26272b;
+  border: 1px solid #3a3b40;
+  border-radius: 10px;
 }
 
 .policy-row label {
-  color: #aaa;
+  color: #9a9ba0;
 }
 
 #policy-select {
-  background-color: #1a1a1a;
-  color: #ddd;
-  border: 1px solid #444;
+  background-color: #1c1d20;
+  color: #e4e4e6;
+  border: 1px solid #45464c;
   border-radius: 6px;
   padding: 6px 10px;
   font-size: 14px;
@@ -133,14 +161,14 @@ body {
   display: flex;
   flex: 1;
   min-height: 0;
-  gap: 16px;
-  padding: 16px;
+  gap: 20px;
+  padding: 20px;
 }
 
 .right-column {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
   width: 280px;
   flex-shrink: 0;
   overflow-y: auto;
@@ -150,15 +178,31 @@ body {
   display: none;
 }
 
+/* Shared card chrome for every top-level panel in .main-layout/.right-column -
+   gives each one a visible boundary against the page background instead of
+   floating content directly on it. */
+.topdown,
+.telemetry-plots,
+.camera-view,
+.command-panel,
+.manip-command-panel {
+  background: #26272b;
+  border: 1px solid #3a3b40;
+  border-radius: 10px;
+}
+
 .topdown {
   height: 100%;
   aspect-ratio: 1 / 2; /* matches the SVG's viewBox: 0 0 2 4 */
+  padding: 12px;
+  box-sizing: border-box;
 }
 
 .topdown svg {
   width: 100%;
   height: 100%;
-  background: #111;
+  background: #1c1d20;
+  border-radius: 6px;
   display: block;
 }
 
@@ -169,6 +213,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
 .telemetry-plots > div {
@@ -180,7 +226,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  padding: 8px 16px;
+  padding: 16px;
 }
 
 .pose-command-panel,
@@ -321,6 +367,7 @@ body {
 .camera-view {
   position: relative;
   display: inline-block; /* shrink-wrap to the image */
+  overflow: hidden; /* clip the feed to the card's rounded corners */
 }
 
 .camera-view img,
@@ -340,9 +387,16 @@ body {
 .manip-command-panel {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 8px 16px;
-  width: 360px;
+  gap: 12px;
+  padding: 16px;
+  width: 320px;
+}
+
+.manip-command-panel > label {
+  color: #9a9ba0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .manip-enable-row {
@@ -380,14 +434,14 @@ body {
 .joint-rows {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .joint-slider-row {
   display: grid;
   grid-template-columns: max-content 1fr max-content;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .joint-slider-row label,
@@ -406,7 +460,7 @@ body {
   display: grid;
   grid-template-columns: max-content max-content 1fr max-content;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .jog-row button {
@@ -426,5 +480,5 @@ body {
   align-items: center;
   gap: 10px;
   padding-top: 12px;
-  border-top: 1px solid #333;
+  border-top: 1px solid #3a3b40;
 }

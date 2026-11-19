@@ -107,8 +107,8 @@ private:
     std::vector<double> mJointLowerLimits;
     std::vector<double> mJointUpperLimits;
     std::vector<double> mJointVelLimits;
-    std::vector<double> mGripperLowerLimits;
-    std::vector<double> mGripperUpperLimits;
+    std::vector<double> mGripperOpen;
+    std::vector<double> mGripperClosed;
 
     std::thread mControlThread;
     std::thread mArrivalThread;

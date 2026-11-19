@@ -65,11 +65,8 @@ Manipulator::Manipulator(ManipConfigManager::Config aConfig)
         const auto& closed = mConfig.gripper->closedPos;
         if(open && closed)
         {
-            for(size_t i = 0; i < mConfig.gripper->jointNames.size(); i++)
-            {
-                mGripperLowerLimits.push_back(std::min((*open)[i], (*closed)[i]));
-                mGripperUpperLimits.push_back(std::max((*open)[i], (*closed)[i]));
-            }
+            mGripperOpen = *open;
+            mGripperClosed = *closed;
         }
     }
 
@@ -706,8 +703,8 @@ void Manipulator::publishHardwareStateLoop()
     {
         limitsMsg.gripper_joint_names = mConfig.gripper->jointNames;
     }
-    limitsMsg.gripper_lower = mGripperLowerLimits;
-    limitsMsg.gripper_upper = mGripperUpperLimits;
+    limitsMsg.gripper_open = mGripperOpen;
+    limitsMsg.gripper_closed = mGripperClosed;
 
     // Static data - no need to publish every tick, just often enough that any
     // browser connecting at any time picks it up quickly (no latched/

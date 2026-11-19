@@ -1,4 +1,3 @@
-
 #include "autobot_manip_controller/WaypointExecutor.h"
 #include "plog/Log.h"
 

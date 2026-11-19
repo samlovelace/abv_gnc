@@ -64,7 +64,6 @@ const GRIPPER_TOLERANCE = 0.002; // m
 const TASK_POS_TOLERANCE = [0.005, 0.005, 0.005, 0.02, 0.02, 0.02]; // xyz (m), rpy (rad)
 const LINEAR_JOG_MPS = 0.05;
 const ANGULAR_JOG_RADPS = 0.2;
-const FIRE_INTERVAL_MS = 100;
 
 type Axis6 = "x" | "y" | "z" | "roll" | "pitch" | "yaw";
 const AXIS6: Axis6[] = ["x", "y", "z", "roll", "pitch", "yaw"];
@@ -140,24 +139,26 @@ class SyncedInput {
   }
 }
 
-// Press-and-hold jog button, shared mutual-exclusion firing logic - ports
-// CommandPanelHandler's #makeFireButton/#startFiring/#stopFiring pattern
-// (only one jog fires at a time across the whole panel).
+// Press-and-hold jog button - sends the velocity goal exactly once on press
+// and once (zero) on release, NOT on a repeating interval: CommandHandler
+// treats every incoming waypoint as brand new and fully reinitializes the
+// Ruckig trajectory from scratch (Manipulator::setGoalWaypoint's default
+// aResetState=true), discarding whatever ramp was already in progress. The
+// control loop re-evaluates the executor every tick on its own, so a single
+// send is all that's needed for the velocity to actually ramp up and hold;
+// resending periodically (as CommandPanelHandler's thruster fire pattern
+// does for the vehicle's non-trajectory controller) only restarts the ramp
+// forever and the joint never visibly moves.
 class JogFire {
-  #handle: ReturnType<typeof setInterval> | null = null;
   #pendingZero: (() => void) | null = null;
 
   start(fire: () => void, zero: () => void): void {
     this.stop();
     fire();
-    this.#handle = setInterval(fire, FIRE_INTERVAL_MS);
     this.#pendingZero = zero;
   }
 
   stop(): void {
-    if (this.#handle === null) return;
-    clearInterval(this.#handle);
-    this.#handle = null;
     const zero = this.#pendingZero;
     this.#pendingZero = null;
     zero?.();
@@ -220,6 +221,8 @@ export class ManipCommandPanel implements Handler {
 
   #gripperSlider: SyncedInput;
   #gripperValue: HTMLElement;
+  #gripperOpen: number[] = [];
+  #gripperClosed: number[] = [];
 
   #jointNames: string[] = [];
   #jointLower: number[] = [];
@@ -338,7 +341,14 @@ export class ManipCommandPanel implements Handler {
   };
 
   #onGripperTelemetry = (msg: ManipHardwareTelemetry): void => {
-    this.#gripperSlider.sync(msg.position[0] ?? 0);
+    if (this.#gripperOpen.length === 0) return;
+    // Slider is a 0 (closed) .. 1 (open) fraction, not a raw joint position -
+    // the two gripper joints (a mimic finger pair) move in opposite
+    // directions, so there's no single "position" that means the same thing
+    // for both; the fraction is the only value that does.
+    const span = this.#gripperOpen[0] - this.#gripperClosed[0];
+    const t = span !== 0 ? (msg.position[0] - this.#gripperClosed[0]) / span : 0;
+    this.#gripperSlider.sync(t);
     this.#gripperValue.textContent = (msg.position[0] ?? 0).toFixed(3);
   };
 
@@ -352,11 +362,14 @@ export class ManipCommandPanel implements Handler {
       this.#buildJointVelRows();
     }
 
-    if (msg.gripper_joint_names.length > 0 && msg.gripper_lower.length > 0) {
-      const slider = this.#gripperSlider.el;
-      slider.min = String(msg.gripper_lower[0]);
-      slider.max = String(msg.gripper_upper[0]);
-      slider.disabled = false;
+    if (
+      this.#gripperOpen.length === 0 &&
+      msg.gripper_joint_names.length > 0 &&
+      msg.gripper_open.length === msg.gripper_joint_names.length
+    ) {
+      this.#gripperOpen = msg.gripper_open;
+      this.#gripperClosed = msg.gripper_closed;
+      this.#gripperSlider.el.disabled = false;
     }
   };
 
@@ -510,9 +523,17 @@ export class ManipCommandPanel implements Handler {
   }
 
   #onGripperInput = (): void => {
+    // gripperPosWaypointCallback rejects any message whose size doesn't
+    // match getGripperNrJoints() exactly - every gripper joint must be sent,
+    // not just the one the slider conceptually controls.
+    if (this.#gripperOpen.length === 0) return;
+    const t = this.#gripperSlider.value;
+    const positions = this.#gripperOpen.map(
+      (open, i) => this.#gripperClosed[i] + t * (open - this.#gripperClosed[i]),
+    );
     const msg: JointPositionWaypoint = {
-      positions: [this.#gripperSlider.value],
-      tolerances: [GRIPPER_TOLERANCE],
+      positions,
+      tolerances: positions.map(() => GRIPPER_TOLERANCE),
     };
     this.#ros.publish(ARM_GRIPPER_WP_TOPIC, ARM_GRIPPER_WP_TYPE, msg);
   };

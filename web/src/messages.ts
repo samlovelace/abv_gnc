@@ -194,8 +194,8 @@ export interface JointLimits {
   upper: number[];
   velocity: number[];
   gripper_joint_names: string[];
-  gripper_lower: number[];
-  gripper_upper: number[];
+  gripper_open: number[];
+  gripper_closed: number[];
 }
 
 export interface Enable {
